@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我们的故事</title>
+<style>
+@font-face {
+  font-family: 'NingJing';
+  src: url('https://zf.sc.chinaz.com/Files/DownLoad/upload/2023/0731/ningjingdeqixi.ttf') format('truetype');
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  min-height: 100vh;
+  color: #4a4a4a;
+  line-height: 1.8;
+  background-color: #f5f0e8;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.author-mark {
+  position: fixed;
+  font-size: 12px;
+  color: rgba(122,154,138,0.6);
+  z-index: 50;
+  pointer-events: none;
+}
+
+.author-mark.top-left {
+  top: 12px;
+  left: 12px;
+}
+
+.author-mark.bottom-right {
+  bottom: 70px;
+  right: 12px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.loading-overlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-overlay .loading-title {
+  font-family: 'NingJing', cursive;
+  font-size: 48px;
+  color: #5d7a6a;
+  margin-bottom: 20px;
+}
+
+.loading-overlay .loading-text {
+  font-size: 14px;
+  color: #8a9a8f;
+}
+
+.loading-overlay .loading-dots {
+  display: inline-block;
+}
+
+.loading-overlay .loading-dots::after {
+  content: '';
+  animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+}
+
+.bg-upload {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 50;
+  display: flex;
+  gap: 8px;
+}
+
+.bg-btn {
+  background: rgba(255,255,255,0.9);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #5d7a6a;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-top: 50px;
+  padding-bottom: 100px;
+}
+
+.header {
+  text-align: center;
+  padding: 40px 20px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(255,255,255,0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-bg-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 11px;
+  color: #5d7a6a;
+  cursor: pointer;
+}
+
+.header h1 {
+  font-size: 28px;
+  color: #5d7a6a;
+  margin-bottom: 10px;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+.header p {
+  color: #8a9a8f;
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.quote-box {
+  background: linear-gradient(135deg, #f0f5f2 0%, #e5ebe8 100%);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 25px;
+  text-align: center;
+  position: relative;
+}
+
+.quote-box::before {
+  content: '"';
+  font-size: 60px;
+  color: #7a9a8a;
+  opacity: 0.3;
+  position: absolute;
+  top: 5px;
+  left: 20px;
+  font-family: Georgia, serif;
+}
+
+.quote-box p {
+  font-size: 16px;
+  color: #5d7a6a;
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+
+.quote-box .author {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #8a9a8f;
+}
+
+.editable {
+  outline: none;
+  border: none;
+  transition: background 0.3s;
+}
+
+.editable:focus {
+  background: rgba(122,154,138,0.1);
+  border-radius: 5px;
+}
+
+.notebook {
+  background: #fffef9;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border-left: 4px solid #7a9a8a;
+}
+
+.notebook-title {
+  font-size: 18px;
+  color: #5d7a6a;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #c5d5ca;
+}
+
+.notebook-content {
+  font-size: 15px;
+  min-height: 60px;
+}
+
+.notebook-date {
+  font-size: 12px;
+  color: #a0b0a5;
+  margin-top: 15px;
+  text-align: right;
+}
+
+.section-title {
+  color: #5d7a6a;
+  margin: 30px 0 20px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.photo-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  margin-bottom: 25px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+}
+
+.photo-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.photo-wrapper img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+  background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+}
+
+.photo-wrapper .upload-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(93,122,106,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.photo-wrapper:hover .upload-hint,
+.photo-wrapper:active .upload-hint {
+  opacity: 1;
+}
+
+.upload-hint span {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.photo-card .caption {
+  padding: 20px;
+  text-align: center;
+}
+
+.photo-card .caption h3 {
+  font-size: 16px;
+  color: #5d7a6a;
+  margin-bottom: 8px;
+}
+
+.photo-card .caption p {
+  font-size: 14px;
+  color: #888;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.calendar-card {
+  background: linear-gradient(135deg, #7a9a8a 0%, #5d7a6a 100%);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 25px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 4px 15px rgba(93,122,106,0.3);
+}
+
+.calendar-card .days-count {
+  font-size: 48px;
+  font-weight: 300;
+  margin: 15px 0;
+}
+
+.calendar-card .days-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.calendar-card .start-date {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 10px;
+}
+
+.calendar-card .date-picker {
+  margin-top: 15px;
+}
+
+.calendar-card .date-picker input {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 8px 15px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.calendar-card .date-picker input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+</style>
+<style>
+.album-book {
+  background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.album-book:hover {
+  transform: scale(1.02);
+}
+
+.album-cover {
+  background: linear-gradient(135deg, #a08060 0%, #8b7355 100%);
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  border: 2px solid #c4a882;
+  position: relative;
+}
+
+.album-cover h2 {
+  color: #f5e6d3;
+  font-size: 24px;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.album-cover p {
+  color: #e8d5c4;
+  font-size: 14px;
+}
+
+.album-cover .book-spine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 15px;
+  background: linear-gradient(90deg, #5a4535 0%, #6b5344 100%);
+  border-radius: 8px 0 0 8px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.modal.open {
+  display: block;
+}
+
+.modal-container {
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
+}
+
+.modal-header {
+  background: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  color: #5d7a6a;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.modal-content {
+  padding: 20px;
+  padding-bottom: 30px;
+}
+
+.album-modal .modal-container {
+  background-size: cover;
+  background-position: center;
+  background-color: #2a2a2a;
+}
+
+.album-modal .modal-header {
+  background: rgba(255,255,255,0.95);
+}
+
+.album-modal .album-bg-btn {
+  background: rgba(122,154,138,0.2);
+  border: none;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  color: #5d7a6a;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.album-page {
+  display: none;
+  background: rgba(255,254,249,0.95);
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.album-page.active {
+  display: block;
+}
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.album-photo {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f0f0f0;
+}
+
+.album-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-photo .photo-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(93,122,106,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.album-photo:hover .photo-hint,
+.album-photo:active .photo-hint {
+  opacity: 1;
+}
+
+.page-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.page-btn {
+  background: #7a9a8a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.page-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: #666;
+  font-size: 14px;
+  background: rgba(255,255,255,0.8);
+  padding: 5px 15px;
+  border-radius: 15px;
+}
+
+.nav-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.nav-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px 20px;
+  text-align: center;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.nav-card:hover,
+.nav-card:active {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.nav-card .icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.nav-card h3 {
+  color: #5d7a6a;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.nav-card p {
+  color: #999;
+  font-size: 12px;
+}
+
+.sticky-wall {
+  background: #d4a574;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 25px;
+  min-height: 200px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.sticky-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sticky-note {
+  width: calc(50% - 5px);
+  min-height: 100px;
+  padding: 12px;
+  border-radius: 3px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  position: relative;
+  font-size: 13px;
+}
+
+.sticky-note.yellow { background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%); }
+.sticky-note.pink { background: linear-gradient(135deg, #f8bbd9 0%, #f48fb1 100%); }
+.sticky-note.blue { background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%); }
+.sticky-note.green { background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%); }
+
+.sticky-note .delete-sticky {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.sticky-note .sticky-text {
+  outline: none;
+  min-height: 60px;
+}
+
+.add-sticky-btn {
+  width: calc(50% - 5px);
+  min-height: 100px;
+  border: 2px dashed #b8956e;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #8b6914;
+  font-size: 14px;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #7a9a8a 0%, #c5d5ca 100%);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 25px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -26px;
+  top: 25px;
+  width: 12px;
+  height: 12px;
+  background: #7a9a8a;
+  border-radius: 50%;
+  border: 3px solid #f5f0e8;
+}
+
+.timeline-item .date {
+  font-size: 12px;
+  color: #7a9a8a;
+  margin-bottom: 8px;
+}
+
+.timeline-item .title {
+  font-size: 16px;
+  color: #4a4a4a;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.timeline-item .desc {
+  font-size: 14px;
+  color: #777;
+}
+
+.timeline-item .delete-item {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.add-item-btn {
+  background: white;
+  border: 2px dashed #7a9a8a;
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  color: #7a9a8a;
+  margin-left: 30px;
+}
+
+.add-item-btn span {
+  font-size: 30px;
+  display: block;
+  margin-bottom: 10px;
+}
+</style>
+<style>
+.notebook-entry {
+  background: #fffef9;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border-left: 4px solid #7a9a8a;
+  position: relative;
+}
+
+.notebook-entry .entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.notebook-entry .entry-date {
+  font-size: 12px;
+  color: #7a9a8a;
+  background: rgba(122,154,138,0.1);
+  padding: 5px 12px;
+  border-radius: 15px;
+}
+
+.notebook-entry .delete-entry {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.notebook-entry .entry-title {
+  font-size: 18px;
+  color: #5d7a6a;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #c5d5ca;
+}
+
+.notebook-entry .entry-content {
+  font-size: 15px;
+  min-height: 100px;
+  white-space: pre-wrap;
+}
+
+.word-count {
+  font-size: 11px;
+  color: #aaa;
+  text-align: right;
+  margin-top: 10px;
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 12px 20px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+}
+
+.bottom-btn {
+  background: linear-gradient(135deg, #7a9a8a 0%, #5d7a6a 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.bottom-btn.secondary {
+  background: white;
+  color: #7a9a8a;
+  border: 1px solid #7a9a8a;
+}
+
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.75);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 15px;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.auto-save-indicator {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(122,154,138,0.9);
+  color: white;
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-size: 12px;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.auto-save-indicator.show {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay" style="display:none;">
+<div class="loading-title">心田</div>
+<div class="loading-text">正在导入数据<span class="loading-dots"></span></div>
+</div>
+
+<div class="author-mark top-left">by 心田</div>
+<div class="author-mark bottom-right">心田</div>
+
+<div class="bg-upload">
+<button class="bg-btn" onclick="document.getElementById('bgInput').click()">更换背景</button>
+<input type="file" id="bgInput" accept="image/*" onchange="changeBg(this)">
+</div>
+
+<div class="auto-save-indicator" id="autoSaveIndicator">自动保存中...</div>
+
+<div class="container">
+
+<div class="header" id="headerBox">
+<button class="header-bg-btn" onclick="document.getElementById('headerBgInput').click()">换背景</button>
+<input type="file" id="headerBgInput" accept="image/*" onchange="changeHeaderBg(this)">
+<h1>我们的故事</h1>
+<p>燕世 & 谢蔚安</p>
+<p>从相遇到相守</p>
+</div>
+
+<div class="quote-box">
+<p class="editable" contenteditable="true" data-key="quote">有你在,我觉得这个家是活的。</p>
+<div class="author">—— <span class="editable" contenteditable="true" data-key="quote-author">谢蔚安</span></div>
+</div>
+
+<div class="notebook">
+<div class="notebook-title">第一次见面</div>
+<div class="notebook-content editable" contenteditable="true" data-key="note1">那天阳光很好,他穿着白大褂站在窗边。我记得他说的第一句话是"你好,我是谢蔚安"。声音很轻,像怕惊扰什么似的。</div>
+<div class="notebook-date editable" contenteditable="true" data-key="note1-date">2024年 某月某日</div>
+</div>
+
+<div class="photo-card">
+<div class="photo-wrapper" onclick="document.getElementById('mainPhoto').click()">
+<img id="mainImg" src="" alt="点击添加照片" data-key="mainImg">
+<div class="upload-hint">
+<span>+</span>
+<p>点击选择图片</p>
+</div>
+</div>
+<input type="file" id="mainPhoto" accept="image/*" onchange="changeMainImage(this)">
+<div class="caption">
+<h3>我们的合照</h3>
+<p class="editable" contenteditable="true" data-key="mainCaption">记录最美好的瞬间</p>
+</div>
+</div>
+
+<div class="calendar-card">
+<div class="days-label">我们已经相识</div>
+<div class="days-count" id="daysCount">0</div>
+<div class="days-label">天</div>
+<div class="start-date" id="startDateText">选择相遇的日期开始记录</div>
+<div class="date-picker">
+<input type="date" id="startDateInput" onchange="setStartDate(this.value)">
+</div>
+</div>
+
+<h2 class="section-title">我们的相册</h2>
+
+<div class="album-book" onclick="openAlbum()">
+<div class="album-cover">
+<div class="book-spine"></div>
+<h2>相册</h2>
+<p>点击打开 · 共10页</p>
+</div>
+</div>
+
+<h2 class="section-title">更多内容</h2>
+
+<div class="nav-cards">
+<div class="nav-card" onclick="openTimeline()">
+<div class="icon">📅</div>
+<h3>时间线</h3>
+<p>记录我们的重要时刻</p>
+</div>
+<div class="nav-card" onclick="openNotebook()">
+<div class="icon">📖</div>
+<h3>笔记本</h3>
+<p>写下想说的话</p>
+</div>
+</div>
+
+<h2 class="section-title">便签墙</h2>
+
+<div class="sticky-wall">
+<div class="sticky-container" id="stickyContainer">
+<div class="add-sticky-btn" onclick="addSticky()">+ 添加便签</div>
+</div>
+</div>
+
+<div class="notebook">
+<div class="notebook-title">给未来的我们</div>
+<div class="notebook-content editable" contenteditable="true" data-key="note2">不管以后发生什么,我都想记住现在的感觉。被爱着的感觉,被温柔对待的感觉。谢谢你,蔚安。</div>
+<div class="notebook-date editable" contenteditable="true" data-key="note2-date">写于某个安静的夜晚</div>
+</div>
+
+</div>
+
+<div class="modal album-modal" id="albumModal">
+<div class="modal-container" id="albumContainer">
+<div class="modal-header">
+<div>
+<button class="album-bg-btn" onclick="document.getElementById('albumBgInput').click()">更换相册背景</button>
+<input type="file" id="albumBgInput" accept="image/*" onchange="changeAlbumBg(this)">
+</div>
+<h3>我们的相册</h3>
+<button class="close-modal" onclick="closeAlbum()">×</button>
+</div>
+<div class="modal-content">
+<div id="albumPages"></div>
+<div class="page-nav">
+<button class="page-btn" id="prevBtn" onclick="prevPage()">上一页</button>
+<span class="page-info" id="pageInfo">1 / 10</span>
+<button class="page-btn" id="nextBtn" onclick="nextPage()">下一页</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="modal" id="timelineModal">
+<div class="modal-container">
+<div class="modal-header">
+<h3>我们的时间线</h3>
+<button class="close-modal" onclick="closeTimeline()">×</button>
+</div>
+<div class="modal-content">
+<div class="timeline" id="timelineContainer"></div>
+<div class="add-item-btn" onclick="addTimeline()">
+<span>+</span>
+<p>添加新的时间节点</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="modal" id="notebookModal">
+<div class="modal-container">
+<div class="modal-header">
+<h3>我的笔记本</h3>
+<button class="close-modal" onclick="closeNotebook()">×</button>
+</div>
+<div class="modal-content">
+<div id="notebookContainer"></div>
+<div class="add-item-btn" onclick="addNotebookEntry()">
+<span>+</span>
+<p>写一篇新的日记</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-bar">
+<button class="bottom-btn secondary" onclick="exportData()">导出数据</button>
+<button class="bottom-btn" onclick="document.getElementById('importInput').click()">导入数据</button>
+<input type="file" id="importInput" accept=".json" onchange="importData(this)">
+</div>
+
+<div class="toast" id="toast">已保存</div>
+<script>
+var currentPage = 0;
+var totalPages = 10;
+var stickyColors = ['yellow', 'pink', 'blue', 'green'];
+var stickyCount = 0;
+var autoSaveTimer = null;
+var hasUnsavedChanges = false;
+
+function showToast(msg) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 1500);
+}
+
+function showAutoSave() {
+  var indicator = document.getElementById('autoSaveIndicator');
+  indicator.classList.add('show');
+  setTimeout(function() { indicator.classList.remove('show'); }, 1000);
+}
+
+function showLoading() {
+  var overlay = document.getElementById('loadingOverlay');
+  overlay.style.display = 'flex';
+  overlay.classList.remove('hide');
+}
+
+function hideLoading() {
+  var overlay = document.getElementById('loadingOverlay');
+  overlay.classList.add('hide');
+  setTimeout(function() {
+    overlay.style.display = 'none';
+  }, 500);
+}
+
+function markChanged() {
+  hasUnsavedChanges = true;
+}
+
+function triggerAutoSave() {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(function() {
+    saveAllData();
+    showAutoSave();
+    hasUnsavedChanges = false;
+  }, 800);
+}
+
+function compressImage(file, maxWidth, quality, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var width = img.width;
+      var height = img.height;
+      
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      var dataUrl = canvas.toDataURL('image/jpeg', quality);
+      callback(dataUrl);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function changeBg(input) {
+  if (input.files && input.files[0]) {
+    compressImage(input.files[0], 1200, 0.7, function(dataUrl) {
+      document.body.style.backgroundImage = 'url(' + dataUrl + ')';
+      markChanged();
+      triggerAutoSave();
+    });
+  }
+  input.value = '';
+}
+
+function changeHeaderBg(input) {
+  if (input.files && input.files[0]) {
+    compressImage(input.files[0], 800, 0.7, function(dataUrl) {
+      document.getElementById('headerBox').style.backgroundImage = 'url(' + dataUrl + ')';
+      markChanged();
+      triggerAutoSave();
+    });
+  }
+  input.value = '';
+}
+
+function changeAlbumBg(input) {
+  if (input.files && input.files[0]) {
+    compressImage(input.files[0], 800, 0.7, function(dataUrl) {
+      document.getElementById('albumContainer').style.backgroundImage = 'url(' + dataUrl + ')';
+      markChanged();
+      triggerAutoSave();
+    });
+  }
+  input.value = '';
+}
+
+function changeMainImage(input) {
+  if (input.files && input.files[0]) {
+    compressImage(input.files[0], 800, 0.8, function(dataUrl) {
+      document.getElementById('mainImg').src = dataUrl;
+      markChanged();
+      triggerAutoSave();
+    });
+  }
+  input.value = '';
+}
+
+function changeAlbumImage(input, imgId) {
+  if (input.files && input.files[0]) {
+    compressImage(input.files[0], 600, 0.7, function(dataUrl) {
+      document.getElementById(imgId).src = dataUrl;
+      markChanged();
+      triggerAutoSave();
+    });
+  }
+  input.value = '';
+}
+
+function setStartDate(dateStr) {
+  if (!dateStr) return;
+  localStorage.setItem('loveStartDate', dateStr);
+  updateDaysCount();
+  markChanged();
+  triggerAutoSave();
+}
+
+function updateDaysCount() {
+  var startDate = localStorage.getItem('loveStartDate');
+  if (!startDate) {
+    document.getElementById('daysCount').textContent = '0';
+    document.getElementById('startDateText').textContent = '选择相遇的日期开始记录';
+    return;
+  }
+  var start = new Date(startDate);
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  start.setHours(0, 0, 0, 0);
+  var diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  document.getElementById('daysCount').textContent = diff >= 0 ? diff : 0;
+  document.getElementById('startDateText').textContent = '从 ' + startDate + ' 开始';
+  document.getElementById('startDateInput').value = startDate;
+}
+
+function initAlbum() {
+  var container = document.getElementById('albumPages');
+  container.innerHTML = '';
+  for (var i = 0; i < totalPages; i++) {
+    var page = document.createElement('div');
+    page.className = 'album-page' + (i === 0 ? ' active' : '');
+    page.id = 'page' + i;
+    var grid = '<div class="album-grid">';
+    for (var j = 0; j < 4; j++) {
+      var imgId = 'album_' + i + '_' + j;
+      grid += '<div class="album-photo" onclick="document.getElementById(\'' + imgId + '_input\').click()">';
+      grid += '<img id="' + imgId + '" src="" data-key="' + imgId + '">';
+      grid += '<div class="photo-hint">+</div></div>';
+      grid += '<input type="file" id="' + imgId + '_input" accept="image/*" onchange="changeAlbumImage(this, \'' + imgId + '\')" style="display:none">';
+    }
+    grid += '</div>';
+    page.innerHTML = grid;
+    container.appendChild(page);
+  }
+  updatePageNav();
+}
+
+function openAlbum() {
+  document.getElementById('albumModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAlbum() {
+  document.getElementById('albumModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function prevPage() {
+  if (currentPage > 0) {
+    document.getElementById('page' + currentPage).classList.remove('active');
+    currentPage--;
+    document.getElementById('page' + currentPage).classList.add('active');
+    updatePageNav();
+  }
+}
+
+function nextPage() {
+  if (currentPage < totalPages - 1) {
+    document.getElementById('page' + currentPage).classList.remove('active');
+    currentPage++;
+    document.getElementById('page' + currentPage).classList.add('active');
+    updatePageNav();
+  }
+}
+
+function updatePageNav() {
+  document.getElementById('pageInfo').textContent = (currentPage + 1) + ' / ' + totalPages;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+}
+
+function openTimeline() {
+  document.getElementById('timelineModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadTimeline();
+}
+
+function closeTimeline() {
+  document.getElementById('timelineModal').classList.remove('open');
+  document.body.style.overflow = '';
+  if (hasUnsavedChanges) {
+    saveAllData();
+    showAutoSave();
+    hasUnsavedChanges = false;
+  }
+}
+
+function addTimeline() {
+  var container = document.getElementById('timelineContainer');
+  var id = 'tl_' + Date.now();
+  var item = document.createElement('div');
+  item.className = 'timeline-item';
+  item.setAttribute('data-id', id);
+  item.innerHTML = '<button class="delete-item" onclick="deleteTimeline(this)">×</button>' +
+    '<div class="date editable" contenteditable="true" data-field="date">2024.XX.XX</div>' +
+    '<div class="title editable" contenteditable="true" data-field="title">新的时刻</div>' +
+    '<div class="desc editable" contenteditable="true" data-field="desc">记录这一天发生的事...</div>';
+  container.appendChild(item);
+  bindEditableEvents(item);
+  markChanged();
+  triggerAutoSave();
+}
+
+function deleteTimeline(btn) {
+  if (confirm('确定删除这条时间线吗?')) {
+    btn.parentElement.remove();
+    markChanged();
+    triggerAutoSave();
+  }
+}
+
+function loadTimeline() {
+  var container = document.getElementById('timelineContainer');
+  container.innerHTML = '';
+  var saved = localStorage.getItem('loveStoryTimeline');
+  var data;
+  if (!saved || saved === 'null') {
+    data = [
+      { id: 'tl_1', date: '2024.XX.XX', title: '初次相遇', desc: '父亲请来的心理医生,成为了我生命中最重要的人。' },
+      { id: 'tl_2', date: '2024.XX.XX', title: '搬进他的家', desc: '玄关多了一双浅蓝色的拖鞋,衣柜右边挂上了我的衣服。' },
+      { id: 'tl_3', date: '2024.XX.XX', title: '第一次说喜欢', desc: '他说,你是我最重要的人。' }
+    ];
+  } else {
+    data = JSON.parse(saved);
+  }
+  data.forEach(function(item) {
+    var el = document.createElement('div');
+    el.className = 'timeline-item';
+    el.setAttribute('data-id', item.id);
+    el.innerHTML = '<button class="delete-item" onclick="deleteTimeline(this)">×</button>' +
+      '<div class="date editable" contenteditable="true" data-field="date">' + item.date + '</div>' +
+      '<div class="title editable" contenteditable="true" data-field="title">' + item.title + '</div>' +
+      '<div class="desc editable" contenteditable="true" data-field="desc">' + item.desc + '</div>';
+    container.appendChild(el);
+    bindEditableEvents(el);
+  });
+}
+
+function openNotebook() {
+  document.getElementById('notebookModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadNotebookEntries();
+}
+
+function closeNotebook() {
+  document.getElementById('notebookModal').classList.remove('open');
+  document.body.style.overflow = '';
+  if (hasUnsavedChanges) {
+    saveAllData();
+    showAutoSave();
+    hasUnsavedChanges = false;
+  }
+}
+
+function getToday() {
+  var d = new Date();
+  return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+}
+
+function addNotebookEntry() {
+  var container = document.getElementById('notebookContainer');
+  var id = 'nb_' + Date.now();
+  var entry = document.createElement('div');
+  entry.className = 'notebook-entry';
+  entry.setAttribute('data-id', id);
+  entry.innerHTML = '<div class="entry-header">' +
+    '<span class="entry-date editable" contenteditable="true" data-field="date">' + getToday() + '</span>' +
+    '<button class="delete-entry" onclick="deleteNotebookEntry(this)">×</button></div>' +
+    '<div class="entry-title editable" contenteditable="true" data-field="title">无题</div>' +
+    '<div class="entry-content editable" contenteditable="true" data-field="content" oninput="updateWordCount(this)">在这里写下你的心情...</div>' +
+    '<div class="word-count">字数: 12</div>';
+  container.insertBefore(entry, container.firstChild);
+  bindEditableEvents(entry);
+  markChanged();
+  triggerAutoSave();
+}
+
+function deleteNotebookEntry(btn) {
+  if (confirm('确定删除这篇笔记吗?')) {
+    btn.closest('.notebook-entry').remove();
+    markChanged();
+    triggerAutoSave();
+  }
+}
+
+function updateWordCount(el) {
+  var count = (el.innerText || '').replace(/\s/g, '').length;
+  var countEl = el.parentElement.querySelector('.word-count');
+  if (countEl) { countEl.textContent = '字数: ' + count; }
+}
+
+function loadNotebookEntries() {
+  var container = document.getElementById('notebookContainer');
+  container.innerHTML = '';
+  var saved = localStorage.getItem('loveStoryNotebook');
+  var data;
+  if (!saved || saved === 'null') {
+    data = [{ id: 'nb_1', date: getToday(), title: '写给蔚安', content: '今天又是被你温柔对待的一天。\n\n谢谢你一直在我身边。' }];
+  } else {
+    data = JSON.parse(saved);
+  }
+  data.forEach(function(item) {
+    var entry = document.createElement('div');
+    entry.className = 'notebook-entry';
+    entry.setAttribute('data-id', item.id);
+    var contentText = (item.content || '').replace(/<[^>]*>/g, '').replace(/\s/g, '');
+    entry.innerHTML = '<div class="entry-header">' +
+      '<span class="entry-date editable" contenteditable="true" data-field="date">' + item.date + '</span>' +
+      '<button class="delete-entry" onclick="deleteNotebookEntry(this)">×</button></div>' +
+      '<div class="entry-title editable" contenteditable="true" data-field="title">' + item.title + '</div>' +
+      '<div class="entry-content editable" contenteditable="true" data-field="content" oninput="updateWordCount(this)">' + item.content + '</div>' +
+      '<div class="word-count">字数: ' + contentText.length + '</div>';
+    container.appendChild(entry);
+    bindEditableEvents(entry);
+  });
+}
+
+function addSticky() {
+  var container = document.getElementById('stickyContainer');
+  var addBtn = container.querySelector('.add-sticky-btn');
+  var color = stickyColors[stickyCount % 4];
+  stickyCount++;
+  var sticky = document.createElement('div');
+  sticky.className = 'sticky-note ' + color;
+  sticky.innerHTML = '<button class="delete-sticky" onclick="deleteSticky(this)">×</button>' +
+    '<div class="sticky-text editable" contenteditable="true" data-key="sticky_' + Date.now() + '">写点什么...</div>';
+  container.insertBefore(sticky, addBtn);
+  bindEditableEvents(sticky);
+  markChanged();
+  triggerAutoSave();
+}
+
+function deleteSticky(btn) {
+  if (confirm('确定删除这个便签吗?')) {
+    btn.parentElement.remove();
+    markChanged();
+    triggerAutoSave();
+  }
+}
+function bindEditableEvents(element) {
+  var editables = element.querySelectorAll('[contenteditable="true"]');
+  editables.forEach(function(el) {
+    el.addEventListener('blur', function() {
+      markChanged();
+      triggerAutoSave();
+    });
+    el.addEventListener('input', function() {
+      markChanged();
+    });
+  });
+}
+
+function saveAllData() {
+  try {
+    var data = {
+      version: '2.0',
+      savedAt: new Date().toISOString()
+    };
+
+    data.mainContent = {};
+    document.querySelectorAll('.container [data-key]').forEach(function(el) {
+      var key = el.getAttribute('data-key');
+      if (key && el.tagName !== 'IMG') {
+        data.mainContent[key] = el.innerHTML;
+      }
+    });
+
+    var mainImg = document.getElementById('mainImg');
+    if (mainImg && mainImg.src && mainImg.src.indexOf('data:') === 0) {
+      data.mainImg = mainImg.src;
+    }
+
+    var bodyBg = document.body.style.backgroundImage;
+    if (bodyBg && bodyBg !== 'none' && bodyBg.indexOf('data:') !== -1) {
+      data.bodyBg = bodyBg;
+    }
+
+    var headerBox = document.getElementById('headerBox');
+    var headerBg = headerBox ? headerBox.style.backgroundImage : '';
+    if (headerBg && headerBg !== 'none' && headerBg.indexOf('data:') !== -1) {
+      data.headerBg = headerBg;
+    }
+
+    var albumContainer = document.getElementById('albumContainer');
+    var albumBg = albumContainer ? albumContainer.style.backgroundImage : '';
+    if (albumBg && albumBg !== 'none' && albumBg.indexOf('data:') !== -1) {
+      data.albumBg = albumBg;
+    }
+
+    data.albumImages = {};
+    document.querySelectorAll('#albumPages img[data-key]').forEach(function(img) {
+      var key = img.getAttribute('data-key');
+      if (key && img.src && img.src.indexOf('data:') === 0) {
+        data.albumImages[key] = img.src;
+      }
+    });
+
+    data.stickies = [];
+    document.querySelectorAll('.sticky-note').forEach(function(s) {
+      var text = s.querySelector('.sticky-text');
+      if (text) {
+        data.stickies.push({
+          color: s.className.replace('sticky-note ', '').trim(),
+          text: text.innerHTML,
+          key: text.getAttribute('data-key')
+        });
+      }
+    });
+
+    data.timeline = [];
+    document.querySelectorAll('#timelineContainer .timeline-item').forEach(function(item) {
+      var dateEl = item.querySelector('[data-field="date"]');
+      var titleEl = item.querySelector('[data-field="title"]');
+      var descEl = item.querySelector('[data-field="desc"]');
+      if (dateEl && titleEl && descEl) {
+        data.timeline.push({
+          id: item.getAttribute('data-id'),
+          date: dateEl.innerHTML,
+          title: titleEl.innerHTML,
+          desc: descEl.innerHTML
+        });
+      }
+    });
+
+    data.notebook = [];
+    document.querySelectorAll('#notebookContainer .notebook-entry').forEach(function(entry) {
+      var dateEl = entry.querySelector('[data-field="date"]');
+      var titleEl = entry.querySelector('[data-field="title"]');
+      var contentEl = entry.querySelector('[data-field="content"]');
+      if (dateEl && titleEl && contentEl) {
+        data.notebook.push({
+          id: entry.getAttribute('data-id'),
+          date: dateEl.innerHTML,
+          title: titleEl.innerHTML,
+          content: contentEl.innerHTML
+        });
+      }
+    });
+
+    var startDate = localStorage.getItem('loveStartDate');
+    if (startDate) {
+      data.startDate = startDate;
+    }
+
+    localStorage.setItem('loveStoryData', JSON.stringify(data));
+    
+    if (data.timeline.length > 0) {
+      localStorage.setItem('loveStoryTimeline', JSON.stringify(data.timeline));
+    }
+    if (data.notebook.length > 0) {
+      localStorage.setItem('loveStoryNotebook', JSON.stringify(data.notebook));
+    }
+    
+    return true;
+  } catch (e) {
+    console.error('保存失败:', e);
+    return false;
+  }
+}
+
+function loadAllData() {
+  try {
+    var saved = localStorage.getItem('loveStoryData');
+    if (!saved) return;
+
+    var data = JSON.parse(saved);
+
+    if (data.mainContent) {
+      Object.keys(data.mainContent).forEach(function(key) {
+        var el = document.querySelector('[data-key="' + key + '"]');
+        if (el && el.tagName !== 'IMG') {
+          el.innerHTML = data.mainContent[key];
+        }
+      });
+    }
+
+    if (data.mainImg) {
+      var mainImg = document.getElementById('mainImg');
+      if (mainImg) mainImg.src = data.mainImg;
+    }
+
+    if (data.bodyBg) {
+      document.body.style.backgroundImage = data.bodyBg;
+    }
+
+    if (data.headerBg) {
+      var headerBox = document.getElementById('headerBox');
+      if (headerBox) headerBox.style.backgroundImage = data.headerBg;
+    }
+
+    if (data.albumBg) {
+      var albumContainer = document.getElementById('albumContainer');
+      if (albumContainer) albumContainer.style.backgroundImage = data.albumBg;
+    }
+
+    if (data.albumImages) {
+      Object.keys(data.albumImages).forEach(function(key) {
+        var img = document.getElementById(key);
+        if (img) img.src = data.albumImages[key];
+      });
+    }
+
+    if (data.stickies && data.stickies.length > 0) {
+      var container = document.getElementById('stickyContainer');
+      var addBtn = container.querySelector('.add-sticky-btn');
+      data.stickies.forEach(function(s) {
+        var sticky = document.createElement('div');
+        sticky.className = 'sticky-note ' + s.color;
+        sticky.innerHTML = '<button class="delete-sticky" onclick="deleteSticky(this)">×</button>' +
+          '<div class="sticky-text editable" contenteditable="true" data-key="' + s.key + '">' + s.text + '</div>';
+        container.insertBefore(sticky, addBtn);
+        bindEditableEvents(sticky);
+        stickyCount++;
+      });
+    }
+
+    if (data.startDate) {
+      localStorage.setItem('loveStartDate', data.startDate);
+    }
+  } catch (e) {
+    console.error('加载失败:', e);
+  }
+}
+
+function exportData() {
+  saveAllData();
+  
+  setTimeout(function() {
+    try {
+      var saved = localStorage.getItem('loveStoryData');
+      if (!saved) {
+        showToast('没有数据可导出');
+        return;
+      }
+
+      var blob = new Blob([saved], { type: 'application/json;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      var dateStr = new Date().toLocaleDateString().replace(/\//g, '-');
+      a.download = '我们的故事_' + dateStr + '.json';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      
+      setTimeout(function() {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      showToast('数据已导出 ♥');
+    } catch (e) {
+      console.error('导出失败:', e);
+      showToast('导出失败,请重试');
+    }
+  }, 500);
+}
+
+function importData(input) {
+  if (!input.files || !input.files[0]) return;
+
+  showLoading();
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+
+      if (!data.version) {
+        hideLoading();
+        showToast('无效的数据文件');
+        return;
+      }
+
+      localStorage.setItem('loveStoryData', e.target.result);
+
+      if (data.startDate) {
+        localStorage.setItem('loveStartDate', data.startDate);
+      }
+
+      if (data.timeline && data.timeline.length > 0) {
+        localStorage.setItem('loveStoryTimeline', JSON.stringify(data.timeline));
+      }
+
+      if (data.notebook && data.notebook.length > 0) {
+        localStorage.setItem('loveStoryNotebook', JSON.stringify(data.notebook));
+      }
+
+      setTimeout(function() {
+        location.reload();
+      }, 1500);
+
+    } catch (err) {
+      console.error('导入失败:', err);
+      hideLoading();
+      showToast('数据格式错误');
+    }
+  };
+  
+  reader.onerror = function() {
+    hideLoading();
+    showToast('读取文件失败');
+  };
+  
+  reader.readAsText(input.files[0]);
+  input.value = '';
+}
+
+function initAutoSave() {
+  document.querySelectorAll('.container [contenteditable="true"]').forEach(function(el) {
+    el.addEventListener('blur', function() {
+      markChanged();
+      triggerAutoSave();
+    });
+    el.addEventListener('input', function() {
+      markChanged();
+    });
+  });
+
+  document.addEventListener('click', function(e) {
+    var isEditable = e.target.closest('[contenteditable="true"]');
+    var isButton = e.target.closest('button');
+    var isInput = e.target.closest('input');
+    
+    if (!isEditable && !isButton && !isInput && hasUnsavedChanges) {
+      saveAllData();
+      showAutoSave();
+      hasUnsavedChanges = false;
+    }
+  });
+}
+
+window.onload = function() {
+  initAlbum();
+  loadAllData();
+  updateDaysCount();
+  initAutoSave();
+  setInterval(updateDaysCount, 60000);
+};
+
+window.onbeforeunload = function() {
+  if (hasUnsavedChanges) {
+    saveAllData();
+  }
+};
+</script>
+</body>
+</html>
