@@ -4249,13 +4249,12 @@ function fallbackCopy(text) {
 // ===== 数据管理 =====
 async function exportAllData() {
   showLoading();
-  
   try {
     const allSettings = await dbGetAll('settings');
     const allMessages = await dbGetAll('messages');
     const allWorldBook = await dbGetAll('worldbook');
     const allMemories = await dbGetAll('memories');
-    
+
     const exportData = {
       version: 1,
       exportTime: new Date().toISOString(),
@@ -4265,22 +4264,55 @@ async function exportAllData() {
       memories: allMemories,
       apiPresets: apiPresets
     };
-    
+
     const json = JSON.stringify(exportData, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ai-pager-backup-${Date.now()}.json`;
-    a.click();
-    
-    URL.revokeObjectURL(url);
-    showToast('✅ 数据导出成功');
-  } catch (e) {
-    showToast('导出失败: ' + e.message, true);
-  } finally {
+    const fileName = `ai-pager-backup-${Date.now()}.json`;
+
+    // 方法1：Web Share API（Android APK 里可用）
+    try {
+      const file = new File([blob], fileName, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        hideLoading();
+        await navigator.share({ files: [file], title: '传呼机数据备份' });
+        showToast('✅ 数据导出成功');
+        return;
+      }
+    } catch(shareErr) { /* 继续往下走 */ }
+
+    // 方法2：传统下载链接（浏览器可用）
+    try {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      hideLoading();
+      showToast('✅ 数据导出成功');
+      return;
+    } catch(dlErr) { /* 继续往下走 */ }
+
+    // 方法3：最终备用 —— 弹出文本框让用户手动复制
     hideLoading();
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;box-sizing:border-box;';
+    modal.innerHTML = `
+      <div style="width:100%;max-width:500px;background:#151528;border-radius:12px;padding:16px;">
+        <div style="color:#00ff41;font-size:14px;margin-bottom:8px;">📋 请手动复制以下数据（全选后复制）</div>
+        <textarea readonly style="width:100%;height:200px;background:#0e0e20;color:#ccc;border:1px solid #333;border-radius:8px;padding:8px;font-size:11px;font-family:monospace;">${json}</textarea>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button onclick="navigator.clipboard&&navigator.clipboard.writeText(this.closest('div').previousElementSibling.previousElementSibling.value).then(()=>alert('已复制！'))" style="flex:1;padding:10px;background:#006633;color:#fff;border:none;border-radius:8px;cursor:pointer;">📋 一键复制</button>
+          <button onclick="this.closest('div').parentElement.parentElement.remove()" style="flex:1;padding:10px;background:#333;color:#fff;border:none;border-radius:8px;cursor:pointer;">关闭</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+  } catch (e) {
+    hideLoading();
+    showToast('导出失败: ' + e.message, true);
   }
 }
 
