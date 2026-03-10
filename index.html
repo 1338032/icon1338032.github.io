@@ -1548,6 +1548,7 @@ body {
     <div class="btn-group">
       <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
       <button class="receive-btn" id="receiveBtn" onclick="receiveMessage()">接收</button>
+      <button class="receive-btn" id="cancelBtn" onclick="cancelReceive()" style="display:none;background:linear-gradient(135deg,#aa3333,#882222);">取消</button>
     </div>
   </div>
 </div>
@@ -2120,6 +2121,21 @@ let memoryEntries = [];
 let editingWbId = null;
 let pendingConfirmFn = null;
 let isReceiving = false;
+let currentAbortController = null;
+
+function cancelReceive() {
+  if (currentAbortController) {
+    currentAbortController.abort();
+    currentAbortController = null;
+  }
+  isReceiving = false;
+  document.getElementById('receiveBtn').disabled = false;
+  document.getElementById('receiveBtn').style.display = '';
+  document.getElementById('cancelBtn').style.display = 'none';
+  document.getElementById('statusText').textContent = '就绪';
+  document.getElementById('typingIndicator').classList.remove('show');
+  showToast('已取消接收');
+}
 
 // ===== 默认设置 =====
 const DEFAULT_SETTINGS = {
@@ -2542,19 +2558,6 @@ async function testApi() {
   try {
     let response;
     if (provider === 'claude') {
-      response = await fetch(baseUrl + '/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: model,
-          max_tokens: 20,
-          messages: [{ role: 'user', content: 'Hi' }]
-        })
-      });
     } else if (provider === 'gemini') {
       response = await fetch(`${baseUrl}/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -2863,7 +2866,10 @@ async function receiveMessage() {
   }
   
   isReceiving = true;
+  currentAbortController = new AbortController();
   document.getElementById('receiveBtn').disabled = true;
+  document.getElementById('receiveBtn').style.display = 'none';
+  document.getElementById('cancelBtn').style.display = '';
   document.getElementById('statusText').textContent = '接收中...';
   
   const typingIndicator = document.getElementById('typingIndicator');
@@ -2932,34 +2938,26 @@ async function receiveMessage() {
     await checkAutoSummarize();
   }
         // 根据句子长度计算停顿时间
-        if (si < sentences.length - 1) {
-          const charCount = sentence.length;
-          // 短句快发，长句慢发，模拟真人打字
-          let pauseTime;
-          if (charCount < 10) {
-            pauseTime = 300 + Math.random() * 300;
-          } else if (charCount < 30) {
-            pauseTime = 600 + Math.random() * 600;
-          } else {
-            pauseTime = 1000 + charCount * 30 + Math.random() * 800;
+          if (si < sentences.length - 1) {
+            const charCount = sentence.length;
+            let pauseTime;
+            if (charCount < 10) {
+              pauseTime = 300 + Math.random() * 300;
+            } else if (charCount < 30) {
+              pauseTime = 600 + Math.random() * 600;
+            } else {
+              pauseTime = 1000 + charCount * 30 + Math.random() * 800;
+            }
+            pauseTime = Math.max(250, Math.min(4000, pauseTime));
+            
+            typingIndicator.classList.add('show');
+            chatArea.appendChild(typingIndicator);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            await new Promise(r => setTimeout(r, pauseTime));
+            
+            typingIndicator.classList.remove('show');
           }
-          pauseTime = Math.max(250, Math.min(4000, pauseTime));
-          
-          // 显示"正在输入"指示器
-          var typingInd = document.getElementById('typingIndicator');
-          var chatBox = document.getElementById('chatArea');
-          chatBox.appendChild(typingInd);
-          typingInd.classList.add('show');
-          chatBox.scrollTop = chatBox.scrollHeight;
-          
-          await new Promise(r => setTimeout(r, pauseTime));
-          
-          typingInd.classList.remove('show');
-          
-          await new Promise(r => setTimeout(r, pauseTime));
-          
-          typingIndicator.classList.remove('show');
-        }
       }
       await checkAutoSummarize();
     }
@@ -2970,7 +2968,10 @@ async function receiveMessage() {
   } finally {
     document.getElementById('typingIndicator').classList.remove('show');
     isReceiving = false;
+    currentAbortController = null;
     document.getElementById('receiveBtn').disabled = false;
+    document.getElementById('receiveBtn').style.display = '';
+    document.getElementById('cancelBtn').style.display = 'none';
     document.getElementById('statusText').textContent = '就绪';
   }
 }
@@ -3051,8 +3052,30 @@ function cleanupResponse(text) {
   var prefixRegex = new RegExp('^(' + charNameVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '|AI|助手|角色)[：:]\\s*', 'i');
   text = text.replace(prefixRegex, '');
   
+  // 移除动作描写 *动作* 格式
+  text = text.replace(/\*[^*]+\*/g, '');
+  
+  // 移除动作描写 （动作） 格式
+  text = text.replace(/（[^）]*）/g, '');
+  text = text.replace(/\([^)]*\)/g, '');
+  
+  // 移除【旁白】格式
+  text = text.replace(/【[^】]*】/g, '');
+  
+  // 移除整段文字首尾的双引号（中文和英文）
+  text = text.replace(/^["""]+/, '');
+  text = text.replace(/["""]+$/, '');
+  
+  // 移除每一行首尾的双引号
+  text = text.split('\n').map(function(line) {
+    return line.replace(/^["""]+/, '').replace(/["""]+$/, '');
+  }).join('\n');
+  
   // 移除多余的空白行
   text = text.replace(/\n{3,}/g, '\n\n');
+  
+  // 清理后可能出现的多余空格
+  text = text.replace(/  +/g, ' ');
   
   return text.trim();
 }
@@ -3287,7 +3310,8 @@ async function callOpenAIAPI(systemPrompt, contextMessages, streaming) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: currentAbortController ? currentAbortController.signal : undefined
   });
   
   if (!response.ok) {
@@ -3329,7 +3353,8 @@ async function callClaudeAPI(systemPrompt, contextMessages, streaming) {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01'
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: currentAbortController ? currentAbortController.signal : undefined
   });
   
   if (!response.ok) {
@@ -3382,7 +3407,8 @@ async function callGeminiAPI(systemPrompt, contextMessages, streaming) {
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: currentAbortController ? currentAbortController.signal : undefined
   });
   
   if (!response.ok) {
@@ -3981,18 +4007,18 @@ ${dialogText}`;
     
     if (provider === 'claude') {
       const response = await fetch(baseUrl + '/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: model,
-          max_tokens: 512,
-          messages: summaryMessages
-        })
-      });
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: model,
+      max_tokens: 512,
+      messages: [{ role: 'user', content: summaryPrompt }]
+    })
+  });
       const data = await response.json();
       summary = data.content[0]?.text || '';
     } else if (provider === 'gemini') {
@@ -4015,7 +4041,7 @@ ${dialogText}`;
         },
         body: JSON.stringify({
           model: model,
-          messages: messages,
+          messages: summaryMessages,
           max_tokens: 512
         })
       });
