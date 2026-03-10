@@ -1697,9 +1697,12 @@ body {
       <!-- 世界书页面 -->
       <div class="tab-page" id="page-worldbook">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span style="font-size:13px;color:#aaa;">提示词条目</span>
-          <button class="action-btn primary" onclick="addWorldBookEntry()">+ 新建条目</button>
-        </div>
+  <span style="font-size:13px;color:#aaa;">提示词条目</span>
+  <div style="display:flex;gap:6px;">
+    <button class="action-btn" onclick="checkWorldBookUpdate()" title="检查更新">🔄</button>
+    <button class="action-btn primary" onclick="addWorldBookEntry()">+ 新建条目</button>
+  </div>
+</div>
         <div id="worldBookList"></div>
         <div class="divider"></div>
         <div class="form-hint">提示：已启用的条目将作为系统提示词的一部分发送给AI。内置条目包含回复格式要求和记忆总结指令。</div>
@@ -2019,6 +2022,7 @@ window.addEventListener('offline', () => {
 // ===== IndexedDB 数据库 =====
 const DB_NAME = 'AIPagerDB';
 const DB_VERSION = 2;
+const WORLDBOOK_VERSION = 2; // 世界书版本号，每次更新内置提示词时+1
 let db = null;
 
 function openDB() {
@@ -2157,7 +2161,8 @@ const DEFAULT_WORLDBOOK = [
 保持角色一致性，永远像一个真实的人那样交流。`,
     active: true,
     builtin: true,
-    priority: 0
+    priority: 0,
+    version: 2  // 添加版本号
   },
   {
     id: 'wb_default_format',
@@ -2171,7 +2176,8 @@ const DEFAULT_WORLDBOOK = [
 - 可以主动聊新话题、反问、开玩笑、吐槽`,
     active: true,
     builtin: true,
-    priority: 5
+    priority: 5,
+    version: 2
   },
   {
     id: 'wb_default_personality',
@@ -2187,7 +2193,8 @@ const DEFAULT_WORLDBOOK = [
 - 如果对方说了让你在意的话，可以过几条消息后再提起来`,
     active: true,
     builtin: true,
-    priority: 5
+    priority: 5,
+    version: 2
   },
   {
     id: 'wb_default_memory_usage',
@@ -2207,7 +2214,8 @@ const DEFAULT_WORLDBOOK = [
 记忆是丰富对话的工具，而非对话焦点。`,
     active: true,
     builtin: true,
-    priority: 10
+    priority: 10,
+    version: 2
   },
   {
     id: 'wb_default_memory_summarize',
@@ -2215,7 +2223,8 @@ const DEFAULT_WORLDBOOK = [
     content: '当被要求总结对话时，请提取关键信息、重要事件、用户偏好和决策，以简洁的条目格式输出摘要。',
     active: true,
     builtin: true,
-    priority: 10
+    priority: 10,
+    version: 2
   },
   {
     id: 'wb_default_space_auto',
@@ -2225,7 +2234,8 @@ const DEFAULT_WORLDBOOK = [
 只在明确需要移动时才加这个标记，日常聊天不要加。地点名称必须和已有地点完全一致。`,
     active: true,
     builtin: true,
-    priority: 10
+    priority: 10,
+    version: 2
   },
   {
     id: 'wb_default_important',
@@ -2238,7 +2248,8 @@ const DEFAULT_WORLDBOOK = [
 - 回复要简洁自然，不要长篇大论`,
     active: true,
     builtin: true,
-    priority: 99
+    priority: 99,
+    version: 2
   }
 ];
 
@@ -3488,14 +3499,63 @@ async function handleClaudeStream(response) {
 async function loadWorldBook() {
   const entries = await dbGetAll('worldbook');
   
+  // 检查世界书版本
+  const savedVersion = await dbGet('settings', 'worldbookVersion');
+  const currentVersion = savedVersion?.value || 1;
+  
   if (entries.length === 0) {
-    // 初始化默认条目
+    // 首次使用，初始化默认条目
     for (const entry of DEFAULT_WORLDBOOK) {
       await dbPut('worldbook', entry);
     }
     worldBookEntries = [...DEFAULT_WORLDBOOK];
+    await dbPut('settings', { key: 'worldbookVersion', value: WORLDBOOK_VERSION });
   } else {
     worldBookEntries = entries;
+    
+    // 版本检测：如果版本号不同，更新内置提示词
+    if (currentVersion < WORLDBOOK_VERSION) {
+      console.log('检测到世界书更新，正在同步...');
+      
+      let hasUpdates = false;
+      
+      for (const defaultEntry of DEFAULT_WORLDBOOK) {
+        if (!defaultEntry.builtin) continue; // 只更新内置条目
+        
+        const existingEntry = worldBookEntries.find(e => e.id === defaultEntry.id);
+        
+        if (existingEntry) {
+          // 检查版本号
+          const existingVersion = existingEntry.version || 1;
+          const newVersion = defaultEntry.version || 1;
+          
+          if (newVersion > existingVersion) {
+            // 更新内容，但保留用户的启用状态
+            existingEntry.title = defaultEntry.title;
+            existingEntry.content = defaultEntry.content;
+            existingEntry.priority = defaultEntry.priority;
+            existingEntry.version = defaultEntry.version;
+            
+            await dbPut('worldbook', existingEntry);
+            hasUpdates = true;
+            console.log('已更新：' + existingEntry.title);
+          }
+        } else {
+          // 新增的内置条目
+          await dbPut('worldbook', defaultEntry);
+          worldBookEntries.push(defaultEntry);
+          hasUpdates = true;
+          console.log('已添加：' + defaultEntry.title);
+        }
+      }
+      
+      // 更新版本号
+      await dbPut('settings', { key: 'worldbookVersion', value: WORLDBOOK_VERSION });
+      
+      if (hasUpdates) {
+        showToast('✨ 内置提示词已更新到最新版本');
+      }
+    }
   }
   
   renderWorldBook();
@@ -3652,7 +3712,63 @@ async function deleteWorldBookEntry(id) {
     showToast('条目已删除');
   });
 }
-
+// 手动检查世界书更新
+async function checkWorldBookUpdate() {
+  showLoading();
+  
+  try {
+    const savedVersion = await dbGet('settings', 'worldbookVersion');
+    const currentVersion = savedVersion?.value || 1;
+    
+    if (currentVersion >= WORLDBOOK_VERSION) {
+      hideLoading();
+      showToast('✅ 已是最新版本 (v' + WORLDBOOK_VERSION + ')');
+      return;
+    }
+    
+    let updateCount = 0;
+    
+    for (const defaultEntry of DEFAULT_WORLDBOOK) {
+      if (!defaultEntry.builtin) continue;
+      
+      const existingEntry = worldBookEntries.find(e => e.id === defaultEntry.id);
+      
+      if (existingEntry) {
+        const existingVersion = existingEntry.version || 1;
+        const newVersion = defaultEntry.version || 1;
+        
+        if (newVersion > existingVersion) {
+          existingEntry.title = defaultEntry.title;
+          existingEntry.content = defaultEntry.content;
+          existingEntry.priority = defaultEntry.priority;
+          existingEntry.version = defaultEntry.version;
+          
+          await dbPut('worldbook', existingEntry);
+          updateCount++;
+        }
+      } else {
+        await dbPut('worldbook', defaultEntry);
+        worldBookEntries.push(defaultEntry);
+        updateCount++;
+      }
+    }
+    
+    await dbPut('settings', { key: 'worldbookVersion', value: WORLDBOOK_VERSION });
+    
+    hideLoading();
+    
+    if (updateCount > 0) {
+      renderWorldBook();
+      showToast('✨ 已更新 ' + updateCount + ' 个提示词到 v' + WORLDBOOK_VERSION);
+    } else {
+      showToast('✅ 已是最新版本');
+    }
+    
+  } catch (e) {
+    hideLoading();
+    showToast('检查更新失败: ' + e.message, true);
+  }
+}
 // ===== 记忆管理 =====
 async function saveCoreMemory() {
   var content = document.getElementById('coreMemory').value;
