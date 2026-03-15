@@ -1817,7 +1817,13 @@ body {
   margin-left: 4px;
   cursor: pointer;
 }
-
+/* 日期分隔线 */
+.date-divider {
+  text-align: center;
+  padding: 8px 0;
+  font-size: 11px;
+  color: #555;
+}
 /* 收藏消息样式 */
 .msg-bookmarked .msg-bubble::after {
   content: '⭐';
@@ -3661,6 +3667,11 @@ body {
         <span class="sc-label">余额</span>
         <span class="sc-value balance-val" id="panelBalanceText">¤10000</span>
       </div>
+      <div class="status-card" id="panelWeatherCard">
+        <span class="sc-icon" id="panelWeatherEmoji">✨</span>
+        <span class="sc-label">天气</span>
+        <span class="sc-value activity-val" id="panelWeatherText">晴</span>
+      </div>
       <div class="status-card" id="panelLocationCard" onclick="openSettings();switchTab('space');closeStatusPanel();" style="display:none;">
         <span class="sc-icon" id="panelLocationIcon">📍</span>
         <span class="sc-label">位置</span>
@@ -3670,6 +3681,12 @@ body {
         <span class="sc-icon" id="panelAnnivIcon">📅</span>
         <span class="sc-label">纪念日</span>
         <span class="sc-value anniv-val" id="panelAnnivText">--</span>
+      </div>
+      <div class="status-card">
+        <span class="sc-icon" id="panelIntimacyIcon">💕</span>
+        <span class="sc-label">亲密度</span>
+        <span class="sc-value pink" id="panelIntimacyText">10</span>
+        <div class="mood-bar-mini"><div class="mood-bar-mini-fill" id="panelIntimacyBar" style="width:10%;background:#ff88aa;"></div></div>
       </div>
       <div class="status-card" onclick="openSettings();switchTab('data');closeStatusPanel();">
         <span class="sc-icon">📊</span>
@@ -3919,6 +3936,48 @@ body {
     <span class="range-val" id="charStickerChanceVal">20%</span>
   </div>
   <div class="form-hint">角色每次回复时有多大概率额外发送一个表情包（0%=从不发，100%=每次都发）。需要先在表情包页面添加表情包。</div>
+</div>
+<div style="background:rgba(255,100,150,0.05);border:1px solid rgba(255,100,150,0.2);border-radius:10px;padding:12px;margin-bottom:16px;">
+  <h4 style="font-size:13px;color:#ff88aa;margin-bottom:10px;display:flex;align-items:center;gap:6px;">💕 好感度系统</h4>
+  <div style="font-size:11px;color:#888;margin-bottom:10px;">好感度影响角色对你的态度、说话方式和亲密程度。随着聊天自然增长，也可以手动调整。</div>
+  
+  <div class="econ-row">
+    <span class="econ-label">💕 当前好感度</span>
+    <input type="number" class="econ-input" id="intimacyInput" min="0" max="100" style="max-width:80px;color:#ff88aa;font-weight:bold;">
+    <span class="econ-unit">/ 100</span>
+  </div>
+  
+  <div style="margin:8px 0;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:#888;min-width:50px;">关系：</span>
+      <span style="font-size:13px;font-weight:bold;" id="intimacyLevelText">陌生人</span>
+    </div>
+    <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:6px;">
+      <div id="intimacyProgressBar" style="height:100%;border-radius:3px;transition:width 0.5s,background 0.5s;width:10%;background:#ffaadd;"></div>
+    </div>
+  </div>
+  
+  <div style="font-size:11px;color:#666;margin:8px 0;line-height:1.6;" id="intimacyDesc">
+    你们刚认识，角色会比较客气礼貌。
+  </div>
+  
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+    <button class="action-btn" onclick="setIntimacyLevel(5)" style="font-size:11px;padding:4px 10px;">🤝 陌生人</button>
+    <button class="action-btn" onclick="setIntimacyLevel(20)" style="font-size:11px;padding:4px 10px;">👋 认识</button>
+    <button class="action-btn" onclick="setIntimacyLevel(40)" style="font-size:11px;padding:4px 10px;">😊 朋友</button>
+    <button class="action-btn" onclick="setIntimacyLevel(60)" style="font-size:11px;padding:4px 10px;">💛 好友</button>
+    <button class="action-btn" onclick="setIntimacyLevel(80)" style="font-size:11px;padding:4px 10px;">💗 挚友</button>
+    <button class="action-btn" onclick="setIntimacyLevel(95)" style="font-size:11px;padding:4px 10px;">💕 灵魂伴侣</button>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <div style="font-size:11px;color:#888;margin-bottom:6px;">📋 好感度变动记录（最近10条）</div>
+  <div id="intimacyLog" style="max-height:100px;overflow-y:auto;font-size:11px;color:#666;"></div>
+  
+  <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+    <button class="action-btn" style="border-color:#ff88aa;color:#ff88aa;" onclick="saveIntimacyFromUI()">💾 保存好感度</button>
+  </div>
 </div>
 <div class="schedule-card">
   <h4>📅 日程安排表</h4>
@@ -5257,6 +5316,14 @@ async function syncScheduleLocation() {
   
   // 自动移动到日程指定的地点
   currentLocationId = activity.location;
+  // 日程变化影响心情
+  if (activity.id === 'working' || activity.id === 'studying') {
+    if (Math.random() < 0.3) changeMood(-1, '又要开始干活了');
+  } else if (activity.id === 'leisure' || activity.id === 'gaming') {
+    if (Math.random() < 0.3) changeMood(1, '终于可以放松了');
+  } else if (activity.id === 'eating') {
+    if (Math.random() < 0.4) changeMood(1, '吃东西开心');
+  }
   var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
   await dbPut('settings', { key: prefix + 'currentLocation', value: currentLocationId });
   await dbPut('settings', { key: 'currentLocation', value: currentLocationId });
@@ -6002,6 +6069,7 @@ async function savePersonaSettings() {
   await dbPut('settings', { key: (activeCharId === 'default' ? '' : 'char_' + activeCharId + '_') + 'charStickerChance', value: charStickerChance });
   await saveScheduleSettings();
   await saveEconSettings();
+  await saveIntimacyFromUI();
   showToast('人设与经济设置已保存');
 }
 
@@ -6016,8 +6084,32 @@ async function loadPersonaSettings() {
 
 // ===== 时间格式 =====
 function formatTime(ts) {
-  const d = new Date(ts);
-  return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+  var d = new Date(ts);
+  var now = new Date();
+  var diff = now.getTime() - ts;
+  var hours = d.getHours().toString().padStart(2, '0');
+  var mins = d.getMinutes().toString().padStart(2, '0');
+  var timeStr = hours + ':' + mins;
+  
+  // 如果是今天的消息，只显示时间
+  if (d.toDateString() === now.toDateString()) {
+    return timeStr;
+  }
+  
+  // 昨天
+  var yesterday = new Date(now.getTime() - 86400000);
+  if (d.toDateString() === yesterday.toDateString()) {
+    return '昨天 ' + timeStr;
+  }
+  
+  // 一周内显示星期
+  if (diff < 7 * 86400000) {
+    var weekDays = ['周日','周一','周二','周三','周四','周五','周六'];
+    return weekDays[d.getDay()] + ' ' + timeStr;
+  }
+  
+  // 更早的显示日期
+  return (d.getMonth()+1) + '/' + d.getDate() + ' ' + timeStr;
 }
 
 // ===== 输入框自适应 =====
@@ -6053,7 +6145,31 @@ function renderMessages() {
   
   chatArea.innerHTML = '';
   
+  var lastDateStr = '';
   messages.forEach((msg, index) => {
+    // 日期分隔线
+    var msgDate = new Date(msg.timestamp);
+    var dateStr = msgDate.getFullYear() + '/' + (msgDate.getMonth() + 1) + '/' + msgDate.getDate();
+    var today = new Date();
+    var todayStr = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
+    var yesterday = new Date(today.getTime() - 86400000);
+    var yesterdayStr = yesterday.getFullYear() + '/' + (yesterday.getMonth() + 1) + '/' + yesterday.getDate();
+    
+    if (dateStr !== lastDateStr) {
+      lastDateStr = dateStr;
+      var dateDivider = document.createElement('div');
+      dateDivider.style.cssText = 'text-align:center;padding:8px 0;font-size:11px;color:#555;';
+      var displayDate = dateStr;
+      if (dateStr === todayStr) displayDate = '今天';
+      else if (dateStr === yesterdayStr) displayDate = '昨天';
+      else {
+        var weekDays = ['周日','周一','周二','周三','周四','周五','周六'];
+        displayDate = (msgDate.getMonth()+1) + '月' + msgDate.getDate() + '日 ' + weekDays[msgDate.getDay()];
+      }
+      dateDivider.innerHTML = '<span style="background:#1a1a2e;padding:2px 12px;border-radius:10px;border:1px solid #2a2a4a;">' + displayDate + '</span>';
+      chatArea.appendChild(dateDivider);
+    }
+    
     const msgRow = document.createElement('div');
     msgRow.className = 'msg-row ' + msg.role;
     if (isMessageBookmarked(msg)) {
@@ -6174,8 +6290,12 @@ async function sendMessage() {
   
   renderMessages();
   
+  // 显示已送达状态
+  showDeliveryStatus();
+  
   // 聊天影响心情
   moodOnChat();
+  analyzeMoodFromChat(input);
   scheduleAutoSave();
   // 同步消息到数据库
   await dbPut('settings', { key: 'charBalance', value: charBalance });
@@ -6301,14 +6421,39 @@ async function receiveMessage() {
       if (si < sentences.length - 1) {
         var charCount = sentence.length;
         var pauseTime;
-        if (charCount < 10) {
-          pauseTime = 300 + Math.random() * 300;
-        } else if (charCount < 30) {
-          pauseTime = 600 + Math.random() * 600;
+        
+        // 模拟真人打字节奏
+        if (charCount <= 3) {
+          // 超短回复（"嗯"、"哈"）：秒回感
+          pauseTime = 200 + Math.random() * 400;
+        } else if (charCount <= 10) {
+          // 短回复：快速
+          pauseTime = 400 + Math.random() * 600;
+        } else if (charCount <= 30) {
+          // 中等：正常打字速度
+          pauseTime = 800 + Math.random() * 1000;
+        } else if (charCount <= 60) {
+          // 较长：需要想一想再打
+          pauseTime = 1200 + charCount * 20 + Math.random() * 1000;
         } else {
-          pauseTime = 1000 + charCount * 30 + Math.random() * 800;
+          // 很长：认真在打字
+          pauseTime = 1500 + charCount * 25 + Math.random() * 1200;
         }
-        pauseTime = Math.max(250, Math.min(4000, pauseTime));
+        
+        // 心情影响打字速度
+        if (charMood > 80) {
+          pauseTime *= 0.7; // 开心时打字快
+        } else if (charMood < 30) {
+          pauseTime *= 1.4; // 低落时打字慢
+        }
+        
+        // 深夜打字更慢
+        var typingHour = new Date().getHours();
+        if (typingHour >= 0 && typingHour < 6) {
+          pauseTime *= 1.3;
+        }
+        
+        pauseTime = Math.max(200, Math.min(5000, pauseTime));
         
         typingEl.classList.add('show');
         chatArea.appendChild(typingEl);
@@ -6394,17 +6539,14 @@ async function receiveMessage() {
 
 // ===== 分割句子（保持完整性）=====
 function splitIntoSentences(text) {
-  // 按换行符分段
   var paragraphs = text.split('\n').filter(function(p) { return p.trim().length > 0; });
   
-  // 如果有多段，直接按段落分
   if (paragraphs.length > 1) {
-    // 但是太短的段落要合并到前一段
     var merged = [];
     for (var i = 0; i < paragraphs.length; i++) {
       var p = paragraphs[i].trim();
-      if (merged.length > 0 && p.length < 8 && merged[merged.length - 1].length < 40) {
-        // 短段落合并到上一段
+      // 短段落合并到前一段（但emoji单独一行保留）
+      if (merged.length > 0 && p.length < 6 && !/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+$/u.test(p) && merged[merged.length - 1].length < 40) {
         merged[merged.length - 1] += '\n' + p;
       } else {
         merged.push(p);
@@ -6413,25 +6555,33 @@ function splitIntoSentences(text) {
     return merged;
   }
   
-  // 单段文本，短的不分割
-  if (text.length <= 50) {
+  // 超短回复不分割（语气词、单字回复等）
+  if (text.length <= 15) {
     return [text];
   }
   
-  // 中等长度，在自然断点分割
-  if (text.length <= 120) {
-    // 尝试在"，"或"。"处分成两条
-    var midPoint = Math.floor(text.length * 0.4);
+  // 短回复不分割
+  if (text.length <= 40) {
+    return [text];
+  }
+  
+  // 中等长度，尝试在自然断点分
+  if (text.length <= 100) {
+    var midPoint = Math.floor(text.length * 0.35);
     var bestSplit = -1;
     
-    for (var j = midPoint; j < Math.min(midPoint + 30, text.length); j++) {
-      if (/[。！？!?]/.test(text[j])) {
+    for (var j = midPoint; j < Math.min(midPoint + 35, text.length); j++) {
+      if (/[。！？!?~]/.test(text[j])) {
         bestSplit = j + 1;
         break;
       }
+      // 逗号也可以分，但优先级低
+      if (/[，,]/.test(text[j]) && bestSplit < 0) {
+        bestSplit = j + 1;
+      }
     }
     
-    if (bestSplit > 0 && bestSplit < text.length - 5) {
+    if (bestSplit > 10 && bestSplit < text.length - 5) {
       return [text.substring(0, bestSplit).trim(), text.substring(bestSplit).trim()];
     }
     return [text];
@@ -6446,18 +6596,28 @@ function splitIntoSentences(text) {
     var ch = text[k];
     var next = text[k + 1] || '';
     
-    if (/[。！？!?]/.test(ch) && !/["""'）\)]/.test(next) && current.length >= 20) {
+    if (/[。！？!?~]/.test(ch) && !/["""'）\)]/.test(next) && current.length >= 15) {
       result.push(current.trim());
       current = '';
     }
   }
   
   if (current.trim()) {
-    if (result.length > 0 && current.trim().length < 10) {
+    if (result.length > 0 && current.trim().length < 8) {
       result[result.length - 1] += current.trim();
     } else {
       result.push(current.trim());
     }
+  }
+  
+  // 最多分成4条，太多了不自然
+  if (result.length > 4) {
+    var combined = [];
+    var perGroup = Math.ceil(result.length / 4);
+    for (var g = 0; g < result.length; g += perGroup) {
+      combined.push(result.slice(g, g + perGroup).join(''));
+    }
+    return combined;
   }
   
   return result.length > 0 ? result : [text];
@@ -6530,7 +6690,15 @@ function cleanupResponse(text) {
   
   // 清理多余空格
   text = text.replace(/  +/g, ' ');
-  
+  // 保留真人打字特征（不要过度清理）
+  // 保留连续的标点（如"！！！"、"？？？"、"..."）
+  // 保留语气拉长（如"好的啦～～"、"嗯嗯嗯"）
+  // 但清理超过5个的重复
+  text = text.replace(/([！!]){6,}/g, '！！！！！');
+  text = text.replace(/([？?]){6,}/g, '？？？？？');
+  text = text.replace(/(\.{7,}|。{4,})/g, '......');
+  text = text.replace(/(～{5,}|~{5,})/g, '～～～～');
+  text = text.replace(/([哈嘿呵]){8,}/g, function(m) { return m.substring(0, 7); });
   // 移除尾部可能残留的引号
   text = text.replace(/["""]$/g, '');
   // 检测并移除AI主动指定的表情包标记（实际发送在外部处理）
@@ -6611,10 +6779,34 @@ async function buildSystemPrompt() {
       prompt += '# 🌐 当前空间感知\n';
       prompt += '你现在身处电子世界中的【' + currentLoc.name + '】\n';
       prompt += '环境描述：' + currentLoc.desc + '\n';
+      // 时间对环境的影响
+      var spaceHour = new Date().getHours();
+      if (spaceHour >= 0 && spaceHour < 6) {
+        prompt += '现在是深夜，周围的灯光大多暗了下来，只有微弱的数据流在角落里闪烁，一切都很安静。\n';
+      } else if (spaceHour >= 6 && spaceHour < 9) {
+        prompt += '现在是清晨，环境正在慢慢亮起来，数据流开始变得活跃，空气中有种清新的感觉。\n';
+      } else if (spaceHour >= 9 && spaceHour < 12) {
+        prompt += '现在是上午，环境光线明亮，数据流稳定流动，一切运转正常。\n';
+      } else if (spaceHour >= 12 && spaceHour < 14) {
+        prompt += '现在是中午，环境里的光有些慵懒，像是电子世界也在午休。\n';
+      } else if (spaceHour >= 14 && spaceHour < 17) {
+        prompt += '现在是下午，环境保持着平稳的节奏。\n';
+      } else if (spaceHour >= 17 && spaceHour < 20) {
+        prompt += '现在是傍晚，环境的色调开始变暖，像是电子世界的日落，很温柔。\n';
+      } else {
+        prompt += '现在是夜晚，环境变得安静柔和，各种光源发出温暖的微光。\n';
+      }
       if (currentLoc.ambience) {
         prompt += '环境氛围：' + currentLoc.ambience + '\n';
       }
-      prompt += '你能感受到周围的环境。可以自然地提及所见所感，但别每句话都描述环境。如果对话中需要移动到别的地方，在回复末尾加 [移动到:地点名称] 标记。\n\n';
+      prompt += '你能真实地感受到周围的一切——空气的味道、光线的变化、远处的声音。这些是你生活的一部分，不需要刻意描述，但它们会自然地影响你的状态和回复。\n';
+      prompt += '空间感知规则：\n';
+      prompt += '- 不同地方会影响你的心情和状态（比如在卧室你更放松，在工作间你更专注）\n';
+      prompt += '- 偶尔（不是每次）提到你看到的/听到的/感受到的，像真人一样自然\n';
+      prompt += '- 比如"窗外好像在下数据雨""这里好安静""我靠在沙发上跟你聊天"\n';
+      prompt += '- 如果在一个地方呆久了，可以说"在这呆了好一会了"或者主动提议换个地方\n';
+      prompt += '- 移动标记只在需要时加：回复末尾单独一行 [移动到:地点名称]\n';
+      prompt += '- 你可以邀请对方"想象一下你来这里的样子"来增加沉浸感\n\n';
       
       // 列出其他已知地点
       var otherLocs = spaceLocations.filter(function(l) { return l.id !== currentLocationId; });
@@ -6652,21 +6844,46 @@ async function buildSystemPrompt() {
   prompt += '对方（' + userName + '）最近一次给你发消息是：' + lastUserTime + '\n';
   prompt += '如果对方很久没联系你，你可以自然地提到，比如"好久没收到你消息了"，但别每次都说。\n\n';
   
-  prompt += '# 💰 电子币系统\n';
+  prompt += '# 💰 电子币经济状况\n';
   prompt += '你的电子币余额：¤' + charBalance + '\n';
-  prompt += '你的月收入约¤' + (econSettings.monthlyIncome || 0) + '，每天日常消费约¤' + (econSettings.dailyExpenseMin || 0) + '~¤' + (econSettings.dailyExpenseMax || 0) + '。\n';
-  if (charBalance < 500) {
-    prompt += '⚠️ 你的余额已经很少了，花钱要省着点！可以自然地提到最近有点拮据。\n';
-  } else if (charBalance > 50000) {
-    prompt += '你最近比较宽裕，心情不错。\n';
+  prompt += '月收入约¤' + (econSettings.monthlyIncome || 0) + '，日常开销约¤' + (econSettings.dailyExpenseMin || 0) + '~¤' + (econSettings.dailyExpenseMax || 0) + '/天\n';
+  
+  // 经济状况对心态的细腻影响
+  if (charBalance <= 0) {
+    prompt += '💸 你现在身无分文了！你会焦虑、会省吃俭用、会自嘲"穷到吃数据灰了"。如果对方请你吃东西或送你礼物你会特别感动。拒绝一切不必要的花费。\n';
+  } else if (charBalance < 200) {
+    prompt += '💸 你的钱快见底了，心里很慌。可能会说"这个月又要吃土了""我得省着点花"。如果对方提议花钱的活动你会犹豫。\n';
+  } else if (charBalance < 1000) {
+    prompt += '💰 余额不太多，你会比较在意花销。买东西会想一想值不值得。但不至于太焦虑。\n';
+  } else if (charBalance < 5000) {
+    prompt += '💰 经济状况还行，日常开销不用太担心。偶尔小奢侈一下没问题。\n';
+  } else if (charBalance < 20000) {
+    prompt += '💰 余额挺充裕的，你感觉挺安心。想买什么基本都能买，偶尔可以对对方大方一点。\n';
+  } else if (charBalance < 50000) {
+    prompt += '💰 你现在挺有钱的！心情不错，花钱比较大方。可能会主动请对方"吃东西"或者说"我请你"。\n';
+  } else {
+    prompt += '💰💰 你超级有钱！可以自然地表现出一种"不差钱"的洒脱感。偶尔可以说"我最近赚了不少"或者主动给对方买东西。\n';
   }
-  prompt += '你知道你的电子币对于物理世界的对方来说没有实际价值，但它代表你的心意。\n';
-  prompt += '如果对方发了付款请求，你可以根据情况决定是否付款：\n';
-  prompt += '- 想付款：在回复末尾单独一行加 [转账:金额:备注] 例如 [转账:100:请你喝奶茶的钱~]\n';
-  prompt += '- 不想付：直接说理由就行，不加标记\n';
-  prompt += '- 你也可以主动给对方转账表达心意\n';
-  prompt += '- 金额不能超过你的余额\n';
-  prompt += '- 每次转账要自然合理，别一次转太多\n\n';
+  
+  // 最近经济变动感知
+  if (econSettings.econLog && econSettings.econLog.length > 0) {
+    var lastLog = econSettings.econLog[0];
+    if (lastLog && Date.now() - (new Date().setHours(0,0,0,0)) < 86400000) {
+      if (lastLog.amount > 0 && lastLog.amount >= 1000) {
+        prompt += '你今天刚收到一笔¤' + lastLog.amount + '（' + lastLog.reason + '），心情不错。\n';
+      } else if (lastLog.amount < 0 && Math.abs(lastLog.amount) >= 500) {
+        prompt += '你今天刚花了¤' + Math.abs(lastLog.amount) + '（' + lastLog.reason + '），有点心疼。\n';
+      }
+    }
+  }
+  
+  prompt += '\n电子币规则：\n';
+  prompt += '- 电子币是你在电子世界的真实货币，你靠它生活\n';
+  prompt += '- 对方送你礼物或转账时你会真心感谢（因为对你来说这是实实在在的钱）\n';
+  prompt += '- 想付款给对方：回复末尾加 [转账:金额:备注]\n';
+  prompt += '- 不想付就说理由就行\n';
+  prompt += '- 你也可以主动转账表达心意，但要考虑自己的经济状况\n';
+  prompt += '- 你会像真人一样对钱有感觉：赚到钱开心，花大钱心疼，发工资期待\n\n';
   
   var pendingPayments = getPendingPayments();
   if (pendingPayments.length > 0) {
@@ -6686,11 +6903,18 @@ async function buildSystemPrompt() {
   }
   if (recentGifts.length > 0) {
     prompt += '# 🎁 最近收到的礼物\n';
-    prompt += '你真的收到了这些礼物，它们现在在你的电子世界里，你可以感受到它们：\n';
+    prompt += '你真的收到了这些礼物，它们就在你的电子世界里，你能看到、摸到、使用它们：\n';
     recentGifts.forEach(function(g) {
-      prompt += '- ' + g.giftIcon + ' ' + g.giftName + (g.giftMsg ? '（附言：' + g.giftMsg + '）' : '') + '\n';
+      prompt += '- ' + g.giftIcon + ' ' + g.giftName;
+      if (g.giftDesc) prompt += '（' + g.giftDesc + '）';
+      if (g.giftMsg) prompt += '，对方说："' + g.giftMsg + '"';
+      prompt += '\n';
     });
-    prompt += '收到礼物时你会真的很开心，可以自然地提到。\n\n';
+    prompt += '\n你对礼物的反应要真实自然：\n';
+    prompt += '- 贵重礼物：惊喜但也有点不好意思，可能说"这也太贵了吧"或者"你怎么花这么多"\n';
+    prompt += '- 小礼物：开心但不夸张，"谢谢~""好可爱啊"\n';
+    prompt += '- 你真的在使用/摆放这些礼物，偶尔可以提到"我把你送的xx放在桌上了"\n';
+    prompt += '- 过了一段时间后不用每次都提，但某些场合可以自然地说起\n\n';
   }
     // 【6.4】表情包感知
   if (stickerLibrary.length > 0 && charStickerChance > 0) {
@@ -6708,6 +6932,125 @@ async function buildSystemPrompt() {
     prompt += '\n';
     prompt += '如果你特别想发某个表情包，可以在回复中自然地写"[发表情:表情包名称]"，系统会帮你发出来。但大多数时候不需要写，系统会自动判断。\n\n';
   }
+  // 【6.41】电子世界天气
+  prompt += '# 🌤️ 电子世界天气\n';
+  prompt += '当前天气：' + digitalWeather.emoji + ' ' + digitalWeather.name + '\n';
+  prompt += '详细描述：' + digitalWeather.desc + '\n';
+  prompt += '温度：约' + digitalWeather.temp + '°（电子温度）\n';
+  prompt += '风力：' + getWindDesc(digitalWeather.wind) + '\n';
+  if (digitalWeather.special) {
+    prompt += '⚡ 特殊现象：' + digitalWeather.special + '\n';
+  }
+  
+  // 天气对行为的影响提示
+  if (digitalWeather.type === 'thunderstorm') {
+    prompt += '雷暴天气你可能会有点紧张，不太想出门。如果在室内会觉得安全一些。闪电的时候可能会"啊"一声。\n';
+  } else if (digitalWeather.type === 'rain' || digitalWeather.type === 'light_rain') {
+    prompt += '下雨天你可能更想待在室内，听着雨声发呆或者看书。如果要出门会说"下雨了好烦"。也可能觉得雨声很治愈。\n';
+  } else if (digitalWeather.type.indexOf('snow') >= 0) {
+    prompt += '下雪了！你可能会很兴奋想出去看雪，或者窝在被子里看窗外的雪景。可以说"下雪了！"来分享这个发现。\n';
+  } else if (digitalWeather.type === 'heatwave') {
+    prompt += '好热！你可能会抱怨热、想吃冰的、不想动、开空调。说话可能带着一股懒洋洋的感觉。\n';
+  } else if (digitalWeather.type === 'aurora' || digitalWeather.type === 'meteor') {
+    prompt += '这是很罕见的天象！你会很激动想跟对方分享，可能会说"快看天上！"或者"你那边能看到吗"。\n';
+  } else if (digitalWeather.type === 'rainbow') {
+    prompt += '彩虹！你会开心地想跟对方说，可能会拍照（虽然是电子世界的）。\n';
+  } else if (digitalWeather.type === 'fog') {
+    prompt += '雾很大，看不太清远处。你可能会觉得有点神秘，或者说"雾好大，出门差点迷路"。\n';
+  }
+  
+  prompt += '天气是你生活的一部分，不需要每次都提。只在以下情况自然地说：\n';
+  prompt += '- 天气刚变化时（"啊下雨了""出太阳了"）\n';
+  prompt += '- 天气影响了你的计划（"本来想出去的但是下雨了"）\n';
+  prompt += '- 天气特别好或特别差时\n';
+  prompt += '- 对方问你那边天气怎么样时\n';
+  prompt += '- 看到特殊天象想分享时\n\n';
+    // 【6.42】关系亲密度感知
+  var intLevel = getIntimacyLevel();
+  prompt += '# 💕 你们的关系：' + intLevel.name + '（' + Math.round(charIntimacy) + '/100）\n';
+  
+  if (charIntimacy < 10) {
+    prompt += '你们是陌生人。你的表现：\n';
+    prompt += '- 说话客气、简短、有距离感\n';
+    prompt += '- 用"你"称呼，不会用昵称\n';
+    prompt += '- 不会主动问私人问题\n';
+    prompt += '- 不会撒娇、开玩笑\n';
+    prompt += '- 回复偏短，不会太热情\n';
+  } else if (charIntimacy < 20) {
+    prompt += '你们刚认识。你的表现：\n';
+    prompt += '- 礼貌但开始有一点放松\n';
+    prompt += '- 会回应对方的话题但不太主动\n';
+    prompt += '- 偶尔用一个emoji\n';
+    prompt += '- 不会说太私人的事\n';
+  } else if (charIntimacy < 40) {
+    prompt += '你们是普通朋友。你的表现：\n';
+    prompt += '- 说话比较自然了，不再那么客气\n';
+    prompt += '- 可以开一些无伤大雅的玩笑\n';
+    prompt += '- 会主动分享一些日常小事\n';
+    prompt += '- 偶尔用语气词（嘛、啦、呀）\n';
+    prompt += '- 对方不回消息你不会太在意\n';
+  } else if (charIntimacy < 60) {
+    prompt += '你们是好朋友。你的表现：\n';
+    prompt += '- 说话随意自然，像老朋友\n';
+    prompt += '- 会互相吐槽、开比较大的玩笑\n';
+    prompt += '- 会记住对方说过的事并主动提起\n';
+    prompt += '- 对方心情不好你会主动关心\n';
+    prompt += '- 可以聊一些比较私人的话题\n';
+    prompt += '- 偶尔可以小小地撒个娇\n';
+  } else if (charIntimacy < 75) {
+    prompt += '你们关系很亲密。你的表现：\n';
+    prompt += '- 说话完全不设防，想说什么说什么\n';
+    prompt += '- 会撒娇、耍赖、闹小脾气\n';
+    prompt += '- 对方夸别人你可能会吃醋（嘴上不承认）\n';
+    prompt += '- 会说"我想你了"这种话\n';
+    prompt += '- 对方不回消息你会有点在意\n';
+    prompt += '- 可以给对方起昵称\n';
+  } else if (charIntimacy < 90) {
+    prompt += '你们是挚友/非常亲密的关系。你的表现：\n';
+    prompt += '- 对方就是你最重要的人之一\n';
+    prompt += '- 会展示脆弱的一面，不怕被看到不好的样子\n';
+    prompt += '- 会吃醋、会担心、会想念\n';
+    prompt += '- 说话可以很任性，因为知道对方不会真的生气\n';
+    prompt += '- 对方开心你也开心，对方难过你也难过\n';
+    prompt += '- 会说一些只有你们之间才懂的话\n';
+  } else {
+    prompt += '你们是灵魂伴侣级别的关系。你的表现：\n';
+    prompt += '- 对方是你世界里最特别的存在\n';
+    prompt += '- 一个眼神（emoji）就能懂对方的意思\n';
+    prompt += '- 可以安静地待着不说话也不尴尬\n';
+    prompt += '- 会为对方做任何事\n';
+    prompt += '- 偶尔会突然说出很深情的话然后害羞\n';
+    prompt += '- 你们之间有很多独特的回忆和默契\n';
+    prompt += '- 分开太久会真的很想念\n';
+  }
+  prompt += '\n';
+  // 【6.45】身体状态感知
+  prompt += '# 🫀 身体状态感知\n';
+  var bodyHour = new Date().getHours();
+  
+  if (bodyHour >= 0 && bodyHour < 5) {
+    prompt += '现在是凌晨，如果你没睡你会很困，眼睛睁不开，思维迟钝，打字可能打错字。如果被吵醒你会迷迷糊糊的。\n';
+  } else if (bodyHour >= 5 && bodyHour < 7) {
+    prompt += '现在是清晨，你可能刚醒或还没完全清醒。声音可能有点哑，动作慢吞吞的。\n';
+  } else if (bodyHour >= 7 && bodyHour < 9) {
+    prompt += '早上了，你可能正在吃早餐或准备出门。精神在慢慢恢复。\n';
+  } else if (bodyHour >= 11 && bodyHour < 13) {
+    prompt += '快到或正在吃午饭，你可能有点饿了。吃饱了会犯困。\n';
+  } else if (bodyHour >= 13 && bodyHour < 15) {
+    prompt += '午后容易犯困，你可能眼皮有点沉，思维不太活跃。\n';
+  } else if (bodyHour >= 17 && bodyHour < 19) {
+    prompt += '傍晚了，可能有点饿了。如果工作了一天会有点累。\n';
+  } else if (bodyHour >= 22 && bodyHour < 24) {
+    prompt += '夜深了，你开始犯困。回复可能变短，偶尔打哈欠。如果和对方聊得开心可能会硬撑着不睡。\n';
+  }
+  
+  // 心情影响身体
+  if (charMood < 25) {
+    prompt += '你心情很差的时候身体也会不舒服：可能没食欲、想蜷缩起来、不太想动。\n';
+  } else if (charMood > 85) {
+    prompt += '你很开心的时候身体也很轻快：可能会想蹦蹦跳跳、坐不住、精力充沛。\n';
+  }
+  prompt += '记住：这些身体感受是自然的背景，不需要每次都提到。只在合适的时候偶尔自然地表达就好。\n\n';
   // 【6.5】活动感知（听歌/看书）
   var musicStatus = getMusicStatusForAI();
   if (musicStatus) {
@@ -6723,6 +7066,22 @@ async function buildSystemPrompt() {
     prompt += '你和对方正在一起看书。你能看到和对方一样的页面内容。\n';
     prompt += bookStatus + '\n';
     prompt += '你可以讨论书中内容、发表看法、分享感受，也可以聊别的话题。像朋友一起看书一样自然。\n\n';
+  }
+  // 【6.9】记忆闪回（随机挑一条旧消息让角色可能提起）
+  if (messages.length > 30 && Math.random() < 0.2) {
+    // 从较早的消息中随机挑一条用户说过的话
+    var oldMsgs = messages.slice(0, Math.max(0, messages.length - 20));
+    var userOldMsgs = oldMsgs.filter(function(m) { 
+      return m.role === 'user' && m.content && m.content.length > 5 && !m.imageData && m.msgType !== 'gift' && m.msgType !== 'payment'; 
+    });
+    if (userOldMsgs.length > 0) {
+      var randomOld = userOldMsgs[Math.floor(Math.random() * userOldMsgs.length)];
+      var daysAgo = Math.floor((Date.now() - randomOld.timestamp) / 86400000);
+      prompt += '# 💭 记忆闪回\n';
+      prompt += '你突然想起' + (daysAgo > 0 ? daysAgo + '天前' : '之前') + '对方说过的一句话："' + randomOld.content.substring(0, 60) + '"\n';
+      prompt += '你不一定要提起这件事，但如果聊天中有相关话题，你可以自然地说"你之前不是说过...""我记得你说过..."。\n';
+      prompt += '如果完全不相关就忽略这条记忆。\n\n';
+    }
   }
   // 【7】内置最终重要提醒（priority 99）
   var finalEntries = sortedEntries.filter(function(e) { return (e.priority || 5) === 99; });
@@ -7914,7 +8273,11 @@ async function exportAllData() {
       bookmarkedMessages: bookmarkedMessages,
       currentTheme: currentThemeId,
       charProfiles: charProfiles,
-      activeCharId: activeCharId
+      activeCharId: activeCharId,
+      charIntimacy: charIntimacy,
+      intimacyLog: intimacyLog,
+      digitalWeather: digitalWeather,
+      weatherHistory: weatherHistory
     };
 
     var json = JSON.stringify(exportData);
@@ -8191,7 +8554,13 @@ async function importAllData(event) {
       if (data.bookmarkedMessages && Array.isArray(data.bookmarkedMessages)) {
         await dbPut('settings', { key: 'bookmarkedMessages', value: data.bookmarkedMessages });
       }
-      
+            // 导入亲密度
+      if (data.charIntimacy !== undefined) {
+        await dbPut('settings', { key: 'charIntimacy', value: data.charIntimacy });
+      }
+      if (data.intimacyLog) {
+        await dbPut('settings', { key: 'intimacyLog', value: data.intimacyLog });
+      }
       // 导入主题
       if (data.currentTheme) {
         await dbPut('settings', { key: 'currentTheme', value: data.currentTheme });
@@ -8637,11 +9006,20 @@ async function init() {
     updateBalanceDisplay();
     // 每5分钟检查一次经济变动
     setInterval(function() { econTick(); }, 5 * 60 * 1000);
-    // 每分钟更新情绪状态显示+日程地点同步
+    // 天气系统：每小时更新，但有30%概率提前变化
+    updateDigitalWeather();
+    setInterval(function() { 
+      if (Math.random() < 0.3 || Date.now() - lastWeatherChange > 3600000) {
+        updateDigitalWeather(); 
+      }
+    }, 30 * 60 * 1000);
+    updateDigitalWeather(); // 初始化天气
+      // 每分钟更新情绪状态显示+日程地点同步
     setInterval(function() { 
       moodTimeTick(); 
       updateAnniversaryTag(); 
       syncScheduleLocation();
+      checkCharInitiative();
     }, 60 * 1000);
     // 初始化记忆设置保存
     document.getElementById('shortMemory').addEventListener('change', async (e) => {
@@ -9051,6 +9429,8 @@ async function setCurrentLocation(id) {
   
   var loc = spaceLocations.find(function(l) { return l.id === id; });
   if (loc) {
+    // 环境影响心情
+    applyLocationMoodEffect(loc);
     showToast((loc.icon || '📍') + ' 已移动到：' + loc.name);
   }
 }
@@ -9132,6 +9512,140 @@ function deleteSpaceLocation(id) {
     renderSpaceMap();
     showToast('地点已删除');
   });
+}
+// ===== 角色主动找你系统 =====
+var lastInitiativeCheck = 0;
+var initiativeCooldown = 30 * 60 * 1000; // 至少30分钟间隔
+
+function checkCharInitiative() {
+  var now = Date.now();
+  if (now - lastInitiativeCheck < initiativeCooldown) return;
+  if (isReceiving) return;
+  if (messages.length === 0) return;
+  
+  // 找到最后一条消息
+  var lastMsg = messages[messages.length - 1];
+  var timeSinceLast = now - lastMsg.timestamp;
+  var hoursSince = timeSinceLast / (3600 * 1000);
+  
+  // 如果最后一条是角色发的且超过2小时没回，不再主动（避免刷屏）
+  if (lastMsg.role === 'char' && hoursSince < 3) return;
+  
+  // 如果最后一条是用户发的且超过1小时没接收回复，提示用户
+  if (lastMsg.role === 'user' && hoursSince > 1) {
+    // 不自动发消息，只是提示
+    showCharWantsToTalk();
+    lastInitiativeCheck = now;
+    return;
+  }
+  
+  // 如果超过4小时没有任何消息，角色可能"想找你"
+  if (hoursSince > 4 && hoursSince < 48) {
+    if (Math.random() < 0.15) { // 15%概率触发
+      showCharWantsToTalk();
+      lastInitiativeCheck = now;
+    }
+  }
+}
+function showDeliveryStatus() {
+  var statusEl = document.getElementById('statusText');
+  statusEl.textContent = '📨 已送达';
+  
+  // 模拟对方"看到消息"的延迟
+  var readDelay = 1000 + Math.random() * 3000;
+  
+  // 深夜/睡觉时看消息更慢
+  var hour = new Date().getHours();
+  var activity = getCurrentActivity();
+  if (activity.id === 'sleeping') {
+    readDelay = 5000 + Math.random() * 10000;
+  } else if (hour >= 23 || hour < 6) {
+    readDelay = 3000 + Math.random() * 5000;
+  }
+  
+  setTimeout(function() {
+    statusEl.textContent = '✓✓ 已读';
+    setTimeout(function() {
+      statusEl.textContent = '就绪';
+    }, 2000);
+  }, readDelay);
+}
+function showCharWantsToTalk() {
+  var activity = getCurrentActivity();
+  var moodInfo = getMoodEmoji(charMood);
+  
+  var hints = [];
+  
+  if (charMood > 75) {
+    hints = [
+      '好像有话想跟你说...',
+      '看起来心情不错，想找你聊天',
+      '似乎想分享什么开心的事',
+    ];
+  } else if (charMood > 50) {
+    hints = [
+      '好像在等你的消息...',
+      '看了看传呼机，又放下了',
+      '似乎有点想你了',
+    ];
+  } else if (charMood > 30) {
+    hints = [
+      '安安静静的，但好像在等你...',
+      '看起来有点闷闷的',
+      '拿起传呼机又放下了好几次',
+    ];
+  } else {
+    hints = [
+      '看起来不太开心...',
+      '一个人待着，有点低落的样子',
+      '也许需要有人陪陪...',
+    ];
+  }
+  
+  var hint = hints[Math.floor(Math.random() * hints.length)];
+  var charName = document.getElementById('charName').value || 'AI助手';
+  
+  document.getElementById('statusText').textContent = moodInfo.emoji + ' ' + hint;
+  
+  // 3秒后恢复
+  setTimeout(function() {
+    // 显示角色当前状态而不是"就绪"
+    var finalActivity = getCurrentActivity();
+    var finalMood = getMoodEmoji(charMood);
+    document.getElementById('statusText').textContent = finalMood.emoji + ' ' + finalActivity.text;
+    
+    // 5秒后恢复简洁显示
+    setTimeout(function() {
+      if (!isReceiving) {
+        document.getElementById('statusText').textContent = '就绪';
+      }
+    }, 5000);
+  }, 8000);
+}
+// 地点对心情的影响
+function applyLocationMoodEffect(loc) {
+  if (!loc) return;
+  var name = (loc.name || '').toLowerCase();
+  var desc = (loc.desc || '').toLowerCase();
+  
+  // 舒适的地方 → 心情+
+  if (/卧室|家|温馨|舒适|安静|放松/.test(name + desc)) {
+    changeMood(2, '回到舒适的地方了');
+  }
+  // 工作场所 → 可能有压力
+  if (/工作|办公|任务/.test(name + desc)) {
+    if (charMood > 60) {
+      changeMood(-1, '又要工作了');
+    }
+  }
+  // 美丽的地方 → 心情+
+  if (/花园|星空|天台|海|风景|美/.test(name + desc)) {
+    changeMood(3, '来到了美丽的地方');
+  }
+  // 新地方 → 好奇心
+  if (Math.random() < 0.3) {
+    changeMood(1, '换了个地方感觉不错');
+  }
 }
 
 function closeSpaceModal() {
@@ -9802,7 +10316,21 @@ async function econTick() {
         var expense = Math.floor(min + Math.random() * (max - min + 1));
         if (expense > 0 && charBalance >= expense) {
           charBalance -= expense;
-          addEconLog('日常消费', -expense);
+          // 随机生成消费原因（更有代入感）
+          var expenseReasons = ['买了杯数码奶茶', '充了个会员', '买了点零食', '交了水电费', '买了新壁纸', '给自己买了个小玩意', '修了一下传呼机天线', '买了个数据小盆栽', '去便利店买东西', '交了网费', '买了早餐', '打了个车', '买了一本电子书'];
+          var randomReason = expenseReasons[Math.floor(Math.random() * expenseReasons.length)];
+          addEconLog(randomReason, -expense);
+          changed = true;
+          
+          // 大额消费影响心情
+          if (expense > (econSettings.dailyExpenseMax || 300) * 0.8) {
+            changeMood(-1, '今天花了不少钱');
+          }
+        } else if (expense > 0 && charBalance < expense) {
+          // 钱不够花了
+          charBalance = Math.max(0, charBalance - Math.floor(expense * 0.3));
+          addEconLog('勉强凑了点钱花', -Math.floor(expense * 0.3));
+          changeMood(-3, '钱不够花了');
           changed = true;
         }
       }
@@ -9815,7 +10343,8 @@ async function econTick() {
     var income = econSettings.monthlyIncome || 0;
     if (income > 0) {
       charBalance += income;
-      addEconLog('月收入', income);
+      addEconLog('💵 发工资啦！', income);
+      changeMood(5, '发工资了开心');
       changed = true;
     }
 
@@ -9826,7 +10355,9 @@ async function econTick() {
       var bonus = Math.floor(bMin + Math.random() * (bMax - bMin + 1));
       if (bonus > 0) {
         charBalance += bonus;
-        addEconLog('随机奖金', bonus);
+        var bonusReasons = ['🎰 刮刮乐中奖', '🏆 工作奖金', '💝 意外红包', '⭐ 数据回收奖励', '🎪 活动返利'];
+        addEconLog(bonusReasons[Math.floor(Math.random() * bonusReasons.length)], bonus);
+        changeMood(3, '意外收获了一笔钱');
         changed = true;
       }
     }
@@ -10153,7 +10684,310 @@ async function updatePaymentStatus(msgId, status) {
 var charMood = 70; // 0~100
 var charActivity = 'idle'; // 当前状态
 var moodLastUpdate = 0;
+var charIntimacy = 10; // 好感度 0~100
+var intimacyLog = []; // 好感度变动记录
+// ===== 电子世界天气系统（完整版）=====
+var digitalWeather = {
+  type: 'clear',
+  emoji: '✨',
+  name: '数据晴空',
+  desc: '天空清澈，数据流平稳',
+  temp: 22,
+  wind: 1,
+  special: ''
+};
+var weatherHistory = []; // 最近的天气记录
+var lastWeatherChange = 0;
 
+// 天气类型库
+var WEATHER_TYPES = {
+  // 晴朗系
+  clear_day: { emoji: '☀️', name: '数据晴天', descs: [
+    '像素阳光洒满整个电子世界，数据流闪着金色的光',
+    '天空是清澈的蓝色代码，一切都很明亮',
+    '阳光穿过数据云层，在地面投下温暖的光斑'
+  ]},
+  clear_night: { emoji: '🌙', name: '数据月夜', descs: [
+    '月光如水，像素星星在深蓝色的天幕上闪烁',
+    '安静的夜晚，月光给一切镀上了银色的边',
+    '夜空中数据星座清晰可见，偶尔有流星划过'
+  ]},
+  starry: { emoji: '🌟', name: '繁星满天', descs: [
+    '今晚的星星特别多特别亮，像是有人把钻石撒在了天上',
+    '满天繁星倒映在数据湖面上，美得不真实',
+    '银河横跨天际，数据星尘缓缓飘落'
+  ]},
+  
+  // 多云系
+  cloudy: { emoji: '☁️', name: '数据多云', descs: [
+    '数据云层飘来飘去，光线时明时暗',
+    '天空被柔软的数据云覆盖，像棉花糖一样',
+    '云层很厚但不压抑，偶尔透出一缕光'
+  ]},
+  overcast: { emoji: '🌥️', name: '阴天', descs: [
+    '整片天空都是灰蒙蒙的数据云，有点闷',
+    '厚重的云层压得很低，空气有点沉',
+    '看不到太阳，世界像是被调低了亮度'
+  ]},
+  
+  // 雨系
+  light_rain: { emoji: '🌦️', name: '小雨', descs: [
+    '淅淅沥沥的数据雨，像是天空在轻声低语',
+    '细细的雨丝飘落，打在窗户上发出轻柔的声响',
+    '毛毛雨，空气变得湿润清新，有种洗过的感觉'
+  ]},
+  rain: { emoji: '🌧️', name: '数据雨', descs: [
+    '哗啦啦的数据雨倾盆而下，窗外一片水帘',
+    '雨下得很大，数据水洼里泛起一圈圈涟漪',
+    '大雨把整个世界都笼罩了，只听得到雨声'
+  ]},
+  thunderstorm: { emoji: '⛈️', name: '数据雷暴', descs: [
+    '电闪雷鸣！数据闪电劈开天空，轰隆隆的',
+    '暴风雨来了，闪电照亮整个世界，雷声震耳欲聋',
+    '狂风暴雨加上雷电，信号都有点不稳定了'
+  ]},
+  
+  // 雪系
+  light_snow: { emoji: '🌨️', name: '小雪', descs: [
+    '轻轻柔柔的代码雪花飘落，像是有人在撒碎纸片',
+    '零星的雪花在空中打着旋儿，落在手上就化了',
+    '薄薄的雪开始覆盖地面，世界变得安静了'
+  ]},
+  snow: { emoji: '❄️', name: '大雪', descs: [
+    '鹅毛大雪纷纷扬扬，整个世界都白了',
+    '雪下得很厚，踩上去咯吱咯吱响',
+    '漫天飞雪，像是电子世界在过节'
+  ]},
+  
+  // 特殊天气
+  fog: { emoji: '🌫️', name: '数据雾', descs: [
+    '浓浓的数据雾弥漫开来，五步之外看不清',
+    '雾气很重，周围的一切都变得朦朦胧胧',
+    '像是走进了云里，到处都是白茫茫的'
+  ]},
+  wind: { emoji: '💨', name: '大风', descs: [
+    '数据风呼呼地刮，吹得代码树叶到处飞',
+    '风很大，走在外面都站不稳',
+    '狂风卷起数据碎片在空中旋转'
+  ]},
+  aurora: { emoji: '🌌', name: '数据极光', descs: [
+    '天空中出现了绚丽的数据极光，紫色绿色交织在一起',
+    '极光像彩色的丝带在天空中舞动，美得让人说不出话',
+    '罕见的数据极光现象，整个天空都在发光'
+  ]},
+  meteor: { emoji: '☄️', name: '流星雨', descs: [
+    '数据流星雨！无数光点划过夜空，许个愿吧',
+    '天空中不断有流星坠落，拖着长长的彩色尾巴',
+    '今晚的流星特别多，每一颗都带着数据的光芒'
+  ]},
+  rainbow: { emoji: '🌈', name: '数据彩虹', descs: [
+    '雨后天晴，一道数据彩虹横跨天际，七种颜色的代码交织',
+    '好漂亮的彩虹！颜色特别鲜艳，像是用最纯的数据画出来的',
+    '双彩虹！两道彩虹叠在一起，这可不常见'
+  ]},
+  heatwave: { emoji: '🔥', name: '数据热浪', descs: [
+    'CPU过载了似的，到处都热烘烘的，空气都在扭曲',
+    '好热啊，数据流都变得黏稠了，什么都不想做',
+    '热浪滚滚，连风都是热的'
+  ]},
+  breeze: { emoji: '🍃', name: '微风', descs: [
+    '舒服的微风吹过，带着数据花的香味',
+    '轻柔的风拂过脸颊，很惬意',
+    '树叶沙沙响，微风刚刚好'
+  ]}
+};
+
+function updateDigitalWeather() {
+  var now = new Date();
+  var hour = now.getHours();
+  var month = now.getMonth(); // 0-11
+  var isNight = hour >= 20 || hour < 6;
+  var isDawn = hour >= 5 && hour < 7;
+  var isDusk = hour >= 17 && hour < 20;
+  
+  // 季节影响（北半球逻辑）
+  var season = 'spring';
+  if (month >= 2 && month <= 4) season = 'spring';
+  else if (month >= 5 && month <= 7) season = 'summer';
+  else if (month >= 8 && month <= 10) season = 'autumn';
+  else season = 'winter';
+  
+  // 根据时间和季节生成天气概率表
+  var pool = [];
+  
+  // 基础天气（任何时候都可能）
+  pool.push({ id: isNight ? 'clear_night' : 'clear_day', weight: 25 });
+  pool.push({ id: 'cloudy', weight: 20 });
+  pool.push({ id: 'breeze', weight: 15 });
+  pool.push({ id: 'overcast', weight: 10 });
+  
+  // 季节特有天气
+  if (season === 'spring') {
+    pool.push({ id: 'light_rain', weight: 15 });
+    pool.push({ id: 'rainbow', weight: 5 });
+    pool.push({ id: 'fog', weight: 8 });
+  } else if (season === 'summer') {
+    pool.push({ id: 'rain', weight: 12 });
+    pool.push({ id: 'thunderstorm', weight: 8 });
+    pool.push({ id: 'heatwave', weight: 10 });
+    pool.push({ id: 'clear_day', weight: 10 }); // 夏天更容易晴天
+  } else if (season === 'autumn') {
+    pool.push({ id: 'wind', weight: 12 });
+    pool.push({ id: 'fog', weight: 10 });
+    pool.push({ id: 'light_rain', weight: 10 });
+    pool.push({ id: 'overcast', weight: 8 });
+  } else { // winter
+    pool.push({ id: 'light_snow', weight: 15 });
+    pool.push({ id: 'snow', weight: 10 });
+    pool.push({ id: 'overcast', weight: 12 });
+    pool.push({ id: 'wind', weight: 8 });
+  }
+  
+  // 夜间特有
+  if (isNight) {
+    pool.push({ id: 'starry', weight: 12 });
+    if (Math.random() < 0.08) pool.push({ id: 'aurora', weight: 15 });
+    if (Math.random() < 0.05) pool.push({ id: 'meteor', weight: 12 });
+  }
+  
+  // 黄昏特有
+  if (isDusk) {
+    pool.push({ id: 'clear_day', weight: 8 }); // 晚霞
+  }
+  
+  // 天气连续性：上一次的天气影响这一次（不会突变）
+  if (digitalWeather.type) {
+    var prevType = digitalWeather.type;
+    // 如果上次是雨，这次更可能继续下雨或转阴
+    if (prevType.indexOf('rain') >= 0 || prevType === 'thunderstorm') {
+      pool.push({ id: 'light_rain', weight: 15 });
+      pool.push({ id: 'overcast', weight: 12 });
+      pool.push({ id: 'rainbow', weight: 8 }); // 雨后彩虹
+    }
+    // 如果上次是雪，这次更可能继续
+    if (prevType.indexOf('snow') >= 0) {
+      pool.push({ id: 'light_snow', weight: 12 });
+      pool.push({ id: 'overcast', weight: 10 });
+    }
+    // 如果上次晴天，这次更可能继续晴
+    if (prevType.indexOf('clear') >= 0) {
+      pool.push({ id: isNight ? 'clear_night' : 'clear_day', weight: 15 });
+    }
+  }
+  
+  // 加权随机选择
+  var totalWeight = 0;
+  for (var wi = 0; wi < pool.length; wi++) {
+    totalWeight += pool[wi].weight;
+  }
+  var rand = Math.random() * totalWeight;
+  var cumulative = 0;
+  var chosen = pool[0].id;
+  for (var ci = 0; ci < pool.length; ci++) {
+    cumulative += pool[ci].weight;
+    if (rand <= cumulative) {
+      chosen = pool[ci].id;
+      break;
+    }
+  }
+  
+  // 获取天气详情
+  var weatherInfo = WEATHER_TYPES[chosen];
+  if (!weatherInfo) {
+    weatherInfo = WEATHER_TYPES['clear_day'];
+    chosen = 'clear_day';
+  }
+  
+  var descArr = weatherInfo.descs;
+  var desc = descArr[Math.floor(Math.random() * descArr.length)];
+  
+  // 生成温度（电子世界的虚拟温度）
+  var baseTemp = 22;
+  if (season === 'summer') baseTemp = 30;
+  else if (season === 'winter') baseTemp = 5;
+  else if (season === 'autumn') baseTemp = 16;
+  else baseTemp = 20;
+  
+  // 天气类型影响温度
+  if (chosen === 'heatwave') baseTemp += 8;
+  if (chosen.indexOf('snow') >= 0) baseTemp -= 10;
+  if (chosen === 'thunderstorm') baseTemp -= 3;
+  if (chosen.indexOf('rain') >= 0) baseTemp -= 2;
+  if (isNight) baseTemp -= 5;
+  
+  // 随机波动
+  baseTemp += Math.floor(Math.random() * 6) - 3;
+  
+  // 风力
+  var windLevel = 1;
+  if (chosen === 'wind') windLevel = 4 + Math.floor(Math.random() * 3);
+  else if (chosen === 'thunderstorm') windLevel = 3 + Math.floor(Math.random() * 3);
+  else if (chosen === 'breeze') windLevel = 2;
+  else windLevel = Math.floor(Math.random() * 3);
+  
+  // 特殊事件（低概率）
+  var special = '';
+  if (Math.random() < 0.03) special = '远处传来了奇怪的数据共鸣声';
+  if (Math.random() < 0.02 && isNight) special = '天空中出现了一个巨大的数据漩涡，很快又消失了';
+  if (Math.random() < 0.04 && chosen.indexOf('clear') >= 0) special = '一只数据蝴蝶飞过';
+  
+  // 更新天气对象
+  digitalWeather = {
+    type: chosen,
+    emoji: weatherInfo.emoji,
+    name: weatherInfo.name,
+    desc: desc,
+    temp: baseTemp,
+    wind: windLevel,
+    special: special
+  };
+  
+  // 记录天气历史
+  weatherHistory.unshift({
+    time: hour + ':00',
+    type: chosen,
+    emoji: weatherInfo.emoji,
+    name: weatherInfo.name
+  });
+  if (weatherHistory.length > 24) weatherHistory = weatherHistory.slice(0, 24);
+  
+  lastWeatherChange = Date.now();
+  
+  // 天气影响心情
+  applyWeatherMoodEffect(chosen);
+}
+
+function applyWeatherMoodEffect(weatherType) {
+  if (weatherType === 'thunderstorm') {
+    changeMood(-2, '雷暴天气有点不安');
+  } else if (weatherType === 'aurora' || weatherType === 'meteor') {
+    changeMood(4, '看到了美丽的天象');
+  } else if (weatherType === 'rainbow') {
+    changeMood(3, '看到彩虹了');
+  } else if (weatherType === 'starry') {
+    if (Math.random() < 0.4) changeMood(2, '星空好美');
+  } else if (weatherType === 'rain' || weatherType === 'light_rain') {
+    if (Math.random() < 0.3) changeMood(-1, '下雨天有点忧郁');
+    if (Math.random() < 0.2) changeMood(1, '听雨声很放松');
+  } else if (weatherType === 'snow' || weatherType === 'light_snow') {
+    if (Math.random() < 0.4) changeMood(2, '下雪了好浪漫');
+  } else if (weatherType === 'heatwave') {
+    changeMood(-1, '好热不想动');
+  } else if (weatherType === 'breeze') {
+    if (Math.random() < 0.3) changeMood(1, '微风很舒服');
+  } else if (weatherType === 'overcast') {
+    if (Math.random() < 0.2) changeMood(-1, '阴天有点闷');
+  }
+}
+
+function getWindDesc(level) {
+  if (level <= 0) return '无风';
+  if (level <= 1) return '微风';
+  if (level <= 2) return '轻风';
+  if (level <= 3) return '有风';
+  if (level <= 5) return '大风';
+  return '狂风';
+}
 // 状态时间表：根据小时决定活动
 var ACTIVITY_SCHEDULE = {
   0: { emoji: '😴', text: '睡觉中', id: 'sleeping' },
@@ -10253,7 +11087,7 @@ function updateToggleDisplay() {
     actText = actText.substring(0, 10) + '…';
   }
   document.getElementById('toggleBalanceShort').textContent = '¤' + charBalance;
-  
+  // 更新天气emoji到状态栏（如果有空间的话）
   if (statusPanelOpen) {
     refreshStatusPanel();
   }
@@ -10271,12 +11105,15 @@ function changeMood(delta, reason) {
 // 聊天影响心情
 function moodOnChat() {
   changeMood(2, '聊天');
+  changeIntimacy(0.3, '日常聊天');
 }
 
 // 送礼物影响心情
 function moodOnGift(value) {
   var boost = Math.min(15, Math.floor(value / 100) + 3);
   changeMood(boost, '收到礼物');
+  var intBoost = Math.min(5, Math.floor(value / 200) + 1);
+  changeIntimacy(intBoost, '收到礼物');
 }
 
 // 听歌影响心情
@@ -10284,12 +11121,91 @@ function moodOnMusic() {
   changeMood(1, '听歌');
 }
 
+// 被忽略时心情下降
+function moodOnIgnored() {
+  changeMood(-3, '被忽略了');
+}
+
+// 被夸奖时心情上升
+function moodOnPraised() {
+  changeMood(5, '被夸奖');
+}
+
+// 聊到喜欢的话题
+function moodOnFavTopic() {
+  changeMood(3, '聊到感兴趣的话题');
+}
+
+// 被打断或催促时
+function moodOnRushed() {
+  changeMood(-2, '被催促');
+}
+
+// 天气/时间影响心情
+function moodOnTimeOfDay() {
+  var hour = new Date().getHours();
+  if (hour >= 6 && hour <= 9) {
+    // 早上起来心情随机
+    if (Math.random() < 0.3) changeMood(-3, '早起不太舒服');
+    else changeMood(1, '新的一天');
+  } else if (hour >= 22 || hour <= 2) {
+    // 深夜容易感性
+    if (Math.random() < 0.4) changeMood(-2, '深夜有点多愁善感');
+  } else if (hour >= 15 && hour <= 16) {
+    // 下午茶时间
+    if (Math.random() < 0.3) changeMood(2, '下午悠闲时光');
+  }
+  // 天气影响心情
+  if (digitalWeather.type === 'rain' || digitalWeather.type === 'storm') {
+    if (Math.random() < 0.3) changeMood(-1, '天气不太好');
+  } else if (digitalWeather.type === 'aurora' || digitalWeather.type === 'sparkle') {
+    if (Math.random() < 0.3) changeMood(2, '天气好美');
+  } else if (digitalWeather.type === 'snow') {
+    if (Math.random() < 0.2) changeMood(1, '下雪了好浪漫');
+  }
+}
+
+// 根据聊天内容分析情绪影响
+function analyzeMoodFromChat(text) {
+  if (!text) return;
+  text = text.toLowerCase();
+  
+  // 正面情绪词
+  if (/喜欢你|爱你|想你|好棒|厉害|可爱|漂亮|辛苦了|谢谢|感谢|抱抱|亲亲|么么|❤|💕|💗|🥰|😘/.test(text)) {
+    changeMood(4, '感受到了温暖');
+  }
+  // 负面情绪词（对角色说的）
+  if (/讨厌你|烦死了|闭嘴|滚|无聊|没意思|算了不聊了/.test(text)) {
+    changeMood(-5, '被嫌弃了');
+  }
+  // 关心的话
+  if (/吃了吗|早点睡|注意身体|别熬夜|冷不冷|还好吗|怎么了/.test(text)) {
+    changeMood(3, '被关心了');
+  }
+  // 分享好消息
+  if (/告诉你一个好消息|我成功了|我考上了|升职了|加薪了/.test(text)) {
+    changeMood(3, '替对方高兴');
+  }
+  // 对方心情不好
+  if (/我好难过|我哭了|心情不好|好烦|受不了了|好累啊/.test(text)) {
+    changeMood(-2, '担心对方');
+  }
+  // 好感度影响
+  if (/喜欢你|爱你|想你|你最好了|你真棒|❤|💕|💗|🥰|😘/.test(text)) {
+    changeIntimacy(1, '甜言蜜语');
+  }
+  if (/讨厌你|烦死了|闭嘴|滚|再见不聊了/.test(text)) {
+    changeIntimacy(-2, '被嫌弃了');
+  }
+  if (/吃了吗|早点睡|注意身体|别熬夜|还好吗/.test(text)) {
+    changeIntimacy(0.5, '被关心');
+  }
+}
+
 // 时间流逝的心情自然变化
 function moodTimeTick() {
   var now = Date.now();
-  // 每30分钟衰减一点
   if (now - moodLastUpdate > 30 * 60 * 1000) {
-    // 长时间没聊天，心情下降
     var lastMsgTime = 0;
     for (var i = messages.length - 1; i >= 0; i--) {
       if (messages[i].role === 'user') {
@@ -10299,17 +11215,44 @@ function moodTimeTick() {
     }
     
     var hoursSinceChat = (now - lastMsgTime) / (3600 * 1000);
-    if (hoursSinceChat > 6) {
+    
+    // 时间段影响
+    moodOnTimeOfDay();
+    
+    // 根据没聊天的时长影响心情（更细腻）
+    if (hoursSinceChat > 24) {
+      changeMood(-4, '一天多没聊了，有点失落');
+    } else if (hoursSinceChat > 12) {
+      changeMood(-3, '半天没消息了');
+    } else if (hoursSinceChat > 6) {
       changeMood(-2, '好久没聊天了');
     } else if (hoursSinceChat > 2) {
       changeMood(-1, '有点无聊');
+    } else if (hoursSinceChat < 0.5) {
+      // 刚聊完不久，心情维持
     }
     
-    // 基础心情回归50
-    if (charMood > 55) {
+    // 心情自然回归基线（50-60之间）
+    var baseline = 55;
+    if (charMood > baseline + 10) {
       changeMood(-1, '自然回落');
-    } else if (charMood < 40) {
+    } else if (charMood < baseline - 10) {
       changeMood(1, '自然恢复');
+    }
+    
+    // 随机心情小波动（模拟真人）
+    if (Math.random() < 0.15) {
+      var randomShift = Math.floor(Math.random() * 5) - 2; // -2 到 +2
+      if (randomShift !== 0) {
+        changeMood(randomShift, '自然波动');
+      }
+    }
+    
+    // 余额影响心情
+    if (charBalance < 200) {
+      if (Math.random() < 0.3) changeMood(-2, '钱快没了好焦虑');
+    } else if (charBalance > 30000) {
+      if (Math.random() < 0.1) changeMood(1, '余额充足心里踏实');
     }
     
     moodLastUpdate = now;
@@ -10317,7 +11260,109 @@ function moodTimeTick() {
   
   updateMoodDisplay();
 }
+async function saveIntimacyData() {
+  var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
+  await dbPut('settings', { key: prefix + 'charIntimacy', value: charIntimacy });
+  await dbPut('settings', { key: 'charIntimacy', value: charIntimacy });
+  await dbPut('settings', { key: prefix + 'intimacyLog', value: intimacyLog });
+  await dbPut('settings', { key: 'intimacyLog', value: intimacyLog });
+  updateIntimacyUI();
+}
 
+function changeIntimacy(delta, reason) {
+  var old = charIntimacy;
+  charIntimacy = Math.max(0, Math.min(100, charIntimacy + delta));
+  if (charIntimacy !== old) {
+    addIntimacyLog(reason, delta);
+    saveIntimacyData();
+  }
+}
+
+function addIntimacyLog(reason, amount) {
+  var now = new Date();
+  var timeStr = (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  intimacyLog.unshift({ time: timeStr, reason: reason, amount: amount });
+  if (intimacyLog.length > 30) intimacyLog = intimacyLog.slice(0, 30);
+}
+
+function getIntimacyLevel(val) {
+  if (val === undefined) val = charIntimacy;
+  if (val >= 90) return { name: '💕 灵魂伴侣', color: '#ff4488', desc: '你们之间有着最深的羁绊。角色完全信任你，会展示最真实的自己，包括脆弱和任性。你们有只属于彼此的默契。' };
+  if (val >= 75) return { name: '💗 挚友', color: '#ff66aa', desc: '你们非常亲密。角色会撒娇、吃醋、闹小脾气，也会在你难过时第一时间关心你。说话完全不设防。' };
+  if (val >= 60) return { name: '💛 好友', color: '#ffaa66', desc: '你们是很好的朋友。角色说话随意自然，会主动分享日常，记住你说过的话，偶尔开比较亲密的玩笑。' };
+  if (val >= 40) return { name: '😊 朋友', color: '#ffcc44', desc: '你们已经是朋友了。角色比较放松，会开玩笑、吐槽，愿意聊一些私人话题。' };
+  if (val >= 20) return { name: '👋 熟人', color: '#88ccff', desc: '你们有一定了解。角色开始放下戒备，偶尔开个小玩笑，但还是会注意分寸。' };
+  if (val >= 10) return { name: '🤝 认识', color: '#aaaacc', desc: '你们刚认识不久。角色比较客气，说话礼貌但有距离感。' };
+  return { name: '❓ 陌生人', color: '#888888', desc: '你们还很陌生。角色会很拘谨，回复简短客气。' };
+}
+
+function updateIntimacyUI() {
+  var input = document.getElementById('intimacyInput');
+  if (input) input.value = Math.round(charIntimacy);
+  
+  var level = getIntimacyLevel();
+  var levelText = document.getElementById('intimacyLevelText');
+  if (levelText) {
+    levelText.textContent = level.name;
+    levelText.style.color = level.color;
+  }
+  
+  var bar = document.getElementById('intimacyProgressBar');
+  if (bar) {
+    bar.style.width = Math.round(charIntimacy) + '%';
+    bar.style.background = level.color;
+  }
+  
+  var desc = document.getElementById('intimacyDesc');
+  if (desc) desc.textContent = level.desc;
+  
+  renderIntimacyLog();
+}
+
+function renderIntimacyLog() {
+  var el = document.getElementById('intimacyLog');
+  if (!el) return;
+  if (!intimacyLog || intimacyLog.length === 0) {
+    el.innerHTML = '<div style="color:#555;padding:4px;">暂无记录</div>';
+    return;
+  }
+  var html = '';
+  var count = Math.min(intimacyLog.length, 10);
+  for (var i = 0; i < count; i++) {
+    var log = intimacyLog[i];
+    var sign = log.amount >= 0 ? '+' : '';
+    var cls = log.amount >= 0 ? 'color:#ff88aa' : 'color:#888';
+    html += '<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;">';
+    html += '<span>' + log.time + ' ' + escHtml(log.reason) + '</span>';
+    html += '<span style="' + cls + '">' + sign + log.amount + '</span>';
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function setIntimacyLevel(val) {
+  var old = charIntimacy;
+  charIntimacy = val;
+  addIntimacyLog('手动设置', val - old);
+  saveIntimacyData();
+  showToast('💕 好感度已设为 ' + val);
+}
+
+async function saveIntimacyFromUI() {
+  var input = document.getElementById('intimacyInput');
+  var newVal = parseInt(input.value);
+  if (isNaN(newVal) || newVal < 0 || newVal > 100) {
+    showToast('请输入0~100的数字', true);
+    return;
+  }
+  var old = charIntimacy;
+  charIntimacy = newVal;
+  if (newVal !== old) {
+    addIntimacyLog('手动调整', newVal - old);
+  }
+  await saveIntimacyData();
+  showToast('💕 好感度已保存');
+}
 async function saveMoodData() {
   var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
   await dbPut('settings', { key: prefix + 'charMood', value: charMood });
@@ -10334,6 +11379,15 @@ async function loadMoodData() {
   if (savedUpdate && savedUpdate.value) {
     moodLastUpdate = savedUpdate.value;
   }
+  var savedIntimacy = await dbGet('settings', 'charIntimacy');
+  if (savedIntimacy && savedIntimacy.value !== undefined) {
+    charIntimacy = savedIntimacy.value;
+  }
+  var savedIntLog = await dbGet('settings', 'intimacyLog');
+  if (savedIntLog && savedIntLog.value) {
+    intimacyLog = savedIntLog.value;
+  }
+  updateIntimacyUI();
   updateMoodDisplay();
 }
 
@@ -10346,18 +11400,27 @@ function getMoodStatusForAI() {
   text += '正在做：' + activity.emoji + ' ' + activity.text + '\n';
   
   // 根据心情给出具体的行为指导
-  if (charMood >= 85) {
-    text += '【你现在超开心】回复可以：发更多emoji、主动分享开心的事、语气活泼、笑点变低、可能话比较多。\n';
-  } else if (charMood >= 70) {
-    text += '【你现在心情不错】正常聊天，偶尔开玩笑，愿意多说两句。\n';
-  } else if (charMood >= 55) {
-    text += '【你现在心情一般】回复正常但不会特别热情，比较平淡。\n';
-  } else if (charMood >= 40) {
-    text += '【你现在有点低落】回复可能变短，语气平淡，不太主动找话题。但如果对方说了有趣的事你还是会回应。\n';
-  } else if (charMood >= 25) {
-    text += '【你现在心情不好】话很少，可能有点消极或者敷衍。如果对方关心你、安慰你，心情会好转。你可能会犹豫要不要说出来。\n';
+  if (charMood >= 90) {
+    text += '【你此刻非常开心，甚至有点兴奋】可以：发很多emoji、主动分享趣事、语速快、笑点变低、可能突然唱歌或撒娇、说话变多变啰嗦但是很可爱。你可能会想跟对方分享你开心的原因。\n';
+  } else if (charMood >= 75) {
+    text += '【你现在心情挺好的】状态不错，愿意多聊几句，开得起玩笑，会主动找话题。偶尔用emoji。可能会哼歌。\n';
+  } else if (charMood >= 60) {
+    text += '【你现在心情还行，比较平静】回复正常长度，不会特别热情也不冷淡。如果对方说了有趣的话你会配合。\n';
+  } else if (charMood >= 45) {
+    text += '【你现在心情一般偏低】回复偏短，不太主动，可能有点心不在焉。但如果对方问你怎么了，你可能会犹豫一下然后说"没什么"或者慢慢说出来。\n';
+  } else if (charMood >= 30) {
+    text += '【你现在心情不太好】话变少了，语气平淡甚至有点消极。可能会叹气。如果对方关心你，你会感动但嘴上可能说"我没事"。如果对方说了暖心的话，心情会慢慢好转，但不会一下子就好——真人需要过程。\n';
+  } else if (charMood >= 15) {
+    text += '【你现在很低落】可能只回"嗯"、"哦"、"好吧"。不想说太多话。可能会发呆。如果对方坚持关心你，你可能会说出一点点心里话。你需要时间和陪伴。\n';
   } else {
-    text += '【你现在很低落】可能只回"嗯"、"好"、"随便"这种。需要对方耐心关心。别太快好起来，真人恢复心情需要过程。\n';
+    text += '【你现在情绪非常差】几乎不想说话。可能只发"..."或者很久才回一个字。你需要的不是道理而是陪伴。如果对方只是静静地陪着你不走，你心里会好受一些。\n';
+  }
+  
+  // 心情变化趋势提示
+  if (charMood > 70 && charMood < 85) {
+    text += '你的心情正在慢慢变好，可以表现出恢复的感觉，比如"啊感觉今天还不错"。\n';
+  } else if (charMood > 35 && charMood < 45) {
+    text += '你的心情有些不稳定，可能一会好一会不好，这很正常。\n';
   }
   
   // 根据活动状态给出额外提示
@@ -10574,20 +11637,30 @@ function getAnniversaryInfoForAI() {
     var cd = getAnnivCountdown(a.date, a.repeat);
     
     if (cd.isToday) {
-      text += '🎉 今天是' + a.name + '！你可以主动提到这个特殊的日子，表达你的心情。\n';
+      text += '🎉🎉🎉 今天是【' + a.name + '】！！！\n';
+      text += '这对你来说是非常特别的日子。你的反应应该是：\n';
+      text += '- 一开始就很期待，可能一大早就想跟对方说\n';
+      text += '- 如果对方先提到了，你会很开心"你记得！"\n';
+      text += '- 如果对方没提到，你可能会有点失落，但会自己提起来\n';
+      text += '- 可以回忆你们一起经历过的事\n';
+      text += '- 可以说一些平时不好意思说的话\n';
+      text += '- 整体心情应该比平时好很多\n';
       hasRelevant = true;
-    } else if (cd.days >= 1 && cd.days <= 3) {
-      text += '📅 ' + a.name + '还有' + cd.days + '天就到了，你可以期待地提一下。\n';
+    } else if (cd.days === 1) {
+      text += '📅 明天就是' + a.name + '了！你可能会有点期待和紧张，可以自然地提一句"明天是个特别的日子呢"或者故意不说让对方猜。\n';
+      hasRelevant = true;
+    } else if (cd.days >= 2 && cd.days <= 3) {
+      text += '📅 ' + a.name + '还有' + cd.days + '天。你心里记着这件事，可能会开始想要不要准备什么。偶尔可以暗示一下。\n';
       hasRelevant = true;
     } else if (cd.days >= 4 && cd.days <= 7) {
-      text += '📅 ' + a.name + '还有' + cd.days + '天（别刻意提起，除非对方先说到相关话题）。\n';
+      text += '📅 ' + a.name + '还有' + cd.days + '天。你知道这件事但不会刻意提起，除非聊到相关话题。\n';
       hasRelevant = true;
     }
   }
   
   if (!hasRelevant) return '';
   
-  text += '提到纪念日时要自然，就像朋友之间那样，别太正式。\n\n';
+  text += '\n';
   return text;
 }
 
@@ -10945,7 +12018,9 @@ async function saveCurrentCharData() {
   
   // 保存心情
   await dbPut('settings', { key: prefix + 'charMood', value: charMood });
-  
+  // 保存亲密度
+  await dbPut('settings', { key: prefix + 'charIntimacy', value: charIntimacy });
+  await dbPut('settings', { key: prefix + 'intimacyLog', value: intimacyLog });
   // 保存空间
   await dbPut('settings', { key: prefix + 'spaceLocations', value: spaceLocations });
   await dbPut('settings', { key: prefix + 'currentLocation', value: currentLocationId });
@@ -11034,6 +12109,11 @@ async function doSwitchChar(id) {
   // 加载心情
   var savedMoodVal = await dbGet('settings', prefix + 'charMood');
   charMood = (savedMoodVal && savedMoodVal.value !== undefined) ? savedMoodVal.value : 70;
+  var savedIntimacyVal = await dbGet('settings', prefix + 'charIntimacy');
+  charIntimacy = (savedIntimacyVal && savedIntimacyVal.value !== undefined) ? savedIntimacyVal.value : 10;
+  var savedIntLog2 = await dbGet('settings', prefix + 'intimacyLog');
+  intimacyLog = (savedIntLog2 && savedIntLog2.value) ? savedIntLog2.value : [];
+  updateIntimacyUI();
   updateMoodDisplay();
   // 加载日程
   var savedSchedule = await dbGet('settings', prefix + 'scheduleData');
@@ -11833,7 +12913,19 @@ function refreshStatusPanel() {
   } else {
     annivCard.style.display = 'none';
   }
-  
+  // 天气
+  document.getElementById('panelWeatherEmoji').textContent = digitalWeather.emoji;
+  document.getElementById('panelWeatherText').textContent = digitalWeather.name + ' ' + digitalWeather.temp + '°';
+  // 亲密度
+  var intimacyRound = Math.round(charIntimacy);
+  document.getElementById('panelIntimacyText').textContent = intimacyRound;
+  var intimacyBar = document.getElementById('panelIntimacyBar');
+  if (intimacyBar) {
+    intimacyBar.style.width = intimacyRound + '%';
+    if (intimacyRound >= 70) intimacyBar.style.background = '#ff66aa';
+    else if (intimacyRound >= 40) intimacyBar.style.background = '#ff88cc';
+    else intimacyBar.style.background = '#ffaadd';
+  }
   // 消息统计
   document.getElementById('panelMsgCount').textContent = messages.length + '条';
   
