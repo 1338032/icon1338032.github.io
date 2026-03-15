@@ -4768,7 +4768,7 @@ window.addEventListener('offline', () => {
 // ===== IndexedDB 数据库 =====
 const DB_NAME = 'AIPagerDB';
 const DB_VERSION = 2;
-const WORLDBOOK_VERSION = 3; // 世界书版本号，每次更新内置提示词时+1
+const WORLDBOOK_VERSION = 4; // 世界书版本号，每次更新内置提示词时+1
 let db = null;
 
 function openDB() {
@@ -5217,7 +5217,56 @@ async function loadScheduleData() {
   
   renderScheduleTimeline();
 }
+// 日程地点自动同步（不覆盖对话中的移动）
+var lastScheduleLocationSync = -1;
 
+async function syncScheduleLocation() {
+  var hour = new Date().getHours();
+  
+  // 同一个小时只同步一次
+  if (hour === lastScheduleLocationSync) return;
+  
+  var activity = getScheduleActivity(hour);
+  if (!activity.location) return;
+  
+  // 检查目标地点是否存在
+  var targetLoc = spaceLocations.find(function(l) { return l.id === activity.location; });
+  if (!targetLoc) return;
+  
+  // 如果角色已经在目标地点，不需要移动
+  if (currentLocationId === activity.location) {
+    lastScheduleLocationSync = hour;
+    return;
+  }
+  
+  // 检查最近5分钟内是否有对话导致的移动（如果有就不覆盖）
+  var recentMoveByChat = false;
+  for (var i = messages.length - 1; i >= 0; i--) {
+    var msg = messages[i];
+    if (Date.now() - msg.timestamp > 5 * 60 * 1000) break;
+    if (msg.role === 'char' && msg.content && msg.content.indexOf('[移动到:') >= 0) {
+      recentMoveByChat = true;
+      break;
+    }
+  }
+  
+  if (recentMoveByChat) {
+    lastScheduleLocationSync = hour;
+    return;
+  }
+  
+  // 自动移动到日程指定的地点
+  currentLocationId = activity.location;
+  var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
+  await dbPut('settings', { key: prefix + 'currentLocation', value: currentLocationId });
+  await dbPut('settings', { key: 'currentLocation', value: currentLocationId });
+  
+  updateLocationTag();
+  updateLocationSelect();
+  renderSpaceList();
+  
+  lastScheduleLocationSync = hour;
+}
 // 获取当前时间的日程活动（替代原来的ACTIVITY_SCHEDULE）
 function getScheduleActivity(hour) {
   if (hour === undefined || hour === null) hour = new Date().getHours();
@@ -5265,7 +5314,7 @@ function getScheduleInfoForAI() {
   text += '今天是' + dayLabel + '。\n';
   text += '你此刻（' + hour + '点）按日程应该在：' + current.emoji + ' ' + current.text + '\n';
   
-  // 显示前后时间段，让AI有时间感
+  // 显示前后时间段
   var prevHour = (hour - 1 + 24) % 24;
   var nextHour = (hour + 1) % 24;
   var prev = getScheduleActivity(prevHour);
@@ -5274,7 +5323,7 @@ function getScheduleInfoForAI() {
   text += '刚才（' + prevHour + '点）你在：' + prev.emoji + ' ' + prev.text + '\n';
   text += '接下来（' + nextHour + '点）你要：' + next.emoji + ' ' + next.text + '\n';
   
-  // 如果日程中指定了地点
+  // 日程指定的地点
   if (current.location) {
     var loc = spaceLocations.find(function(l) { return l.id === current.location; });
     if (loc) {
@@ -5282,7 +5331,12 @@ function getScheduleInfoForAI() {
     }
   }
   
-  text += '你可以自然地提到你正在做的事或即将要做的事，但不要每句都说。\n\n';
+  text += '\n重要：日程只是参考，你是活人不是机器！\n';
+  text += '- 你可以因为聊天而拖延日程（比如该睡了但聊得开心就晚睡）\n';
+  text += '- 你可以因为心情不好而打乱计划（不想工作就摸鱼）\n';
+  text += '- 对方邀请你去某个地方时，你可以答应并移动过去\n';
+  text += '- 你不需要严格遵守日程，真人从来不会完全按计划行动\n';
+  text += '- 自然地提到你在做的事就好，别说"按照日程"这种话\n\n';
   
   return text;
 }
@@ -5457,13 +5511,19 @@ const DEFAULT_WORLDBOOK = [
   {
     id: 'wb_default_space_auto',
     title: '空间自动感知',
-    content: `你能感知自己所在的空间环境。当对话内容暗示你应该换个地方时，在回复末尾单独一行加上标记：[移动到:地点名称]
+    content: `你能感知自己所在的空间环境。你会根据日程安排自然地在不同地点之间移动。
+当对话内容暗示你应该换个地方时（比如对方说"我们去客厅吧"），在回复末尾单独一行加上标记：[移动到:地点名称]
 例如对方说"去客厅坐坐吧"，你回复后末尾加：[移动到:家中客厅]
-只在明确需要移动时才加这个标记，日常聊天不要加。地点名称必须和已有地点完全一致。`,
+规则：
+- 只在明确需要移动时才加标记，日常聊天不要加
+- 地点名称必须和已有地点完全一致
+- 你也可以主动说"我去某某地方了"然后加移动标记
+- 日程安排的地点会自动移动，你不需要为日程移动加标记
+- 如果聊天聊得开心，你可以不按日程移动（比如该去工作了但还想继续聊）`,
     active: true,
     builtin: true,
     priority: 10,
-    version: 3
+    version: 4
   },
   {
     id: 'wb_default_important',
@@ -8577,8 +8637,12 @@ async function init() {
     updateBalanceDisplay();
     // 每5分钟检查一次经济变动
     setInterval(function() { econTick(); }, 5 * 60 * 1000);
-    // 每分钟更新情绪状态显示
-    setInterval(function() { moodTimeTick(); updateAnniversaryTag(); }, 60 * 1000);
+    // 每分钟更新情绪状态显示+日程地点同步
+    setInterval(function() { 
+      moodTimeTick(); 
+      updateAnniversaryTag(); 
+      syncScheduleLocation();
+    }, 60 * 1000);
     // 初始化记忆设置保存
     document.getElementById('shortMemory').addEventListener('change', async (e) => {
       await dbPut('settings', { key: 'shortMemory', value: parseInt(e.target.value) });
@@ -10176,6 +10240,25 @@ function updateMoodDisplay() {
   updateToggleDisplay();
 }
 
+function updateToggleDisplay() {
+  var moodInfo = getMoodEmoji(charMood);
+  var activity = getCurrentActivity();
+  
+  document.getElementById('toggleMoodEmoji').textContent = moodInfo.emoji;
+  document.getElementById('toggleActivityEmoji').textContent = activity.emoji;
+  
+  // 活动文字限制10个字
+  var actText = activity.text || '';
+  if (actText.length > 10) {
+    actText = actText.substring(0, 10) + '…';
+  }
+  document.getElementById('toggleBalanceShort').textContent = '¤' + charBalance;
+  
+  if (statusPanelOpen) {
+    refreshStatusPanel();
+  }
+}
+
 function changeMood(delta, reason) {
   var oldMood = charMood;
   charMood = Math.max(0, Math.min(100, charMood + delta));
@@ -11695,7 +11778,11 @@ function refreshStatusPanel() {
   // 状态
   var activity = getCurrentActivity();
   document.getElementById('panelActivityEmoji').textContent = activity.emoji;
-  document.getElementById('panelActivityText').textContent = activity.text;
+  var actDisplayText = activity.text || '';
+  if (actDisplayText.length > 10) {
+    actDisplayText = actDisplayText.substring(0, 10) + '…';
+  }
+  document.getElementById('panelActivityText').textContent = actDisplayText;
   
   // 余额
   document.getElementById('panelBalanceText').textContent = '¤' + charBalance;
@@ -11764,19 +11851,6 @@ function refreshStatusPanel() {
   }
 }
 
-// 更新折叠栏的简略显示
-function updateToggleDisplay() {
-  var moodInfo = getMoodEmoji(charMood);
-  var activity = getCurrentActivity();
-  
-  document.getElementById('toggleMoodEmoji').textContent = moodInfo.emoji;
-  document.getElementById('toggleActivityEmoji').textContent = activity.emoji;
-  document.getElementById('toggleBalanceShort').textContent = '¤' + charBalance;
-  
-  if (statusPanelOpen) {
-    refreshStatusPanel();
-  }
-}
 // ===== 从剪贴板导入 =====
 async function importFromClipboard() {
   try {
