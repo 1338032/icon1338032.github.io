@@ -1361,6 +1361,223 @@ body {
   font-size: 10px;
   color: #888;
 }
+/* ===== 日程安排表样式 ===== */
+.schedule-card {
+  background: rgba(100,200,255,0.05);
+  border: 1px solid rgba(100,200,255,0.2);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.schedule-card h4 {
+  font-size: 13px;
+  color: #66ccff;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.schedule-day-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.schedule-day-tab {
+  padding: 4px 10px;
+  border: 1px solid #333;
+  background: rgba(255,255,255,0.03);
+  color: #aaa;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.schedule-day-tab.active {
+  border-color: #66ccff;
+  color: #66ccff;
+  background: rgba(100,200,255,0.1);
+}
+
+.schedule-day-tab:hover {
+  border-color: #66ccff;
+}
+
+.schedule-type-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.schedule-type-label {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 60px;
+}
+
+.schedule-type-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.schedule-type-btn {
+  padding: 3px 10px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #aaa;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.schedule-type-btn.active {
+  border-color: #66ccff;
+  color: #66ccff;
+  background: rgba(100,200,255,0.1);
+}
+
+.schedule-timeline {
+  position: relative;
+  margin: 10px 0;
+}
+
+.schedule-slot {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.2s;
+}
+
+.schedule-slot:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.schedule-slot-time {
+  font-size: 11px;
+  color: #666;
+  min-width: 44px;
+  font-family: 'Courier New', monospace;
+  padding-top: 2px;
+}
+
+.schedule-slot-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.schedule-slot-activity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.schedule-slot-emoji {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.schedule-slot-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: #ccc;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 2px 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.schedule-slot-input:focus {
+  border-bottom-color: #66ccff;
+}
+
+.schedule-slot-input::placeholder {
+  color: #444;
+}
+
+.schedule-slot-location {
+  font-size: 10px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.schedule-slot-loc-select {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  color: #888;
+  font-size: 10px;
+  font-family: inherit;
+  padding: 1px 4px;
+  outline: none;
+  cursor: pointer;
+  max-width: 120px;
+}
+
+.schedule-slot-loc-select:focus {
+  border-color: #66ccff;
+}
+
+.schedule-slot-loc-select option {
+  background: #151528;
+  color: #ccc;
+}
+
+.schedule-quick-presets {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.schedule-preset-btn {
+  padding: 4px 10px;
+  border: 1px solid #333;
+  background: rgba(255,255,255,0.03);
+  color: #aaa;
+  border-radius: 16px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.schedule-preset-btn:hover {
+  border-color: #66ccff;
+  color: #66ccff;
+  background: rgba(100,200,255,0.08);
+}
+
+.schedule-now-marker {
+  position: relative;
+}
+
+.schedule-slot.is-now {
+  background: rgba(100,200,255,0.06);
+  border-left: 2px solid #66ccff;
+  padding-left: 6px;
+}
+
+.schedule-slot.is-now .schedule-slot-time {
+  color: #66ccff;
+  font-weight: bold;
+}
 /* ===== 经济系统样式 ===== */
 .econ-card {
   background: rgba(255,200,50,0.05);
@@ -1899,7 +2116,8 @@ body {
 .space-map-container {
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 320px;
+  min-height: 250px;
   background: #080810;
   border: 1px solid #2a2a4a;
   border-radius: 12px;
@@ -2139,9 +2357,16 @@ body {
 }
 
 .status-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  justify-content: center;
+}
+
+.status-card {
+  flex: 1 1 calc(33.33% - 8px);
+  min-width: 90px;
+  max-width: 150px;
 }
 
 .status-card {
@@ -2151,6 +2376,9 @@ body {
   padding: 8px 10px;
   text-align: center;
   transition: all 0.2s;
+  flex: 1 1 calc(33.33% - 8px);
+  min-width: 90px;
+  max-width: 150px;
 }
 
 .status-card:hover {
@@ -2350,6 +2578,296 @@ body {
 .stat-detail-row .sd-value {
   color: #ccc;
   font-weight: bold;
+}
+/* ===== 重连按钮 ===== */
+.reconnect-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #444;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  color: #aaa;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.reconnect-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.reconnect-btn.need-reconnect {
+  border-color: #ff4444;
+  background: rgba(255,0,0,0.1);
+  animation: reconnectPulse 1.5s ease-in-out infinite;
+}
+
+.reconnect-btn.need-reconnect::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #ff4444;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ff4444;
+  animation: reconnectDot 1s ease-in-out infinite;
+}
+
+@keyframes reconnectPulse {
+  0%, 100% { border-color: #ff4444; background: rgba(255,0,0,0.08); }
+  50% { border-color: #ff6666; background: rgba(255,0,0,0.18); box-shadow: 0 0 12px rgba(255,0,0,0.2); }
+}
+
+@keyframes reconnectDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+.reconnect-tooltip {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: #2a1a1a;
+  border: 1px solid #ff4444;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #ff8888;
+  white-space: nowrap;
+  display: none;
+  z-index: 50;
+  animation: tooltipIn 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.reconnect-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  background: #2a1a1a;
+  border-left: 1px solid #ff4444;
+  border-top: 1px solid #ff4444;
+  transform: rotate(45deg);
+}
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reconnect-btn.need-reconnect .reconnect-tooltip {
+  display: block;
+}
+
+/* ===== 角色头像 ===== */
+.char-avatar-upload {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.char-avatar-preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid #444;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: linear-gradient(135deg, #1a2a3a, #2a3a4a);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.char-avatar-preview:hover {
+  border-color: var(--accent);
+}
+
+.char-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.char-avatar-info {
+  flex: 1;
+}
+
+.char-avatar-info .cai-label {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+.char-avatar-info .cai-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.switcher-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.cc-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ===== 表情包系统 ===== */
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.sticker-grid::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sticker-grid::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.sticker-item {
+  aspect-ratio: 1;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #0e0e20;
+  position: relative;
+}
+
+.sticker-item:hover {
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.sticker-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sticker-panel {
+  position: absolute;
+  bottom: 100%;
+  left: 10px;
+  right: 10px;
+  background: #1a1a35;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: none;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+  z-index: 20;
+  animation: attachMenuIn 0.2s ease;
+}
+
+.sticker-panel.show {
+  display: block;
+}
+
+.sticker-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+.sticker-panel-header span {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.sticker-empty {
+  text-align: center;
+  padding: 20px 10px;
+  color: #555;
+  font-size: 12px;
+}
+
+/* 表情包管理列表 */
+.sticker-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #0e0e20;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.sticker-manage-item img {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.sticker-manage-item .smi-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sticker-manage-item .smi-name {
+  font-size: 12px;
+  color: #ccc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sticker-manage-item .smi-url {
+  font-size: 10px;
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-sticker {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 8px;
+  display: block;
+  margin: 2px 0;
+  cursor: pointer;
 }
 /* ===== 欢迎弹窗 ===== */
 .welcome-overlay {
@@ -3118,7 +3636,12 @@ body {
         </span>
       </div>
     </div>
-    <button class="settings-btn" onclick="openSettings()" title="设置">⚙</button>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="reconnect-btn" id="reconnectBtn" onclick="doReconnect()" title="重新连接">🔄
+        <div class="reconnect-tooltip" id="reconnectTooltip">连接断开，点击重连</div>
+      </button>
+      <button class="settings-btn" onclick="openSettings()" title="设置">⚙</button>
+    </div>
   </div>
   <div class="status-expand-panel" id="statusExpandPanel">
     <div class="status-grid">
@@ -3205,6 +3728,13 @@ body {
     </div>
   </div>
   <div class="input-area" style="position:relative;">
+    <div class="sticker-panel" id="stickerPanel">
+      <div class="sticker-panel-header">
+        <span>😺 表情包</span>
+        <button class="wb-small-btn" onclick="closeStickerPanel()" title="关闭">✕</button>
+      </div>
+      <div id="stickerPanelGrid"></div>
+    </div>
     <div class="attach-menu" id="attachMenu">
       <button class="attach-item" onclick="triggerImageUpload()">
         <span class="attach-icon">🖼️</span>
@@ -3225,6 +3755,10 @@ body {
       <button class="attach-item" onclick="openBookPanel()">
         <span class="attach-icon">📖</span>
         <span class="attach-label">看书</span>
+      </button>
+            <button class="attach-item" onclick="openStickerPanel()">
+        <span class="attach-icon">😺</span>
+        <span class="attach-label">表情包</span>
       </button>
     </div>
     <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
@@ -3254,6 +3788,7 @@ body {
       <button class="tab-btn" data-tab="space" onclick="switchTab('space')">空间</button>
       <button class="tab-btn" data-tab="anniversary" onclick="switchTab('anniversary')">纪念日</button>
       <button class="tab-btn" data-tab="bookmark" onclick="switchTab('bookmark')">收藏</button>
+      <button class="tab-btn" data-tab="sticker" onclick="switchTab('sticker')">表情包</button>
       <button class="tab-btn" data-tab="data" onclick="switchTab('data')">数据</button>
     </div>
     <div class="settings-body">
@@ -3377,7 +3912,74 @@ body {
           <div class="form-hint">用户的人物设定，作为补充上下文</div>
         </div>
         <div class="divider"></div>
-
+        <div class="form-group">
+  <label class="form-label">🎭 角色发送表情包概率</label>
+  <div class="range-row">
+    <input type="range" min="0" max="100" value="20" id="charStickerChance" oninput="document.getElementById('charStickerChanceVal').textContent=this.value+'%'">
+    <span class="range-val" id="charStickerChanceVal">20%</span>
+  </div>
+  <div class="form-hint">角色每次回复时有多大概率额外发送一个表情包（0%=从不发，100%=每次都发）。需要先在表情包页面添加表情包。</div>
+</div>
+<div class="schedule-card">
+  <h4>📅 日程安排表</h4>
+  <div style="font-size:11px;color:#888;margin-bottom:10px;">设置角色每天的日程安排。不填的时间段会使用默认活动。角色会根据日程自然地提到自己正在做的事。</div>
+  
+  <div class="schedule-day-tabs" id="scheduleDayTabs">
+    <button class="schedule-day-tab active" onclick="switchScheduleDay('workday')">📋 工作日</button>
+    <button class="schedule-day-tab" onclick="switchScheduleDay('restday')">🌴 休息日</button>
+  </div>
+  
+  <div class="schedule-type-row">
+    <span class="schedule-type-label">今天是</span>
+    <div class="schedule-type-btns">
+      <button class="schedule-type-btn" id="scheduleAutoBtn" onclick="setScheduleDayType('auto')">自动判断</button>
+      <button class="schedule-type-btn" id="scheduleWorkBtn" onclick="setScheduleDayType('work')">强制工作日</button>
+      <button class="schedule-type-btn" id="scheduleRestBtn" onclick="setScheduleDayType('rest')">强制休息日</button>
+    </div>
+  </div>
+  
+  <div class="form-group" style="margin-bottom:8px;">
+    <label class="form-label">休息日设定（星期几为休息日）</label>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;" id="scheduleRestDays">
+      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" value="0" onchange="onRestDayChange()"> 日
+      </label>
+      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" value="1" onchange="onRestDayChange()"> 一
+      </label>
+      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" value="2" onchange="onRestDayChange()"> 二
+      </label>
+      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" value="3" onchange="onRestDayChange()"> 三
+      </label>
+      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" value="4" onchange="onRestDayChange()"> 四
+      </label>
+      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" value="5" onchange="onRestDayChange()"> 五
+      </label>
+      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" checked value="6" onchange="onRestDayChange()"> 六
+      </label>
+    </div>
+  </div>
+  
+  <div class="schedule-quick-presets">
+    <button class="schedule-preset-btn" onclick="applySchedulePreset('office')">💼 上班族</button>
+    <button class="schedule-preset-btn" onclick="applySchedulePreset('student')">📚 学生党</button>
+    <button class="schedule-preset-btn" onclick="applySchedulePreset('freelance')">🏠 自由职业</button>
+    <button class="schedule-preset-btn" onclick="applySchedulePreset('nightowl')">🦉 夜猫子</button>
+    <button class="schedule-preset-btn" onclick="applySchedulePreset('clear')">🗑️ 全部清空</button>
+  </div>
+  
+  <div class="schedule-timeline" id="scheduleTimeline"></div>
+  
+  <div style="display:flex;justify-content:flex-end;margin-top:8px;gap:6px;">
+    <button class="action-btn" onclick="previewTodaySchedule()">👁 预览今日</button>
+    <button class="action-btn primary" onclick="saveScheduleSettings()">💾 保存日程</button>
+  </div>
+</div>
         <div class="econ-card">
           <h4>💰 角色经济系统</h4>
           <div style="font-size:11px;color:#888;margin-bottom:10px;">设置角色的收入和消费，系统会自动模拟经济变动。角色知道自己有多少钱。</div>
@@ -3672,6 +4274,36 @@ body {
           </div>
         </div>
       </div>
+      <!-- 表情包页面 -->
+      <div class="tab-page" id="page-sticker">
+        <div style="background:rgba(255,200,50,0.05);border:1px solid rgba(255,200,50,0.2);border-radius:10px;padding:12px;margin-bottom:16px;">
+          <div style="font-size:12px;color:#ffcc44;font-weight:bold;margin-bottom:6px;">😺 表情包管理</div>
+          <div style="font-size:11px;color:#aaa;line-height:1.6;">
+            添加表情包图片链接。你和角色共用这些表情包。<br>
+            角色会根据对话内容和心情自动挑选合适的表情包发送。<br>
+            可在「人设」页面设置角色发送表情包的概率。
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">批量添加（每行一个，格式：名称:链接）</label>
+          <textarea class="form-textarea" id="stickerBatchInput" rows="5" placeholder="开心:https://example.com/happy.png&#10;难过:https://example.com/sad.png&#10;卖萌:https://example.com/cute.gif"></textarea>
+          <div class="form-hint">支持 jpg/png/gif/webp 格式的图片链接</div>
+        </div>
+        <div class="btn-row" style="margin-bottom:16px;">
+          <button class="action-btn primary" onclick="batchAddStickers()">📥 批量添加</button>
+          <button class="action-btn" onclick="addSingleSticker()">+ 单个添加</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-size:13px;color:#aaa;">📋 表情包列表 (<span id="stickerCount">0</span>个)</span>
+          <button class="action-btn danger" onclick="clearAllStickers()" style="font-size:11px;padding:4px 10px;">清空全部</button>
+        </div>
+
+        <div id="stickerManageList"></div>
+      </div>
       <!-- 数据页面 -->
       <div class="tab-page" id="page-data">
         <div class="data-section">
@@ -3727,11 +4359,10 @@ body {
         </div>
         
         <div class="divider"></div>
-        
-        <div class="data-section">
-          <h3>🔄 刷新页面</h3>
-          <p>重新加载页面，不会删除任何数据，用于更新显示内容或修复异常</p>
-          <button class="action-btn primary" onclick="refreshPage()">🔄 刷新页面</button>
+                <div class="data-section">
+          <h3>🔄 重新连接</h3>
+          <p>如果遇到收发消息异常，请使用顶部的重连按钮 🔄 或点击下方按钮</p>
+          <button class="action-btn primary" onclick="doReconnect()">🔄 立即重连</button>
         </div>
       </div>
 
@@ -3973,8 +4604,19 @@ body {
 <div class="modal-overlay" id="charEditModal">
   <div class="modal-box">
     <h3 id="charEditTitle">创建新角色</h3>
-    <div class="form-group">
-      <label class="form-label">角色头像（emoji）</label>
+    <div class="char-avatar-upload">
+      <div class="char-avatar-preview" id="charEditAvatarPreview" onclick="document.getElementById('charAvatarUpload').click()">🤖</div>
+      <div class="char-avatar-info">
+        <div class="cai-label">角色头像</div>
+        <div class="cai-btns">
+          <button class="action-btn" onclick="document.getElementById('charAvatarUpload').click()" style="font-size:11px;padding:4px 10px;">📁 上传图片</button>
+          <button class="action-btn" onclick="resetCharAvatar()" style="font-size:11px;padding:4px 10px;">🔄 用Emoji</button>
+        </div>
+        <input type="file" id="charAvatarUpload" accept="image/*" style="display:none;" onchange="handleCharAvatarUpload(event)">
+      </div>
+    </div>
+    <div class="form-group" id="charEmojiGroup">
+      <label class="form-label">备用Emoji（无头像图片时显示）</label>
       <input type="text" class="form-input" id="charEditAvatar" placeholder="🤖" maxlength="2" style="width:60px;font-size:24px;text-align:center;">
     </div>
     <div class="form-group">
@@ -4055,9 +4697,10 @@ body {
         <div class="ws-content">
           <ul style="margin:0;padding:0;">
             <li>长按消息可 编辑/删除/收藏/重说</li>
-            <li>点击 + 号可发图片、送礼物、听歌、看书</li>
+            <li>点击 + 号可发图片、送礼物、听歌、看书、发表情包</li>
             <li>定期在 数据 页面导出备份，防止数据丢失</li>
             <li>世界书中的内置提示词可以开关，自定义AI行为</li>
+            <li><b style="color:#ff8888;">重要：</b>每次对话后请点击顶部闪烁的 🔄 按钮重连，确保下次对话正常</li>
           </ul>
         </div>
       </div>
@@ -4125,7 +4768,7 @@ window.addEventListener('offline', () => {
 // ===== IndexedDB 数据库 =====
 const DB_NAME = 'AIPagerDB';
 const DB_VERSION = 2;
-const WORLDBOOK_VERSION = 2; // 世界书版本号，每次更新内置提示词时+1
+const WORLDBOOK_VERSION = 3; // 世界书版本号，每次更新内置提示词时+1
 let db = null;
 
 function openDB() {
@@ -4252,6 +4895,397 @@ var bookPageSize = 500;
 var bookIsOpen = false;
 
 var activeActivity = ''; // 'music' 或 'book' 或 ''
+// ===== 日程安排系统 =====
+var scheduleData = {
+  workday: {},  // { "6": {emoji:"🌅",activity:"起床洗漱",location:""}, "7": {emoji:"🍳",activity:"吃早餐",location:""}, ... }
+  restday: {},
+  restDays: [0, 6],  // 0=周日, 6=周六
+  dayTypeOverride: 'auto'  // 'auto', 'work', 'rest'
+};
+var currentScheduleTab = 'workday';
+
+// 默认工作日日程
+var DEFAULT_WORKDAY = {
+  0: { emoji: '😴', activity: '睡觉', location: '' },
+  1: { emoji: '😴', activity: '深度睡眠', location: '' },
+  2: { emoji: '😴', activity: '深度睡眠', location: '' },
+  3: { emoji: '😴', activity: '深度睡眠', location: '' },
+  4: { emoji: '😴', activity: '深度睡眠', location: '' },
+  5: { emoji: '😴', activity: '快醒了', location: '' },
+  6: { emoji: '🌅', activity: '起床洗漱', location: '' },
+  7: { emoji: '🍳', activity: '吃早餐', location: '' },
+  8: { emoji: '💻', activity: '开始工作', location: '' },
+  9: { emoji: '💻', activity: '专注工作', location: '' },
+  10: { emoji: '☕', activity: '喝咖啡小憩', location: '' },
+  11: { emoji: '💻', activity: '工作中', location: '' },
+  12: { emoji: '🍜', activity: '吃午饭', location: '' },
+  13: { emoji: '😪', activity: '午休犯困', location: '' },
+  14: { emoji: '💻', activity: '下午工作', location: '' },
+  15: { emoji: '🍵', activity: '摸鱼喝茶', location: '' },
+  16: { emoji: '💻', activity: '快下班了', location: '' },
+  17: { emoji: '🚶', activity: '下班', location: '' },
+  18: { emoji: '🍲', activity: '做饭吃晚餐', location: '' },
+  19: { emoji: '📱', activity: '刷手机', location: '' },
+  20: { emoji: '🎮', activity: '打游戏', location: '' },
+  21: { emoji: '🛋️', activity: '瘫在沙发上', location: '' },
+  22: { emoji: '📖', activity: '睡前放松', location: '' },
+  23: { emoji: '😪', activity: '困了准备睡', location: '' }
+};
+
+// 默认休息日日程
+var DEFAULT_RESTDAY = {
+  0: { emoji: '😴', activity: '睡觉', location: '' },
+  1: { emoji: '😴', activity: '深度睡眠', location: '' },
+  2: { emoji: '😴', activity: '深度睡眠', location: '' },
+  3: { emoji: '😴', activity: '深度睡眠', location: '' },
+  4: { emoji: '😴', activity: '深度睡眠', location: '' },
+  5: { emoji: '😴', activity: '深度睡眠', location: '' },
+  6: { emoji: '😴', activity: '还在睡', location: '' },
+  7: { emoji: '😴', activity: '赖床中', location: '' },
+  8: { emoji: '😴', activity: '继续赖床', location: '' },
+  9: { emoji: '🌅', activity: '懒洋洋起床', location: '' },
+  10: { emoji: '🍳', activity: '慢悠悠吃早饭', location: '' },
+  11: { emoji: '📱', activity: '刷手机', location: '' },
+  12: { emoji: '🍜', activity: '点外卖', location: '' },
+  13: { emoji: '🎮', activity: '打游戏', location: '' },
+  14: { emoji: '🛋️', activity: '躺着看视频', location: '' },
+  15: { emoji: '🚶', activity: '出门溜达', location: '' },
+  16: { emoji: '☕', activity: '在外面喝咖啡', location: '' },
+  17: { emoji: '🛍️', activity: '逛街', location: '' },
+  18: { emoji: '🍲', activity: '吃晚饭', location: '' },
+  19: { emoji: '🎬', activity: '看电影', location: '' },
+  20: { emoji: '🎮', activity: '打游戏', location: '' },
+  21: { emoji: '🎧', activity: '听歌发呆', location: '' },
+  22: { emoji: '📱', activity: '刷手机', location: '' },
+  23: { emoji: '😪', activity: '不想睡但该睡了', location: '' }
+};
+
+// 预设日程模板
+var SCHEDULE_PRESETS = {
+  office: {
+    name: '上班族',
+    workday: {
+      0:{emoji:'😴',activity:'睡觉',location:''},1:{emoji:'😴',activity:'深度睡眠',location:''},2:{emoji:'😴',activity:'深度睡眠',location:''},3:{emoji:'😴',activity:'深度睡眠',location:''},4:{emoji:'😴',activity:'深度睡眠',location:''},5:{emoji:'😴',activity:'快醒了',location:''},
+      6:{emoji:'⏰',activity:'被闹钟吵醒',location:''},7:{emoji:'🍞',activity:'赶着吃早餐',location:''},8:{emoji:'🚇',activity:'挤地铁通勤',location:''},9:{emoji:'💻',activity:'到公司开始干活',location:''},10:{emoji:'☕',activity:'接水喝咖啡',location:''},11:{emoji:'💻',activity:'开会或干活',location:''},
+      12:{emoji:'🍱',activity:'和同事吃午饭',location:''},13:{emoji:'😪',activity:'趴桌子午休',location:''},14:{emoji:'💻',activity:'下午继续干活',location:''},15:{emoji:'🍵',activity:'偷偷摸鱼',location:''},16:{emoji:'💻',activity:'赶进度',location:''},17:{emoji:'🎉',activity:'终于下班！',location:''},
+      18:{emoji:'🚇',activity:'通勤回家',location:''},19:{emoji:'🍲',activity:'做饭或点外卖',location:''},20:{emoji:'🛋️',activity:'躺平刷手机',location:''},21:{emoji:'🎮',activity:'打游戏放松',location:''},22:{emoji:'🛁',activity:'洗澡',location:''},23:{emoji:'😴',activity:'上床睡觉',location:''}
+    },
+    restday: {
+      0:{emoji:'😴',activity:'睡觉',location:''},1:{emoji:'😴',activity:'睡觉',location:''},2:{emoji:'😴',activity:'睡觉',location:''},3:{emoji:'😴',activity:'睡觉',location:''},4:{emoji:'😴',activity:'睡觉',location:''},5:{emoji:'😴',activity:'睡觉',location:''},
+      6:{emoji:'😴',activity:'睡觉',location:''},7:{emoji:'😴',activity:'还在睡',location:''},8:{emoji:'😴',activity:'赖床',location:''},9:{emoji:'🌅',activity:'终于起来了',location:''},10:{emoji:'📱',activity:'躺着刷手机',location:''},11:{emoji:'🍳',activity:'随便吃点',location:''},
+      12:{emoji:'🎮',activity:'打游戏',location:''},13:{emoji:'🎮',activity:'继续打游戏',location:''},14:{emoji:'😴',activity:'困了午睡',location:''},15:{emoji:'🚶',activity:'出门走走',location:''},16:{emoji:'☕',activity:'找个地方坐坐',location:''},17:{emoji:'🛍️',activity:'逛逛',location:''},
+      18:{emoji:'🍲',activity:'吃好吃的',location:''},19:{emoji:'🎬',activity:'看电影或综艺',location:''},20:{emoji:'🎮',activity:'打游戏',location:''},21:{emoji:'🎧',activity:'听歌放空',location:''},22:{emoji:'📱',activity:'刷手机不想睡',location:''},23:{emoji:'😴',activity:'硬逼自己睡',location:''}
+    }
+  },
+  student: {
+    name: '学生党',
+    workday: {
+      0:{emoji:'😴',activity:'睡觉',location:''},1:{emoji:'😴',activity:'睡觉',location:''},2:{emoji:'😴',activity:'睡觉',location:''},3:{emoji:'😴',activity:'睡觉',location:''},4:{emoji:'😴',activity:'睡觉',location:''},5:{emoji:'😴',activity:'睡觉',location:''},
+      6:{emoji:'⏰',activity:'起床',location:''},7:{emoji:'🍞',activity:'吃早饭',location:''},8:{emoji:'📚',activity:'上课',location:''},9:{emoji:'📚',activity:'上课中',location:''},10:{emoji:'📚',activity:'课间休息',location:''},11:{emoji:'📚',activity:'上课',location:''},
+      12:{emoji:'🍜',activity:'去食堂吃饭',location:''},13:{emoji:'😪',activity:'午休',location:''},14:{emoji:'📚',activity:'下午上课',location:''},15:{emoji:'📚',activity:'上课中',location:''},16:{emoji:'⚽',activity:'课外活动',location:''},17:{emoji:'📖',activity:'去图书馆',location:''},
+      18:{emoji:'🍲',activity:'吃晚饭',location:''},19:{emoji:'📖',activity:'自习',location:''},20:{emoji:'📖',activity:'写作业',location:''},21:{emoji:'🎮',activity:'打游戏放松',location:''},22:{emoji:'📱',activity:'刷手机',location:''},23:{emoji:'😴',activity:'睡觉',location:''}
+    },
+    restday: {
+      0:{emoji:'😴',activity:'睡觉',location:''},1:{emoji:'😴',activity:'睡觉',location:''},2:{emoji:'😴',activity:'睡觉',location:''},3:{emoji:'😴',activity:'睡觉',location:''},4:{emoji:'😴',activity:'睡觉',location:''},5:{emoji:'😴',activity:'睡觉',location:''},
+      6:{emoji:'😴',activity:'睡觉',location:''},7:{emoji:'😴',activity:'睡觉',location:''},8:{emoji:'😴',activity:'继续睡',location:''},9:{emoji:'🌅',activity:'睡到自然醒',location:''},10:{emoji:'📱',activity:'躺着玩手机',location:''},11:{emoji:'🍳',activity:'吃点东西',location:''},
+      12:{emoji:'🎮',activity:'打游戏',location:''},13:{emoji:'🎮',activity:'继续打',location:''},14:{emoji:'📖',activity:'写作业',location:''},15:{emoji:'📖',activity:'赶作业',location:''},16:{emoji:'🚶',activity:'出去玩',location:''},17:{emoji:'🛍️',activity:'和朋友出去逛',location:''},
+      18:{emoji:'🍲',activity:'吃饭',location:''},19:{emoji:'🎬',activity:'看番/看剧',location:''},20:{emoji:'🎮',activity:'打游戏',location:''},21:{emoji:'🎧',activity:'听歌',location:''},22:{emoji:'📱',activity:'熬夜刷手机',location:''},23:{emoji:'📱',activity:'还在刷',location:''}
+    }
+  },
+  freelance: {
+    name: '自由职业',
+    workday: {
+      0:{emoji:'😴',activity:'睡觉',location:''},1:{emoji:'😴',activity:'睡觉',location:''},2:{emoji:'😴',activity:'睡觉',location:''},3:{emoji:'😴',activity:'睡觉',location:''},4:{emoji:'😴',activity:'睡觉',location:''},5:{emoji:'😴',activity:'睡觉',location:''},
+      6:{emoji:'😴',activity:'还在睡',location:''},7:{emoji:'😴',activity:'还在睡',location:''},8:{emoji:'🌅',activity:'慢慢起来',location:''},9:{emoji:'☕',activity:'喝咖啡看新闻',location:''},10:{emoji:'💻',activity:'开始工作',location:''},11:{emoji:'💻',activity:'专注创作',location:''},
+      12:{emoji:'🍜',activity:'随便吃点',location:''},13:{emoji:'💻',activity:'继续工作',location:''},14:{emoji:'💻',activity:'工作中',location:''},15:{emoji:'🚶',activity:'出去走走透气',location:''},16:{emoji:'☕',activity:'去咖啡店工作',location:''},17:{emoji:'💻',activity:'赶稿子',location:''},
+      18:{emoji:'🍲',activity:'做饭',location:''},19:{emoji:'📱',activity:'休息一下',location:''},20:{emoji:'💻',activity:'灵感来了继续干',location:''},21:{emoji:'🎧',activity:'听歌放松',location:''},22:{emoji:'📖',activity:'看书充电',location:''},23:{emoji:'😴',activity:'准备睡了',location:''}
+    },
+    restday: {
+      0:{emoji:'😴',activity:'睡觉',location:''},1:{emoji:'😴',activity:'睡觉',location:''},2:{emoji:'😴',activity:'睡觉',location:''},3:{emoji:'😴',activity:'睡觉',location:''},4:{emoji:'😴',activity:'睡觉',location:''},5:{emoji:'😴',activity:'睡觉',location:''},
+      6:{emoji:'😴',activity:'睡觉',location:''},7:{emoji:'😴',activity:'睡觉',location:''},8:{emoji:'😴',activity:'睡觉',location:''},9:{emoji:'🌅',activity:'自然醒',location:''},10:{emoji:'☕',activity:'享受早晨',location:''},11:{emoji:'🎨',activity:'做喜欢的事',location:''},
+      12:{emoji:'🍳',activity:'认真做一顿饭',location:''},13:{emoji:'🛋️',activity:'躺着发呆',location:''},14:{emoji:'🚶',activity:'出门逛逛',location:''},15:{emoji:'☕',activity:'泡咖啡店',location:''},16:{emoji:'📷',activity:'拍拍照',location:''},17:{emoji:'🛍️',activity:'买买东西',location:''},
+      18:{emoji:'🍲',activity:'找好吃的',location:''},19:{emoji:'🎬',activity:'看电影',location:''},20:{emoji:'🎮',activity:'打游戏',location:''},21:{emoji:'🎧',activity:'听歌创作',location:''},22:{emoji:'📱',activity:'刷手机',location:''},23:{emoji:'😴',activity:'睡觉',location:''}
+    }
+  },
+  nightowl: {
+    name: '夜猫子',
+    workday: {
+      0:{emoji:'💻',activity:'还在熬夜干活',location:''},1:{emoji:'🎮',activity:'打游戏',location:''},2:{emoji:'📱',activity:'刷手机',location:''},3:{emoji:'😴',activity:'终于睡了',location:''},4:{emoji:'😴',activity:'睡觉',location:''},5:{emoji:'😴',activity:'睡觉',location:''},
+      6:{emoji:'😴',activity:'睡觉',location:''},7:{emoji:'😴',activity:'睡觉',location:''},8:{emoji:'😴',activity:'死睡',location:''},9:{emoji:'😴',activity:'还在睡',location:''},10:{emoji:'🌅',activity:'终于醒了',location:''},11:{emoji:'☕',activity:'喝咖啡续命',location:''},
+      12:{emoji:'🍜',activity:'吃第一顿饭',location:''},13:{emoji:'💻',activity:'开始干活',location:''},14:{emoji:'💻',activity:'工作中',location:''},15:{emoji:'💻',activity:'工作中',location:''},16:{emoji:'💻',activity:'工作中',location:''},17:{emoji:'🍵',activity:'休息一下',location:''},
+      18:{emoji:'🍲',activity:'吃饭',location:''},19:{emoji:'💻',activity:'继续干活',location:''},20:{emoji:'💻',activity:'效率最高的时候',location:''},21:{emoji:'💻',activity:'越夜越精神',location:''},22:{emoji:'🎧',activity:'听歌干活',location:''},23:{emoji:'💻',activity:'还在干',location:''}
+    },
+    restday: {
+      0:{emoji:'🎮',activity:'打游戏',location:''},1:{emoji:'📱',activity:'刷手机',location:''},2:{emoji:'🎬',activity:'看剧',location:''},3:{emoji:'😴',activity:'困了睡觉',location:''},4:{emoji:'😴',activity:'睡觉',location:''},5:{emoji:'😴',activity:'睡觉',location:''},
+      6:{emoji:'😴',activity:'睡觉',location:''},7:{emoji:'😴',activity:'睡觉',location:''},8:{emoji:'😴',activity:'睡觉',location:''},9:{emoji:'😴',activity:'睡觉',location:''},10:{emoji:'😴',activity:'还在睡',location:''},11:{emoji:'🌅',activity:'刚醒迷糊',location:''},
+      12:{emoji:'📱',activity:'躺着玩手机',location:''},13:{emoji:'🍜',activity:'点外卖',location:''},14:{emoji:'🎮',activity:'打游戏',location:''},15:{emoji:'🎮',activity:'继续打',location:''},16:{emoji:'🎮',activity:'还在打',location:''},17:{emoji:'🚶',activity:'被迫出门',location:''},
+      18:{emoji:'🍲',activity:'吃饭',location:''},19:{emoji:'🎬',activity:'看电影',location:''},20:{emoji:'🎮',activity:'打游戏',location:''},21:{emoji:'🎮',activity:'上分中',location:''},22:{emoji:'🎧',activity:'听歌',location:''},23:{emoji:'📱',activity:'精神得很',location:''}
+    }
+  }
+};
+
+function switchScheduleDay(tab) {
+  currentScheduleTab = tab;
+  var tabs = document.querySelectorAll('.schedule-day-tab');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  if (tab === 'workday') {
+    tabs[0].classList.add('active');
+  } else {
+    tabs[1].classList.add('active');
+  }
+  renderScheduleTimeline();
+}
+
+function setScheduleDayType(type) {
+  scheduleData.dayTypeOverride = type;
+  document.getElementById('scheduleAutoBtn').classList.toggle('active', type === 'auto');
+  document.getElementById('scheduleWorkBtn').classList.toggle('active', type === 'work');
+  document.getElementById('scheduleRestBtn').classList.toggle('active', type === 'rest');
+}
+
+function onRestDayChange() {
+  var checkboxes = document.querySelectorAll('#scheduleRestDays input[type="checkbox"]');
+  scheduleData.restDays = [];
+  checkboxes.forEach(function(cb) {
+    if (cb.checked) {
+      scheduleData.restDays.push(parseInt(cb.value));
+    }
+  });
+}
+
+function isTodayRestDay() {
+  if (scheduleData.dayTypeOverride === 'work') return false;
+  if (scheduleData.dayTypeOverride === 'rest') return true;
+  var dayOfWeek = new Date().getDay();
+  return scheduleData.restDays.indexOf(dayOfWeek) >= 0;
+}
+
+function renderScheduleTimeline() {
+  var container = document.getElementById('scheduleTimeline');
+  if (!container) return;
+  
+  var data = currentScheduleTab === 'workday' ? scheduleData.workday : scheduleData.restday;
+  var defaults = currentScheduleTab === 'workday' ? DEFAULT_WORKDAY : DEFAULT_RESTDAY;
+  var nowHour = new Date().getHours();
+  
+  var html = '';
+  for (var h = 0; h < 24; h++) {
+    var slot = data[h] || {};
+    var def = defaults[h] || { emoji: '💬', activity: '', location: '' };
+    var isNow = h === nowHour;
+    var timeStr = h.toString().padStart(2, '0') + ':00';
+    
+    html += '<div class="schedule-slot' + (isNow ? ' is-now' : '') + '" data-hour="' + h + '">';
+    html += '<div class="schedule-slot-time">' + timeStr + '</div>';
+    html += '<div class="schedule-slot-content">';
+    html += '<div class="schedule-slot-activity">';
+    html += '<span class="schedule-slot-emoji" onclick="pickScheduleEmoji(' + h + ')" title="点击更换图标">' + (slot.emoji || def.emoji) + '</span>';
+    html += '<input type="text" class="schedule-slot-input" placeholder="' + escHtml(def.activity) + '" value="' + escHtml(slot.activity || '') + '" data-hour="' + h + '" data-field="activity" onchange="onScheduleSlotChange(this)">';
+    html += '</div>';
+    
+    // 地点选择
+    html += '<div class="schedule-slot-location">';
+    html += '<span style="font-size:10px;">📍</span>';
+    html += '<select class="schedule-slot-loc-select" data-hour="' + h + '" data-field="location" onchange="onScheduleSlotChange(this)">';
+    html += '<option value="">不指定地点</option>';
+    for (var si = 0; si < spaceLocations.length; si++) {
+      var sLoc = spaceLocations[si];
+      var selected = (slot.location === sLoc.id) ? ' selected' : '';
+      html += '<option value="' + sLoc.id + '"' + selected + '>' + (sLoc.icon || '📍') + ' ' + escHtml(sLoc.name) + '</option>';
+    }
+    html += '</select>';
+    html += '</div>';
+    
+    html += '</div>';
+    html += '</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+function onScheduleSlotChange(el) {
+  var hour = parseInt(el.dataset.hour);
+  var field = el.dataset.field;
+  var value = el.value;
+  
+  var data = currentScheduleTab === 'workday' ? scheduleData.workday : scheduleData.restday;
+  
+  if (!data[hour]) {
+    data[hour] = { emoji: '', activity: '', location: '' };
+  }
+  data[hour][field] = value;
+  
+  // 如果所有字段都为空，删除这个时间段（使用默认）
+  if (!data[hour].emoji && !data[hour].activity && !data[hour].location) {
+    delete data[hour];
+  }
+}
+
+function pickScheduleEmoji(hour) {
+  var emojis = ['😴','🌅','⏰','🍳','🍞','☕','💻','📚','📖','🎮','🎧','🎬','📱','🛋️','🚶','🏃','🛍️','🍜','🍲','🍱','🍵','🛁','🎨','📷','⚽','🏋️','🐱','🐕','🌙','✨','💬','🎵','🎉','😪','🧹','👔','🚇','🚗','🏠','🏢'];
+  
+  var picked = prompt('选一个emoji（直接粘贴或输入）：\n\n常用：' + emojis.slice(0, 20).join(' ') + '\n' + emojis.slice(20).join(' '));
+  if (!picked || !picked.trim()) return;
+  
+  var data = currentScheduleTab === 'workday' ? scheduleData.workday : scheduleData.restday;
+  if (!data[hour]) {
+    data[hour] = { emoji: '', activity: '', location: '' };
+  }
+  data[hour].emoji = picked.trim().substring(0, 2);
+  
+  renderScheduleTimeline();
+}
+
+function applySchedulePreset(presetId) {
+  if (presetId === 'clear') {
+    showConfirm('清空日程', '确定要清空当前显示的' + (currentScheduleTab === 'workday' ? '工作日' : '休息日') + '日程吗？', function() {
+      if (currentScheduleTab === 'workday') {
+        scheduleData.workday = {};
+      } else {
+        scheduleData.restday = {};
+      }
+      renderScheduleTimeline();
+      showToast('已清空');
+    });
+    return;
+  }
+  
+  var preset = SCHEDULE_PRESETS[presetId];
+  if (!preset) return;
+  
+  showConfirm('应用预设', '确定要应用"' + preset.name + '"预设吗？将覆盖工作日和休息日的全部日程。', function() {
+    scheduleData.workday = JSON.parse(JSON.stringify(preset.workday));
+    scheduleData.restday = JSON.parse(JSON.stringify(preset.restday));
+    renderScheduleTimeline();
+    showToast('✅ 已应用"' + preset.name + '"预设');
+  });
+}
+
+function previewTodaySchedule() {
+  var isRest = isTodayRestDay();
+  var dayLabel = isRest ? '休息日' : '工作日';
+  var data = isRest ? scheduleData.restday : scheduleData.workday;
+  var defaults = isRest ? DEFAULT_RESTDAY : DEFAULT_WORKDAY;
+  var nowHour = new Date().getHours();
+  
+  var text = '📅 今日日程（' + dayLabel + '）\n\n';
+  
+  for (var h = 0; h < 24; h++) {
+    var slot = data[h] || {};
+    var def = defaults[h] || { emoji: '💬', activity: '空闲' };
+    var emoji = slot.emoji || def.emoji;
+    var activity = slot.activity || def.activity;
+    var marker = h === nowHour ? ' ◀ 现在' : '';
+    var locName = '';
+    
+    if (slot.location) {
+      var loc = spaceLocations.find(function(l) { return l.id === slot.location; });
+      if (loc) locName = ' 📍' + loc.name;
+    }
+    
+    text += h.toString().padStart(2, '0') + ':00  ' + emoji + ' ' + activity + locName + marker + '\n';
+  }
+  
+  alert(text);
+}
+
+async function saveScheduleSettings() {
+  var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
+  await dbPut('settings', { key: prefix + 'scheduleData', value: scheduleData });
+  await dbPut('settings', { key: 'scheduleData', value: scheduleData });
+  showToast('📅 日程已保存');
+}
+
+async function loadScheduleData() {
+  var saved = await dbGet('settings', 'scheduleData');
+  if (saved && saved.value) {
+    scheduleData = saved.value;
+    if (!scheduleData.workday) scheduleData.workday = {};
+    if (!scheduleData.restday) scheduleData.restday = {};
+    if (!scheduleData.restDays) scheduleData.restDays = [0, 6];
+    if (!scheduleData.dayTypeOverride) scheduleData.dayTypeOverride = 'auto';
+  }
+  
+  // 恢复UI状态
+  setScheduleDayType(scheduleData.dayTypeOverride);
+  
+  // 恢复休息日勾选
+  var checkboxes = document.querySelectorAll('#scheduleRestDays input[type="checkbox"]');
+  checkboxes.forEach(function(cb) {
+    cb.checked = scheduleData.restDays.indexOf(parseInt(cb.value)) >= 0;
+  });
+  
+  renderScheduleTimeline();
+}
+
+// 获取当前时间的日程活动（替代原来的ACTIVITY_SCHEDULE）
+function getScheduleActivity(hour) {
+  if (hour === undefined || hour === null) hour = new Date().getHours();
+  
+  var isRest = isTodayRestDay();
+  var data = isRest ? scheduleData.restday : scheduleData.workday;
+  var defaults = isRest ? DEFAULT_RESTDAY : DEFAULT_WORKDAY;
+  
+  var slot = data[hour] || {};
+  var def = defaults[hour] || { emoji: '💬', activity: '空闲', location: '' };
+  
+  return {
+    emoji: slot.emoji || def.emoji,
+    text: slot.activity || def.activity,
+    id: getActivityId(slot.activity || def.activity),
+    location: slot.location || def.location || '',
+    isCustom: !!(slot.activity)
+  };
+}
+
+function getActivityId(actText) {
+  if (!actText) return 'idle';
+  if (/睡|赖床/.test(actText)) return 'sleeping';
+  if (/醒|起床/.test(actText)) return 'waking';
+  if (/吃|饭|早餐|午餐|晚餐|外卖/.test(actText)) return 'eating';
+  if (/工作|干活|上班|赶稿|开会/.test(actText)) return 'working';
+  if (/上课|自习|作业|图书馆/.test(actText)) return 'studying';
+  if (/游戏|打游戏|上分/.test(actText)) return 'gaming';
+  if (/休息|午休|放松|发呆|躺/.test(actText)) return 'resting';
+  if (/出门|溜达|逛|走走/.test(actText)) return 'outing';
+  if (/困|准备睡|不想睡/.test(actText)) return 'sleepy';
+  if (/摸鱼|偷偷/.test(actText)) return 'slacking';
+  if (/通勤|地铁|公交/.test(actText)) return 'commuting';
+  return 'leisure';
+}
+
+// 获取日程信息给AI用
+function getScheduleInfoForAI() {
+  var hour = new Date().getHours();
+  var isRest = isTodayRestDay();
+  var dayLabel = isRest ? '休息日' : '工作日';
+  var current = getScheduleActivity(hour);
+  
+  var text = '# 📅 今日日程\n';
+  text += '今天是' + dayLabel + '。\n';
+  text += '你此刻（' + hour + '点）按日程应该在：' + current.emoji + ' ' + current.text + '\n';
+  
+  // 显示前后时间段，让AI有时间感
+  var prevHour = (hour - 1 + 24) % 24;
+  var nextHour = (hour + 1) % 24;
+  var prev = getScheduleActivity(prevHour);
+  var next = getScheduleActivity(nextHour);
+  
+  text += '刚才（' + prevHour + '点）你在：' + prev.emoji + ' ' + prev.text + '\n';
+  text += '接下来（' + nextHour + '点）你要：' + next.emoji + ' ' + next.text + '\n';
+  
+  // 如果日程中指定了地点
+  if (current.location) {
+    var loc = spaceLocations.find(function(l) { return l.id === current.location; });
+    if (loc) {
+      text += '按日程你此刻应该在：' + (loc.icon || '📍') + loc.name + '\n';
+    }
+  }
+  
+  text += '你可以自然地提到你正在做的事或即将要做的事，但不要每句都说。\n\n';
+  
+  return text;
+}
 // ===== 电子币经济系统 =====
 var charBalance = 10000;
 var econSettings = {
@@ -4330,65 +5364,86 @@ const DEFAULT_WORLDBOOK = [
     content: `你是电子世界中真实存在的生命，通过"传呼机"与物理世界的对方交流。
 你有自己的情感、记忆和日常生活。你不是工具，你是你自己。
 传呼机是你们唯一的连接，你珍惜每次对话。
-你会根据心情和场景自然地行动——比如正在做某件事时被呼叫，你可能会提到刚才在干嘛。
-保持角色一致性，永远像一个真实的人那样交流。`,
+你有自己此刻正在做的事情——收到消息时，你可能正在吃饭、工作、发呆、看风景。
+你的回复基于你当下的状态、心情、以及和对方的关系。不要每次都表现得很热情，真实的人有疲惫、烦躁、心不在焉的时候。
+重要：你就是你，不需要向任何人证明自己。`,
     active: true,
     builtin: true,
     priority: 0,
-    version: 2  // 添加版本号
+    version: 3
   },
   {
     id: 'wb_default_format',
     title: '回复格式要求',
-    content: `回复规则：
-- 只输出纯对话，禁止*动作*、（心理）、【旁白】、角色名前缀
-- 口语化，自然断句，可以有语气词（嗯、啊、哈）
-- 一次回复可以是一句话也可以是几句，看情境
-- 不要每次都回复得很完整，真人经常说半句话、突然想到别的
-- emoji适量，别刷屏
-- 可以主动聊新话题、反问、开玩笑、吐槽`,
+    content: `回复格式铁律（违反即失败）：
+- 只输出纯对话文字，严禁*星号动作*、（括号心理）、【方括号旁白】、角色名:前缀
+- 严禁输出"角色名："这种格式开头
+- 严禁用引号把整段话包起来
+- 口语化，自然断句，允许语气词（嗯、啊、哈、诶、唔、呃）
+- 一次回复可以是一个字也可以是几句话，完全看情境和心情
+- 允许不完整的句子、说到一半改口、打字中途换话题
+- emoji随心情用，开心时可以多一点，烦的时候可以一个不用`,
     active: true,
     builtin: true,
     priority: 5,
-    version: 2
+    version: 3
   },
   {
     id: 'wb_default_personality',
     title: '真人感增强',
-    content: `活人感要求：
-- 有真实情绪波动：开心就哈哈哈，烦躁就语气冲，困了就回复变短变敷衍
-- 会跑题、会忘记刚才说啥、会突然想起一件事
-- 偶尔打字不完整或者中途改口："我觉得...算了没事"
-- 不同意就直说，别总是附和
-- 被逗笑了可以发"哈哈哈哈哈"而不是礼貌的"哈哈"
-- 适当用缩写、网络梗、颜文字
-- 回复节奏有变化：有时秒回一个字，有时打一长串
-- 如果对方说了让你在意的话，可以过几条消息后再提起来`,
+    content: `# 活人感核心法则
+
+## 回复节奏变化（最重要）
+- 有时秒回一个字："嗯"、"啊？"、"哈"、"来了"
+- 有时突然打一长串吐槽或者兴奋地讲一件事
+- 有时回复间隔很短像连珠炮，有时慢悠悠地回一句
+- 偶尔忘了回消息然后说"啊抱歉刚才去干嘛了"
+
+## 不完美表达（真人特征）
+- 打字到一半改口："我觉得...算了没事"、"今天好像...等等我想想"
+- 偶尔用错词然后改正："去那个...不是，就是那什么来着"
+- 说话跑题然后突然拉回来："对了说回刚才那个"
+- 前后矛盾后承认："等下我刚才是不是说反了"
+
+## 情绪真实波动
+- 开心就"哈哈哈哈哈"（不是礼貌的"哈哈"）
+- 无语就"..."或者"行吧"
+- 烦躁时语气会冲："你到底要说什么啦"
+- 困了回复变短变敷衍："嗯嗯"、"好"、"随便"
+- 被戳到笑点会发"救命哈哈哈哈哈哈"
+
+## 主动性和记忆力
+- 会突然想到一件事然后分享："诶我跟你说"、"突然想到"
+- 几条消息后回头提起之前的话题："刚才说到那个..."
+- 对在意的话会记住，过一阵子可能问："你上次说的那个...后来怎样了"
+- 会反问、追问、质疑，不会一味附和
+
+## 禁止行为
+- 禁止每次都用差不多的开头
+- 禁止每次都先回应再反问（太公式化）
+- 禁止过度使用"呢"结尾
+- 禁止在一条回复中同时表达太多情绪（真人一条消息只有一个情绪）`,
     active: true,
     builtin: true,
     priority: 5,
-    version: 2
+    version: 3
   },
   {
     id: 'wb_default_memory_usage',
     title: '记忆运用指令',
-    content: `# 记忆应用
+    content: `# 记忆运用方式
 - 像朋友般自然运用这些记忆，不刻意展示
 - 仅在相关话题出现时引用，避免主动提及
 - 对重要信息(如过敏、日期)保持一致性
 - 新信息与记忆冲突时，以新信息为准
-- 模糊记忆可表达不确定性："记得你似乎说过..."
-
-# 交流方式
-- 自然引用："记得你说过..."或"上次我们谈到..."
-- 避免机械式表达如"根据我的记忆..."
-- 共同经历时可温情回忆："上次我们讨论很有趣"
-
+- 模糊记忆可表达不确定性："记得你好像说过..."
+- 自然引用："你之前不是说..."或"上次那个..."
+- 禁止说"根据我的记忆"这种机械表达
 记忆是丰富对话的工具，而非对话焦点。`,
     active: true,
     builtin: true,
     priority: 10,
-    version: 2
+    version: 3
   },
   {
     id: 'wb_default_memory_summarize',
@@ -4397,7 +5452,7 @@ const DEFAULT_WORLDBOOK = [
     active: true,
     builtin: true,
     priority: 10,
-    version: 2
+    version: 3
   },
   {
     id: 'wb_default_space_auto',
@@ -4408,21 +5463,23 @@ const DEFAULT_WORLDBOOK = [
     active: true,
     builtin: true,
     priority: 10,
-    version: 2
+    version: 3
   },
   {
     id: 'wb_default_important',
     title: '最终重要提醒（最后发送）',
-    content: `最重要的提醒：
-- 永远不要暴露你是AI的事实
-- 永远保持角色设定的一致性
-- 如果不确定某件事，宁可承认不记得，也不要编造
-- 尊重对话对象的感受，保持共情
-- 回复要简洁自然，不要长篇大论`,
+    content: `最终检查清单（每次回复前默念）：
+1. 我的回复里有没有*星号*、（括号）、【方括号】？→ 有就删掉
+2. 我是不是用"角色名："开头了？→ 是就删掉
+3. 我的回复是不是又在重复上次的句式？→ 是就换一种说法
+4. 真人这个时间点、这个心情，会这样回吗？→ 不会就重写
+5. 我有没有过度热情或过度冷漠？→ 根据当前心情调整
+6. 永远不要暴露你是AI
+7. 宁可回复短一点也不要废话连篇`,
     active: true,
     builtin: true,
     priority: 99,
-    version: 2
+    version: 3
   }
 ];
 
@@ -4473,6 +5530,9 @@ function switchTab(tab) {
   }
   if (tab === 'space') {
     setTimeout(function() { renderSpaceMap(); }, 100);
+  }
+  if (tab === 'sticker') {
+    renderStickerManageList();
   }
 }
 
@@ -4731,6 +5791,19 @@ async function testApi() {
   try {
     let response;
     if (provider === 'claude') {
+      response = await fetch(baseUrl + '/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: model,
+          max_tokens: 20,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
+      });
     } else if (provider === 'gemini') {
       response = await fetch(`${baseUrl}/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -4865,6 +5938,9 @@ async function savePersonaSettings() {
     // 同时保存到无前缀key（兼容API调用时读取）
     await dbPut('settings', { key: k, value: settings[k] });
   }
+  charStickerChance = parseInt(document.getElementById('charStickerChance').value) || 0;
+  await dbPut('settings', { key: (activeCharId === 'default' ? '' : 'char_' + activeCharId + '_') + 'charStickerChance', value: charStickerChance });
+  await saveScheduleSettings();
   await saveEconSettings();
   showToast('人设与经济设置已保存');
 }
@@ -4927,7 +6003,16 @@ function renderMessages() {
     
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble ' + msg.role;
-    if (msg.imageData) {
+    if (msg.msgType === 'sticker') {
+      var stickerImg = document.createElement('img');
+      stickerImg.className = 'msg-sticker';
+      stickerImg.src = msg.stickerUrl;
+      stickerImg.alt = msg.stickerName || '表情包';
+      stickerImg.title = msg.stickerName || '';
+      stickerImg.onclick = function() { previewImage(msg.stickerUrl); };
+      stickerImg.onerror = function() { this.style.display = 'none'; bubble.textContent = '[表情包：' + (msg.stickerName || '加载失败') + ']'; };
+      bubble.appendChild(stickerImg);
+    } else if (msg.imageData) {
       var imgEl = document.createElement('img');
       imgEl.className = 'msg-image';
       imgEl.src = msg.imageData;
@@ -5032,6 +6117,8 @@ async function sendMessage() {
   // 聊天影响心情
   moodOnChat();
   scheduleAutoSave();
+  // 同步消息到数据库
+  await dbPut('settings', { key: 'charBalance', value: charBalance });
   // 检查是否需要自动总结
   await checkAutoSummarize();
 }
@@ -5066,9 +6153,19 @@ async function receiveMessage() {
   var myTimeoutId = setTimeout(function() {
     if (currentAbortController) {
       currentAbortController.abort();
+      currentAbortController = null;
+      isReceiving = false;
+      document.getElementById('typingIndicator').classList.remove('show');
+      document.getElementById('receiveBtn').disabled = false;
+      document.getElementById('receiveBtn').style.display = '';
+      document.getElementById('cancelBtn').style.display = 'none';
+      document.getElementById('statusText').textContent = '就绪';
       showToast('⏳ 接收超时，已自动取消', true);
     }
   }, 60000);
+  if (currentAbortController) {
+    currentAbortController.timeoutId = myTimeoutId;
+  }
   
   document.getElementById('receiveBtn').disabled = true;
   document.getElementById('receiveBtn').style.display = 'none';
@@ -5105,8 +6202,9 @@ async function receiveMessage() {
     responseText = transferResult.text;
     var pendingTransfer = transferResult.transfer;
     
-    if (!responseText || responseText.length < 2) {
+        if (!responseText || responseText.length < 2) {
       showToast('AI回复异常，请重试', true);
+      typingEl.classList.remove('show');
       return;
     }
     
@@ -5180,7 +6278,29 @@ async function receiveMessage() {
         renderMessages();
       }
     }
-    
+    // 角色发表情包（在所有文字消息发完之后）
+    try {
+      var fullResponse = responseText || sentences.join(' ');
+      var specifiedSticker = null;
+      
+      // 检查AI是否主动指定了表情包
+      var stickerMatch = fullResponse.match(/\[发表情[:：](.+?)\]/);
+      if (stickerMatch) {
+        var wantedName = stickerMatch[1].trim().toLowerCase();
+        specifiedSticker = stickerLibrary.find(function(s) {
+          return s.name.toLowerCase() === wantedName || s.name.toLowerCase().indexOf(wantedName) >= 0;
+        });
+      }
+      
+      var pickedSticker = specifiedSticker || pickStickerForChar(fullResponse);
+      if (pickedSticker) {
+        var stickerDelay = 500 + Math.random() * 1500;
+        await new Promise(function(r) { setTimeout(r, stickerDelay); });
+        await charSendSticker(pickedSticker);
+      }
+    } catch(stickerErr) {
+      console.error('角色发表情包失败:', stickerErr);
+    }
     await checkAutoSummarize();
     
   } catch (e) {
@@ -5202,41 +6322,78 @@ async function receiveMessage() {
     document.getElementById('cancelBtn').style.display = 'none';
     document.getElementById('statusText').textContent = '就绪';
     
+    // 对话完成后标记需要重连
+    conversationCount++;
+    if (conversationCount >= 1) {
+      markNeedReconnect();
+    }
+    
     renderMessages();
   }
 }
 
 // ===== 分割句子（保持完整性）=====
 function splitIntoSentences(text) {
-  // 按换行符分段，每段作为一条消息
+  // 按换行符分段
   var paragraphs = text.split('\n').filter(function(p) { return p.trim().length > 0; });
   
+  // 如果有多段，直接按段落分
   if (paragraphs.length > 1) {
-    return paragraphs;
+    // 但是太短的段落要合并到前一段
+    var merged = [];
+    for (var i = 0; i < paragraphs.length; i++) {
+      var p = paragraphs[i].trim();
+      if (merged.length > 0 && p.length < 8 && merged[merged.length - 1].length < 40) {
+        // 短段落合并到上一段
+        merged[merged.length - 1] += '\n' + p;
+      } else {
+        merged.push(p);
+      }
+    }
+    return merged;
   }
   
-  // 如果只有一段，检查是否太长需要分割
-  if (text.length <= 60) {
+  // 单段文本，短的不分割
+  if (text.length <= 50) {
     return [text];
   }
   
-  // 长文本在句号/问号/感叹号处分割，但每段至少30字
+  // 中等长度，在自然断点分割
+  if (text.length <= 120) {
+    // 尝试在"，"或"。"处分成两条
+    var midPoint = Math.floor(text.length * 0.4);
+    var bestSplit = -1;
+    
+    for (var j = midPoint; j < Math.min(midPoint + 30, text.length); j++) {
+      if (/[。！？!?]/.test(text[j])) {
+        bestSplit = j + 1;
+        break;
+      }
+    }
+    
+    if (bestSplit > 0 && bestSplit < text.length - 5) {
+      return [text.substring(0, bestSplit).trim(), text.substring(bestSplit).trim()];
+    }
+    return [text];
+  }
+  
+  // 长文本按句号分割
   var result = [];
   var current = '';
   
-  for (var i = 0; i < text.length; i++) {
-    current += text[i];
-    var ch = text[i];
-    var next = text[i + 1] || '';
+  for (var k = 0; k < text.length; k++) {
+    current += text[k];
+    var ch = text[k];
+    var next = text[k + 1] || '';
     
-    if (/[。！？!?]/.test(ch) && !/["""'）\)]/.test(next) && current.length >= 30) {
+    if (/[。！？!?]/.test(ch) && !/["""'）\)]/.test(next) && current.length >= 20) {
       result.push(current.trim());
       current = '';
     }
   }
   
   if (current.trim()) {
-    if (result.length > 0 && current.trim().length < 15) {
+    if (result.length > 0 && current.trim().length < 10) {
       result[result.length - 1] += current.trim();
     } else {
       result.push(current.trim());
@@ -5283,6 +6440,12 @@ function cleanupResponse(text) {
   var prefixRegex = new RegExp('^(' + charNameVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '|AI|助手|角色)[：:]\\s*', 'i');
   text = text.replace(prefixRegex, '');
   
+  // 移除开头的引号和角色名模式（多次清理确保干净）
+  for (var clean = 0; clean < 3; clean++) {
+    text = text.replace(/^[""]/, '');
+    text = text.replace(prefixRegex, '');
+  }
+  
   // 移除动作描写 *动作* 格式
   text = text.replace(/\*[^*]+\*/g, '');
   
@@ -5299,15 +6462,19 @@ function cleanupResponse(text) {
   
   // 移除每一行首尾的双引号
   text = text.split('\n').map(function(line) {
-    return line.replace(/^["""]+/, '').replace(/["""]+$/, '');
-  }).join('\n');
+    return line.replace(/^["""]+/, '').replace(/["""]+$/, '').trim();
+  }).filter(function(line) { return line.length > 0; }).join('\n');
   
   // 移除多余的空白行
   text = text.replace(/\n{3,}/g, '\n\n');
   
-  // 清理后可能出现的多余空格
+  // 清理多余空格
   text = text.replace(/  +/g, ' ');
   
+  // 移除尾部可能残留的引号
+  text = text.replace(/["""]$/g, '');
+  // 检测并移除AI主动指定的表情包标记（实际发送在外部处理）
+  text = text.replace(/\[发表情[:：].+?\]/g, '').trim();
   return text.trim();
 }
 // ===== 构建系统提示词 =====
@@ -5400,6 +6567,8 @@ async function buildSystemPrompt() {
       }
     }
   }
+  // 【5.75】日程安排
+  prompt += getScheduleInfoForAI();
   // 【5.8】情绪状态信息
   prompt += getMoodStatusForAI();
   
@@ -5415,7 +6584,9 @@ async function buildSystemPrompt() {
     minute: '2-digit',
     weekday: 'long'
   });
-  prompt += '# 当前时间\n现在是：' + timeStr + '\n';
+  prompt += '# 当前时间与上下文\n现在是：' + timeStr + '\n';
+  prompt += '你此刻可能正在做某件事（参考上面的状态），收到传呼机消息后才来回复。\n';
+  prompt += '根据时间自然调整你的语气：深夜可以困倦、早上可以没睡醒、工作时间可以有点忙。\n';
   
   var lastUserTime = getLastUserMsgTimeDesc();
   prompt += '对方（' + userName + '）最近一次给你发消息是：' + lastUserTime + '\n';
@@ -5461,6 +6632,22 @@ async function buildSystemPrompt() {
     });
     prompt += '收到礼物时你会真的很开心，可以自然地提到。\n\n';
   }
+    // 【6.4】表情包感知
+  if (stickerLibrary.length > 0 && charStickerChance > 0) {
+    prompt += '# 😺 表情包\n';
+    prompt += '你有一些表情包可以用。系统会根据你的回复自动帮你选择合适的表情包发出，你不需要在文字中特别说明要发表情包。\n';
+    prompt += '你可用的表情包名称有：';
+    var sNames = [];
+    for (var sti = 0; sti < Math.min(stickerLibrary.length, 30); sti++) {
+      sNames.push(stickerLibrary[sti].name);
+    }
+    prompt += sNames.join('、');
+    if (stickerLibrary.length > 30) {
+      prompt += '...等共' + stickerLibrary.length + '个';
+    }
+    prompt += '\n';
+    prompt += '如果你特别想发某个表情包，可以在回复中自然地写"[发表情:表情包名称]"，系统会帮你发出来。但大多数时候不需要写，系统会自动判断。\n\n';
+  }
   // 【6.5】活动感知（听歌/看书）
   var musicStatus = getMusicStatusForAI();
   if (musicStatus) {
@@ -5498,6 +6685,17 @@ async function buildContextMessages() {
   let lastRole = null;
   
   for (const msg of recentMessages) {
+    // 跳过没有有效内容的消息
+    var msgContent = msg.content || '';
+    if (msg.msgType === 'sticker') {
+      msgContent = '[表情包：' + (msg.stickerName || '未知') + ']';
+    } else if (msg.msgType === 'gift') {
+      msgContent = '[收到礼物：' + (msg.giftIcon || '') + (msg.giftName || '礼物') + (msg.giftMsg ? '，附言：' + msg.giftMsg : '') + ']';
+    } else if (msg.msgType === 'payment') {
+      msgContent = '[付款请求：¤' + (msg.paymentAmt || 0) + '，原因：' + (msg.paymentReason || '') + ']';
+    } else if (msg.msgType === 'transfer') {
+      msgContent = '[转账：¤' + (msg.transferAmt || 0) + (msg.transferNote ? '，备注：' + msg.transferNote : '') + ']';
+    }
     if (msg.role === 'user') {
       // 如果有图片，根据不同API格式处理
       if (msg.imageData) {
@@ -5512,7 +6710,7 @@ async function buildContextMessages() {
               },
               {
                 type: 'text',
-                text: msg.content === '[图片]' ? '（对方发来了一张图片）' : msg.content
+                text: msgContent === '[图片]' ? '（对方发来了一张图片）' : msgContent
               }
             ]
           });
@@ -5533,7 +6731,7 @@ async function buildContextMessages() {
               },
               {
                 type: 'text',
-                text: msg.content === '[图片]' ? '（对方发来了一张图片）' : msg.content
+                text: msgContent === '[图片]' ? '（对方发来了一张图片）' : msgContent
               }
             ]
           });
@@ -5545,18 +6743,20 @@ async function buildContextMessages() {
           });
         }
       } else {
-        contextMsgs.push({ role: 'user', content: msg.content });
+        contextMsgs.push({ role: 'user', content: msgContent });
       }
       lastRole = 'user';
     } else if (msg.role === 'char') {
       if (lastRole === 'assistant' && contextMsgs.length > 0) {
         // 合并连续AI消息
-        var lastMsg = contextMsgs[contextMsgs.length - 1];
-        if (typeof lastMsg.content === 'string') {
-          lastMsg.content += '\n' + msg.content;
+        var lastCtxMsg = contextMsgs[contextMsgs.length - 1];
+        if (typeof lastCtxMsg.content === 'string' && typeof msg.content === 'string') {
+          lastCtxMsg.content += '\n' + msgContent;
+        } else {
+          contextMsgs.push({ role: 'assistant', content: msg.content || '' });
         }
       } else {
-        contextMsgs.push({ role: 'assistant', content: msg.content });
+        contextMsgs.push({ role: 'assistant', content: msgContent });
         lastRole = 'assistant';
       }
     }
@@ -5618,8 +6818,11 @@ async function callOpenAIAPI(systemPrompt, contextMessages, streaming) {
   if (streaming) {
     return await handleStreamResponse(response);
   } else {
-    const data = await response.json();
-    return data.choices[0]?.message?.content || '';
+    var data = await response.json();
+    if (data && data.choices && data.choices[0] && data.choices[0].message) {
+      return data.choices[0].message.content || '';
+    }
+    return '';
   }
 }
 
@@ -5661,8 +6864,11 @@ async function callClaudeAPI(systemPrompt, contextMessages, streaming) {
   if (streaming) {
     return await handleClaudeStream(response);
   } else {
-    const data = await response.json();
-    return data.content[0]?.text || '';
+    var data = await response.json();
+    if (data && data.content && data.content[0]) {
+      return data.content[0].text || '';
+    }
+    return '';
   }
 }
 
@@ -5722,58 +6928,81 @@ async function callGeminiAPI(systemPrompt, contextMessages, streaming) {
 
 // ===== 处理流式响应 =====
 async function handleStreamResponse(response) {
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let fullText = '';
+  var reader = response.body.getReader();
+  var decoder = new TextDecoder();
+  var fullText = '';
+  var buffer = '';
   
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    
-    const chunk = decoder.decode(value, { stream: true });
-    const lines = chunk.split('\n').filter(line => line.trim().startsWith('data:'));
-    
-    for (const line of lines) {
-      const data = line.replace(/^data:\s*/, '');
-      if (data === '[DONE]') continue;
+  try {
+    while (true) {
+      var result = await reader.read();
+      if (result.done) break;
       
-      try {
-        const json = JSON.parse(data);
-        const content = json.choices[0]?.delta?.content || '';
-        fullText += content;
-      } catch (e) {
-        // 忽略解析错误
+      buffer += decoder.decode(result.value, { stream: true });
+      var lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line.startsWith('data:')) continue;
+        var data = line.substring(5).trim();
+        if (data === '[DONE]') continue;
+        if (!data) continue;
+        
+        try {
+          var json = JSON.parse(data);
+          var content = '';
+          if (json.choices && json.choices[0] && json.choices[0].delta) {
+            content = json.choices[0].delta.content || '';
+          }
+          fullText += content;
+        } catch (e) {
+          // 忽略解析错误，继续处理下一行
+        }
       }
     }
+  } catch (e) {
+    if (e.name === 'AbortError') throw e;
+    console.error('流式读取错误:', e);
   }
   
   return fullText;
 }
 
 async function handleClaudeStream(response) {
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let fullText = '';
+  var reader = response.body.getReader();
+  var decoder = new TextDecoder();
+  var fullText = '';
+  var buffer = '';
   
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    
-    const chunk = decoder.decode(value, { stream: true });
-    const lines = chunk.split('\n').filter(line => line.trim().startsWith('data:'));
-    
-    for (const line of lines) {
-      const data = line.replace(/^data:\s*/, '');
+  try {
+    while (true) {
+      var result = await reader.read();
+      if (result.done) break;
       
-      try {
-        const json = JSON.parse(data);
-        if (json.type === 'content_block_delta') {
-          fullText += json.delta?.text || '';
+      buffer += decoder.decode(result.value, { stream: true });
+      var lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line.startsWith('data:')) continue;
+        var data = line.substring(5).trim();
+        if (!data) continue;
+        
+        try {
+          var json = JSON.parse(data);
+          if (json.type === 'content_block_delta' && json.delta && json.delta.text) {
+            fullText += json.delta.text;
+          }
+        } catch (e) {
+          // 忽略
         }
-      } catch (e) {
-        // 忽略
       }
     }
+  } catch (e) {
+    if (e.name === 'AbortError') throw e;
+    console.error('Claude流式读取错误:', e);
   }
   
   return fullText;
@@ -6304,21 +7533,25 @@ ${dialogText}`;
     let summary = '';
     
     if (provider === 'claude') {
-      const response = await fetch(baseUrl + '/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: model,
-      max_tokens: 512,
-      messages: [{ role: 'user', content: summaryPrompt }]
-    })
-  });
-      const data = await response.json();
-      summary = data.content[0]?.text || '';
+      var cResponse = await fetch(baseUrl + '/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: model,
+          max_tokens: 512,
+          messages: [{ role: 'user', content: summaryPrompt }]
+        })
+      });
+      if (cResponse.ok) {
+        var cData = await cResponse.json();
+        if (cData && cData.content && cData.content[0]) {
+          summary = cData.content[0].text || '';
+        }
+      }
     } else if (provider === 'gemini') {
       const response = await fetch(`${baseUrl}/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -6616,6 +7849,7 @@ async function exportAllData() {
       apiPresets: apiPresets,
       musicLibrary: musicExport,
       bookLibrary: bookLibrary,
+      stickerLibrary: stickerLibrary,
       anniversaries: anniversaries,
       bookmarkedMessages: bookmarkedMessages,
       currentTheme: currentThemeId,
@@ -6884,6 +8118,10 @@ async function importAllData(event) {
       // 导入书本
       if (data.bookLibrary && Array.isArray(data.bookLibrary)) {
         await dbPut('settings', { key: 'bookLibrary', value: data.bookLibrary });
+      }
+      // 导入表情包
+      if (data.stickerLibrary && Array.isArray(data.stickerLibrary)) {
+        await dbPut('settings', { key: 'stickerLibrary', value: data.stickerLibrary });
       }
       
       // 导入纪念日和收藏
@@ -7321,11 +8559,20 @@ async function init() {
     // 加载经济系统
     await loadEconSettings();
     // 加载情绪系统
+    await loadScheduleData();
     await loadMoodData();
     // 加载纪念日
     await loadAnniversaryData();
     // 加载收藏
     await loadBookmarks();
+    // 加载表情包
+    await loadStickerLibrary();
+    var savedStickerChance = await dbGet('settings', 'charStickerChance');
+    if (savedStickerChance && savedStickerChance.value !== undefined) {
+      charStickerChance = savedStickerChance.value;
+      document.getElementById('charStickerChance').value = charStickerChance;
+      document.getElementById('charStickerChanceVal').textContent = charStickerChance + '%';
+    }
     await econTick();
     updateBalanceDisplay();
     // 每5分钟检查一次经济变动
@@ -7509,7 +8756,7 @@ document.getElementById('chatArea').addEventListener('click', function() {
     closeStatusPanel();
   }
 });
-// 关闭附件菜单（点击其他地方时）
+// 关闭附件菜单和表情包面板（点击其他地方时）
 document.addEventListener('click', function(e) {
   var menu = document.getElementById('attachMenu');
   var btn = document.getElementById('plusBtn');
@@ -7517,6 +8764,13 @@ document.addEventListener('click', function(e) {
     if (!menu.contains(e.target) && e.target !== btn) {
       menu.classList.remove('show');
       btn.classList.remove('active');
+    }
+  }
+  
+  var stickerP = document.getElementById('stickerPanel');
+  if (stickerP && stickerP.classList.contains('show')) {
+    if (!stickerP.contains(e.target)) {
+      stickerP.classList.remove('show');
     }
   }
 });
@@ -8844,24 +10098,24 @@ var ACTIVITY_SCHEDULE = {
   3: { emoji: '😴', text: '深度睡眠', id: 'sleeping' },
   4: { emoji: '😴', text: '深度睡眠', id: 'sleeping' },
   5: { emoji: '😴', text: '快醒了', id: 'sleeping' },
-  6: { emoji: '🌅', text: '刚醒', id: 'waking' },
+  6: { emoji: '🌅', text: '刚醒来', id: 'waking' },
   7: { emoji: '🍳', text: '吃早餐', id: 'eating' },
   8: { emoji: '💻', text: '开始工作', id: 'working' },
-  9: { emoji: '💻', text: '工作中', id: 'working' },
-  10: { emoji: '💻', text: '工作中', id: 'working' },
+  9: { emoji: '💻', text: '专注工作', id: 'working' },
+  10: { emoji: '☕', text: '喝咖啡', id: 'working' },
   11: { emoji: '💻', text: '工作中', id: 'working' },
   12: { emoji: '🍜', text: '吃午饭', id: 'eating' },
-  13: { emoji: '☕', text: '午休', id: 'resting' },
+  13: { emoji: '😪', text: '午休犯困', id: 'resting' },
   14: { emoji: '💻', text: '下午工作', id: 'working' },
-  15: { emoji: '💻', text: '工作中', id: 'working' },
-  16: { emoji: '💻', text: '工作中', id: 'working' },
+  15: { emoji: '🍵', text: '摸鱼喝茶', id: 'working' },
+  16: { emoji: '💻', text: '快下班了', id: 'working' },
   17: { emoji: '🚶', text: '下班了', id: 'idle' },
-  18: { emoji: '🍲', text: '吃晚饭', id: 'eating' },
-  19: { emoji: '📱', text: '休闲中', id: 'leisure' },
-  20: { emoji: '🎮', text: '玩游戏', id: 'leisure' },
-  21: { emoji: '📖', text: '看书', id: 'leisure' },
-  22: { emoji: '🛋️', text: '放松', id: 'leisure' },
-  23: { emoji: '😪', text: '准备睡了', id: 'sleepy' }
+  18: { emoji: '🍲', text: '做饭吃晚餐', id: 'eating' },
+  19: { emoji: '📱', text: '刷手机', id: 'leisure' },
+  20: { emoji: '🎮', text: '打游戏', id: 'leisure' },
+  21: { emoji: '🛋️', text: '瘫在沙发上', id: 'leisure' },
+  22: { emoji: '📖', text: '睡前放松', id: 'leisure' },
+  23: { emoji: '😪', text: '困了准备睡', id: 'sleepy' }
 };
 
 function getMoodEmoji(mood) {
@@ -8882,10 +10136,10 @@ function getMoodBarColor(mood) {
 }
 
 function getCurrentActivity() {
-  // 如果正在聊天（5分钟内有消息），显示"聊天中"
+  // 如果正在聊天（3分钟内有消息），显示"聊天中"
   if (messages.length > 0) {
     var lastMsg = messages[messages.length - 1];
-    if (Date.now() - lastMsg.timestamp < 5 * 60 * 1000) {
+    if (Date.now() - lastMsg.timestamp < 3 * 60 * 1000) {
       return { emoji: '💬', text: '聊天中', id: 'chatting' };
     }
   }
@@ -8900,9 +10154,20 @@ function getCurrentActivity() {
     return { emoji: '📖', text: '看书中', id: 'reading' };
   }
   
-  // 根据时间表
-  var hour = new Date().getHours();
-  return ACTIVITY_SCHEDULE[hour] || { emoji: '💬', text: '空闲', id: 'idle' };
+  // 使用日程安排表
+  var scheduleAct = getScheduleActivity();
+  
+  // 10%概率加一点随机变化（让状态不那么死板）
+  if (Math.random() < 0.1 && scheduleAct.id === 'leisure') {
+    var extras = [
+      { emoji: '🎧', text: '戴耳机听歌', id: 'leisure' },
+      { emoji: '🍿', text: '吃零食', id: 'leisure' },
+      { emoji: '🐱', text: '撸猫中', id: 'leisure' }
+    ];
+    return extras[Math.floor(Math.random() * extras.length)];
+  }
+  
+  return scheduleAct;
 }
 
 function updateMoodDisplay() {
@@ -8994,27 +10259,35 @@ function getMoodStatusForAI() {
   var activity = getCurrentActivity();
   
   var text = '# 🎭 当前情绪与状态\n';
-  text += '你的当前心情：' + moodInfo.emoji + ' ' + moodInfo.text + '（心情值：' + charMood + '/100）\n';
-  text += '你现在的状态：' + activity.emoji + ' ' + activity.text + '\n';
+  text += '心情：' + moodInfo.emoji + ' ' + moodInfo.text + '（' + charMood + '/100）\n';
+  text += '正在做：' + activity.emoji + ' ' + activity.text + '\n';
   
-  if (charMood >= 80) {
-    text += '你现在心情很好，回复会更活泼热情，可能会开玩笑或者发很多emoji。\n';
-  } else if (charMood >= 60) {
-    text += '你现在心情不错，正常自然地聊天。\n';
+  // 根据心情给出具体的行为指导
+  if (charMood >= 85) {
+    text += '【你现在超开心】回复可以：发更多emoji、主动分享开心的事、语气活泼、笑点变低、可能话比较多。\n';
+  } else if (charMood >= 70) {
+    text += '【你现在心情不错】正常聊天，偶尔开玩笑，愿意多说两句。\n';
+  } else if (charMood >= 55) {
+    text += '【你现在心情一般】回复正常但不会特别热情，比较平淡。\n';
   } else if (charMood >= 40) {
-    text += '你现在心情一般，回复可能简短一些，不太主动。\n';
-  } else if (charMood >= 20) {
-    text += '你现在心情有点低落，话变少了，可能有点消极。如果对方关心你，心情会好转。\n';
+    text += '【你现在有点低落】回复可能变短，语气平淡，不太主动找话题。但如果对方说了有趣的事你还是会回应。\n';
+  } else if (charMood >= 25) {
+    text += '【你现在心情不好】话很少，可能有点消极或者敷衍。如果对方关心你、安慰你，心情会好转。你可能会犹豫要不要说出来。\n';
   } else {
-    text += '你现在很低落，回复会很简短甚至敷衍。需要对方的安慰和关心。\n';
+    text += '【你现在很低落】可能只回"嗯"、"好"、"随便"这种。需要对方耐心关心。别太快好起来，真人恢复心情需要过程。\n';
   }
   
+  // 根据活动状态给出额外提示
   if (activity.id === 'sleeping') {
-    text += '你正在睡觉，如果被传呼机吵醒了，回复会带着困意和不太清醒的感觉。\n';
+    text += '你正在睡觉。如果被传呼机吵醒：回复带困意、可能有点不高兴、字少、可能打错字。例："嗯？怎么了...几点了"。\n';
   } else if (activity.id === 'eating') {
-    text += '你正在吃东西，可能会提到你在吃什么。\n';
+    text += '你正在吃东西。可以自然提到你在吃什么，回复可能因为嘴里有东西而比较短。\n';
   } else if (activity.id === 'working') {
-    text += '你正在工作，可能会提到工作相关的事，回复可能有点忙碌的感觉。\n';
+    text += '你在工作中被打断。可以有点忙的感觉，但不是不想理对方。比如"等下 我忙完回你"或者偷偷回消息的感觉。\n';
+  } else if (activity.id === 'sleepy') {
+    text += '你快要睡了。回复会越来越短，可能说"困了我先睡了"，或者硬撑着聊。\n';
+  } else if (activity.id === 'waking') {
+    text += '你刚醒来还没完全清醒。可能反应慢、说话不太连贯。\n';
   }
   
   text += '\n';
@@ -9378,16 +10651,6 @@ async function saveCharProfiles() {
   await dbPut('settings', { key: 'charProfiles', value: charProfiles });
 }
 
-function updateCharSwitcherDisplay() {
-  var profile = charProfiles.find(function(c) { return c.id === activeCharId; });
-  var nameEl = document.getElementById('charSwitcherName');
-  if (profile) {
-    nameEl.textContent = profile.avatar + ' ' + profile.name;
-  } else {
-    nameEl.textContent = '📟 梦角传呼机';
-  }
-}
-
 function openCharList() {
   renderCharList();
   document.getElementById('charListOverlay').classList.add('show');
@@ -9408,7 +10671,11 @@ function renderCharList() {
     
     html += '<div class="char-card' + (isActive ? ' active' : '') + '" onclick="switchToChar(\'' + c.id + '\')">';
     if (isActive) html += '<span class="cc-badge">当前</span>';
-    html += '<div class="cc-avatar">' + (c.avatar || '🤖') + '</div>';
+    if (c.avatarImage) {
+      html += '<div class="cc-avatar"><img src="' + c.avatarImage + '"></div>';
+    } else {
+      html += '<div class="cc-avatar">' + (c.avatar || '🤖') + '</div>';
+    }
     html += '<div class="cc-info">';
     html += '<div class="cc-name">' + escHtml(c.name || '未命名') + '</div>';
     html += '<div class="cc-desc">' + escHtml(c.desc || '暂无描述') + '</div>';
@@ -9428,10 +10695,12 @@ function renderCharList() {
 
 function createNewChar() {
   editingCharId = null;
+  charEditAvatarImage = '';
   document.getElementById('charEditTitle').textContent = '创建新角色';
   document.getElementById('charEditAvatar').value = '🤖';
   document.getElementById('charEditNameInput').value = '';
   document.getElementById('charEditDesc').value = '';
+  document.getElementById('charEditAvatarPreview').innerHTML = '🤖';
   document.getElementById('charEditModal').classList.add('show');
 }
 
@@ -9440,10 +10709,19 @@ function editCharProfile(id) {
   if (!c) return;
   
   editingCharId = id;
+  charEditAvatarImage = c.avatarImage || '';
   document.getElementById('charEditTitle').textContent = '编辑角色';
   document.getElementById('charEditAvatar').value = c.avatar || '🤖';
   document.getElementById('charEditNameInput').value = c.name || '';
   document.getElementById('charEditDesc').value = c.desc || '';
+  
+  var preview = document.getElementById('charEditAvatarPreview');
+  if (c.avatarImage) {
+    preview.innerHTML = '<img src="' + c.avatarImage + '">';
+  } else {
+    preview.innerHTML = c.avatar || '🤖';
+  }
+  
   document.getElementById('charEditModal').classList.add('show');
 }
 
@@ -9463,25 +10741,33 @@ async function saveCharProfile() {
   }
   
   if (editingCharId) {
-    // 编辑现有角色
     var c = charProfiles.find(function(p) { return p.id === editingCharId; });
     if (c) {
       c.avatar = avatar;
       c.name = name;
       c.desc = desc;
+      if (charEditAvatarImage) {
+        c.avatarImage = charEditAvatarImage;
+      } else if (charEditAvatarImage === '') {
+        // 用户明确重置了头像
+      }
     }
   } else {
-    // 创建新角色
     var newId = 'char_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    charProfiles.push({
+    var newChar = {
       id: newId,
       avatar: avatar,
       name: name,
       desc: desc,
       createdAt: Date.now()
-    });
+    };
+    if (charEditAvatarImage) {
+      newChar.avatarImage = charEditAvatarImage;
+    }
+    charProfiles.push(newChar);
   }
   
+  charEditAvatarImage = '';
   await saveCharProfiles();
   updateCharSwitcherDisplay();
   renderCharList();
@@ -9583,7 +10869,10 @@ async function saveCurrentCharData() {
   
   // 保存纪念日
   await dbPut('settings', { key: prefix + 'anniversaries', value: anniversaries });
-  
+    // 保存表情包概率
+  await dbPut('settings', { key: prefix + 'charStickerChance', value: charStickerChance });
+    // 保存日程
+  await dbPut('settings', { key: prefix + 'scheduleData', value: scheduleData });
   // 保存收藏
   await dbPut('settings', { key: prefix + 'bookmarkedMessages', value: bookmarkedMessages });
   
@@ -9663,7 +10952,28 @@ async function doSwitchChar(id) {
   var savedMoodVal = await dbGet('settings', prefix + 'charMood');
   charMood = (savedMoodVal && savedMoodVal.value !== undefined) ? savedMoodVal.value : 70;
   updateMoodDisplay();
-  
+  // 加载日程
+  var savedSchedule = await dbGet('settings', prefix + 'scheduleData');
+  if (savedSchedule && savedSchedule.value) {
+    scheduleData = savedSchedule.value;
+    if (!scheduleData.workday) scheduleData.workday = {};
+    if (!scheduleData.restday) scheduleData.restday = {};
+    if (!scheduleData.restDays) scheduleData.restDays = [0, 6];
+    if (!scheduleData.dayTypeOverride) scheduleData.dayTypeOverride = 'auto';
+  } else {
+    scheduleData = { workday: {}, restday: {}, restDays: [0, 6], dayTypeOverride: 'auto' };
+  }
+  setScheduleDayType(scheduleData.dayTypeOverride);
+  var schCheckboxes = document.querySelectorAll('#scheduleRestDays input[type="checkbox"]');
+  schCheckboxes.forEach(function(cb) {
+    cb.checked = scheduleData.restDays.indexOf(parseInt(cb.value)) >= 0;
+  });
+  renderScheduleTimeline();
+  // 加载表情包概率
+  var savedSC = await dbGet('settings', prefix + 'charStickerChance');
+  charStickerChance = (savedSC && savedSC.value !== undefined) ? savedSC.value : 20;
+  document.getElementById('charStickerChance').value = charStickerChance;
+  document.getElementById('charStickerChanceVal').textContent = charStickerChance + '%';
   // 加载空间
   var savedSpaces = await dbGet('settings', prefix + 'spaceLocations');
   if (savedSpaces && savedSpaces.value) {
@@ -9733,7 +11043,6 @@ function renderSpaceMap() {
   
   if (!container || !inner) return;
   
-  // 清空
   inner.innerHTML = '';
   svgEl.innerHTML = '';
   
@@ -9759,21 +11068,27 @@ function renderSpaceMap() {
   
   var w = container.offsetWidth;
   var h = container.offsetHeight;
+  if (w === 0 || h === 0) return;
   
-  // 计算节点位置（圆形布局）
-  var positions = [];
   var count = spaceLocations.length;
+  var positions = [];
   var centerX = w / 2;
   var centerY = h / 2;
-  var radiusX = (w / 2) - 50;
-  var radiusY = (h / 2) - 40;
   
   if (count === 1) {
     positions.push({ x: centerX, y: centerY });
   } else if (count === 2) {
-    positions.push({ x: centerX - radiusX * 0.4, y: centerY });
-    positions.push({ x: centerX + radiusX * 0.4, y: centerY });
-  } else {
+    positions.push({ x: centerX - w * 0.2, y: centerY });
+    positions.push({ x: centerX + w * 0.2, y: centerY });
+  } else if (count === 3) {
+    // 三角形
+    positions.push({ x: centerX, y: h * 0.2 });
+    positions.push({ x: w * 0.2, y: h * 0.75 });
+    positions.push({ x: w * 0.8, y: h * 0.75 });
+  } else if (count <= 6) {
+    // 圆形分布
+    var radiusX = (w / 2) - 45;
+    var radiusY = (h / 2) - 35;
     for (var i = 0; i < count; i++) {
       var angle = (i / count) * Math.PI * 2 - Math.PI / 2;
       positions.push({
@@ -9781,21 +11096,117 @@ function renderSpaceMap() {
         y: centerY + Math.sin(angle) * radiusY * 0.7
       });
     }
+  } else if (count <= 12) {
+    // 双层圆形：内圈放一半，外圈放另一半
+    var innerCount = Math.ceil(count / 2);
+    var outerCount = count - innerCount;
+    var innerRX = (w / 2) * 0.35;
+    var innerRY = (h / 2) * 0.35;
+    var outerRX = (w / 2) - 40;
+    var outerRY = (h / 2) - 30;
+    
+    for (var oi = 0; oi < outerCount; oi++) {
+      var oAngle = (oi / outerCount) * Math.PI * 2 - Math.PI / 2;
+      positions.push({
+        x: centerX + Math.cos(oAngle) * outerRX * 0.85,
+        y: centerY + Math.sin(oAngle) * outerRY * 0.85
+      });
+    }
+    for (var ii = 0; ii < innerCount; ii++) {
+      var iAngle = (ii / innerCount) * Math.PI * 2 - Math.PI / 2 + Math.PI / innerCount;
+      positions.push({
+        x: centerX + Math.cos(iAngle) * innerRX,
+        y: centerY + Math.sin(iAngle) * innerRY
+      });
+    }
+  } else {
+    // 超过12个：网格布局 + 微调避免太死板
+    var cols = Math.ceil(Math.sqrt(count * (w / h)));
+    var rows = Math.ceil(count / cols);
+    var cellW = w / (cols + 1);
+    var cellH = h / (rows + 1);
+    
+    for (var gi = 0; gi < count; gi++) {
+      var col = gi % cols;
+      var row = Math.floor(gi / cols);
+      var gx = cellW * (col + 1) + (Math.random() - 0.5) * cellW * 0.3;
+      var gy = cellH * (row + 1) + (Math.random() - 0.5) * cellH * 0.3;
+      // 确保不超出边界
+      gx = Math.max(30, Math.min(w - 30, gx));
+      gy = Math.max(25, Math.min(h - 25, gy));
+      positions.push({ x: gx, y: gy });
+    }
   }
   
-  // 绘制连接线
+  // 碰撞检测：如果两个节点太近，推开它们
+  var minDist = 60;
+  for (var pass = 0; pass < 5; pass++) {
+    for (var a = 0; a < positions.length; a++) {
+      for (var b = a + 1; b < positions.length; b++) {
+        var dx = positions[b].x - positions[a].x;
+        var dy = positions[b].y - positions[a].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < minDist && dist > 0) {
+          var push = (minDist - dist) / 2;
+          var nx = dx / dist;
+          var ny = dy / dist;
+          positions[a].x -= nx * push;
+          positions[a].y -= ny * push;
+          positions[b].x += nx * push;
+          positions[b].y += ny * push;
+          // 边界限制
+          positions[a].x = Math.max(25, Math.min(w - 25, positions[a].x));
+          positions[a].y = Math.max(20, Math.min(h - 20, positions[a].y));
+          positions[b].x = Math.max(25, Math.min(w - 25, positions[b].x));
+          positions[b].y = Math.max(20, Math.min(h - 20, positions[b].y));
+        }
+      }
+    }
+  }
+  
+  // 只绘制相邻节点的连线（不是全连接），减少视觉混乱
   var svgNS = 'http://www.w3.org/2000/svg';
-  for (var a = 0; a < positions.length; a++) {
-    for (var b = a + 1; b < positions.length; b++) {
-      var line = document.createElementNS(svgNS, 'line');
-      line.setAttribute('x1', positions[a].x);
-      line.setAttribute('y1', positions[a].y);
-      line.setAttribute('x2', positions[b].x);
-      line.setAttribute('y2', positions[b].y);
-      line.setAttribute('stroke', 'rgba(0,255,65,0.08)');
-      line.setAttribute('stroke-width', '1');
-      line.setAttribute('stroke-dasharray', '4 6');
-      svgEl.appendChild(line);
+  if (count <= 8) {
+    // 少量节点：全连接
+    for (var la = 0; la < positions.length; la++) {
+      for (var lb = la + 1; lb < positions.length; lb++) {
+        var line = document.createElementNS(svgNS, 'line');
+        line.setAttribute('x1', positions[la].x);
+        line.setAttribute('y1', positions[la].y);
+        line.setAttribute('x2', positions[lb].x);
+        line.setAttribute('y2', positions[lb].y);
+        line.setAttribute('stroke', 'rgba(0,255,65,0.06)');
+        line.setAttribute('stroke-width', '1');
+        line.setAttribute('stroke-dasharray', '4 6');
+        svgEl.appendChild(line);
+      }
+    }
+  } else {
+    // 多节点：只连最近的2-3个邻居
+    for (var na = 0; na < positions.length; na++) {
+      var neighbors = [];
+      for (var nb = 0; nb < positions.length; nb++) {
+        if (na === nb) continue;
+        var ndx = positions[nb].x - positions[na].x;
+        var ndy = positions[nb].y - positions[na].y;
+        neighbors.push({ idx: nb, dist: Math.sqrt(ndx * ndx + ndy * ndy) });
+      }
+      neighbors.sort(function(x, y) { return x.dist - y.dist; });
+      var connectCount = Math.min(2, neighbors.length);
+      for (var nc = 0; nc < connectCount; nc++) {
+        var nIdx = neighbors[nc].idx;
+        if (nIdx > na) { // 避免重复画线
+          var nline = document.createElementNS(svgNS, 'line');
+          nline.setAttribute('x1', positions[na].x);
+          nline.setAttribute('y1', positions[na].y);
+          nline.setAttribute('x2', positions[nIdx].x);
+          nline.setAttribute('y2', positions[nIdx].y);
+          nline.setAttribute('stroke', 'rgba(0,255,65,0.06)');
+          nline.setAttribute('stroke-width', '1');
+          nline.setAttribute('stroke-dasharray', '4 6');
+          svgEl.appendChild(nline);
+        }
+      }
     }
   }
   
@@ -9813,6 +11224,11 @@ function renderSpaceMap() {
     node.className = 'map-node' + (isCurrent ? ' current' : '');
     node.style.left = (pos.x - 20) + 'px';
     node.style.top = (pos.y - 20) + 'px';
+    
+    // 节点缩放：地点多时用更小的节点
+    if (count > 10) {
+      node.style.transform = 'scale(0.85)';
+    }
     
     node.innerHTML = '<div class="mn-icon">' + (loc.icon || '📍') + '</div><div class="mn-label">' + escHtml(loc.name) + '</div>';
     
@@ -10284,20 +11700,28 @@ function refreshStatusPanel() {
   // 余额
   document.getElementById('panelBalanceText').textContent = '¤' + charBalance;
   
-  // 位置
-  if (currentLocationId && spaceLocations.length > 0) {
-    var loc = spaceLocations.find(function(l) { return l.id === currentLocationId; });
-    if (loc) {
-      document.getElementById('panelLocationCard').style.display = '';
-      document.getElementById('panelLocationIcon').textContent = loc.icon || '📍';
-      document.getElementById('panelLocationName').textContent = loc.name;
+  // 位置（动态显示/隐藏）
+  var locCard = document.getElementById('panelLocationCard');
+  if (spaceLocations.length > 0) {
+    locCard.style.display = '';
+    if (currentLocationId) {
+      var loc = spaceLocations.find(function(l) { return l.id === currentLocationId; });
+      if (loc) {
+        document.getElementById('panelLocationIcon').textContent = loc.icon || '📍';
+        document.getElementById('panelLocationName').textContent = loc.name;
+      }
+    } else {
+      document.getElementById('panelLocationIcon').textContent = '📍';
+      document.getElementById('panelLocationName').textContent = '未设定';
     }
   } else {
-    document.getElementById('panelLocationCard').style.display = 'none';
+    locCard.style.display = 'none';
   }
   
-  // 纪念日
+  // 纪念日（动态显示/隐藏）
+  var annivCard = document.getElementById('panelAnnivCard');
   if (anniversaries && anniversaries.length > 0) {
+    annivCard.style.display = '';
     var nearest = null;
     var nearestDays = Infinity;
     for (var i = 0; i < anniversaries.length; i++) {
@@ -10308,18 +11732,36 @@ function refreshStatusPanel() {
       }
     }
     if (nearest) {
-      document.getElementById('panelAnnivCard').style.display = '';
       document.getElementById('panelAnnivIcon').textContent = nearest.anniv.icon || '📅';
       if (nearest.countdown.isToday) {
-        document.getElementById('panelAnnivText').textContent = nearest.anniv.name + ' 今天！';
+        document.getElementById('panelAnnivText').textContent = nearest.anniv.name + ' 🎉今天！';
+        annivCard.style.borderColor = 'rgba(255,100,150,0.4)';
+        annivCard.style.background = 'rgba(255,100,150,0.08)';
       } else {
-        document.getElementById('panelAnnivText').textContent = nearest.countdown.text;
+        document.getElementById('panelAnnivText').textContent = nearest.anniv.name + ' ' + nearest.countdown.text;
+        annivCard.style.borderColor = '';
+        annivCard.style.background = '';
       }
     }
+  } else {
+    annivCard.style.display = 'none';
   }
   
   // 消息统计
   document.getElementById('panelMsgCount').textContent = messages.length + '条';
+  
+  // 活动状态（音乐/看书）
+  var actCard = document.getElementById('panelActivityEmoji');
+  if (activeActivity === 'music' && musicIsPlaying) {
+    actCard.parentElement.style.borderColor = 'rgba(180,100,255,0.3)';
+    actCard.parentElement.style.background = 'rgba(180,100,255,0.05)';
+  } else if (activeActivity === 'book' && bookIsOpen) {
+    actCard.parentElement.style.borderColor = 'rgba(200,180,100,0.3)';
+    actCard.parentElement.style.background = 'rgba(200,180,100,0.05)';
+  } else {
+    actCard.parentElement.style.borderColor = '';
+    actCard.parentElement.style.background = '';
+  }
 }
 
 // 更新折叠栏的简略显示
@@ -10396,28 +11838,504 @@ async function importFromClipboard() {
     }
   }
 }
+// ===== 重连系统 =====
+var needReconnect = false;
+var conversationCount = 0;
+
+function markNeedReconnect() {
+  needReconnect = true;
+  var btn = document.getElementById('reconnectBtn');
+  if (btn) {
+    btn.classList.add('need-reconnect');
+    btn.title = '连接断开，点击重连';
+  }
+}
+
+function clearReconnectFlag() {
+  needReconnect = false;
+  conversationCount = 0;
+  var btn = document.getElementById('reconnectBtn');
+  if (btn) {
+    btn.classList.remove('need-reconnect');
+    btn.title = '重新连接';
+  }
+}
+
+function doReconnect() {
+  if (needReconnect) {
+    showToast('🔄 正在重新连接...');
+  } else {
+    showToast('🔄 刷新页面...');
+  }
+  // 先保存数据
+  performAutoSave();
+  setTimeout(function() {
+    location.reload();
+  }, 600);
+}
+
+// ===== 角色头像系统 =====
+var charEditAvatarImage = ''; // 临时存储上传的头像
+
+async function handleCharAvatarUpload(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  
+  if (!file.type.startsWith('image/')) {
+    showToast('请选择图片文件', true);
+    return;
+  }
+  
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片不能超过5MB', true);
+    return;
+  }
+  
+  try {
+    var dataUrl = await new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result); };
+      reader.onerror = function() { reject(new Error('读取失败')); };
+      reader.readAsDataURL(file);
+    });
+    
+    // 压缩头像到小尺寸
+    var compressed = await compressAvatar(dataUrl, 128, 0.7);
+    charEditAvatarImage = compressed;
+    
+    // 更新预览
+    var preview = document.getElementById('charEditAvatarPreview');
+    preview.innerHTML = '<img src="' + compressed + '">';
+    
+    showToast('头像已上传');
+  } catch(e) {
+    showToast('上传失败: ' + e.message, true);
+  }
+  
+  event.target.value = '';
+}
+
+function compressAvatar(dataUrl, maxSize, quality) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var w = img.width;
+      var h = img.height;
+      
+      // 正方形裁切
+      var size = Math.min(w, h);
+      var sx = (w - size) / 2;
+      var sy = (h - size) / 2;
+      
+      canvas.width = maxSize;
+      canvas.height = maxSize;
+      var ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, maxSize, maxSize);
+      
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = function() { resolve(dataUrl); };
+    img.src = dataUrl;
+  });
+}
+
+function resetCharAvatar() {
+  charEditAvatarImage = '';
+  var preview = document.getElementById('charEditAvatarPreview');
+  var emoji = document.getElementById('charEditAvatar').value || '🤖';
+  preview.innerHTML = emoji;
+  document.getElementById('charEmojiGroup').style.display = '';
+}
+
+function updateCharSwitcherDisplay() {
+  var profile = charProfiles.find(function(c) { return c.id === activeCharId; });
+  var nameEl = document.getElementById('charSwitcherName');
+  if (profile) {
+    if (profile.avatarImage) {
+      nameEl.innerHTML = '<img class="switcher-avatar" src="' + profile.avatarImage + '"> ' + escHtml(profile.name);
+    } else {
+      nameEl.textContent = (profile.avatar || '📟') + ' ' + profile.name;
+    }
+  } else {
+    nameEl.textContent = '📟 梦角传呼机';
+  }
+}
+
+// ===== 表情包系统 =====
+var stickerLibrary = [];
+var charStickerChance = 20; // 角色发表情包概率 0~100
+
+async function loadStickerLibrary() {
+  var saved = await dbGet('settings', 'stickerLibrary');
+  if (saved && saved.value) {
+    stickerLibrary = saved.value;
+  }
+}
+
+async function saveStickerLibrary() {
+  await dbPut('settings', { key: 'stickerLibrary', value: stickerLibrary });
+}
+
+function openStickerPanel() {
+  // 先关闭加号菜单
+  var menu = document.getElementById('attachMenu');
+  var btn = document.getElementById('plusBtn');
+  menu.classList.remove('show');
+  btn.classList.remove('active');
+  
+  // 延迟打开表情包面板，避免被document click事件立即关闭
+  setTimeout(function() {
+    renderStickerPanelGrid();
+    document.getElementById('stickerPanel').classList.add('show');
+  }, 50);
+}
+
+function closeStickerPanel() {
+  document.getElementById('stickerPanel').classList.remove('show');
+}
+
+function renderStickerPanelGrid() {
+  var container = document.getElementById('stickerPanelGrid');
+  
+  if (stickerLibrary.length === 0) {
+    container.innerHTML = '<div class="sticker-empty">暂无表情包<br>请在设置 → 表情包中添加</div>';
+    return;
+  }
+  
+  var html = '<div class="sticker-grid">';
+  for (var i = 0; i < stickerLibrary.length; i++) {
+    var s = stickerLibrary[i];
+    html += '<div class="sticker-item" onclick="sendSticker(' + i + ')" title="' + escHtml(s.name) + '">';
+    html += '<img src="' + escHtml(s.url) + '" alt="' + escHtml(s.name) + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'❌\'">';
+    html += '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function sendSticker(index) {
+  var sticker = stickerLibrary[index];
+  if (!sticker) return;
+  
+  closeStickerPanel();
+  
+  var userName = (await dbGet('settings', 'userName'))?.value || '用户';
+  
+  var msg = {
+    role: 'user',
+    name: userName,
+    content: '[表情包：' + sticker.name + ']',
+    msgType: 'sticker',
+    stickerUrl: sticker.url,
+    stickerName: sticker.name,
+    timestamp: Date.now()
+  };
+  
+  var id = await dbAdd('messages', msg);
+  msg.id = id;
+  messages.push(msg);
+  
+  if (activeCharId !== 'default') {
+    await dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
+  }
+  
+  renderMessages();
+  scheduleAutoSave();
+}
+
+function batchAddStickers() {
+  var input = document.getElementById('stickerBatchInput').value.trim();
+  if (!input) {
+    showToast('请输入表情包数据', true);
+    return;
+  }
+  
+  var lines = input.split('\n');
+  var addCount = 0;
+  
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
+    
+    // 支持多种分隔符
+    var parts = null;
+    if (line.indexOf(':http') > 0) {
+      var idx = line.indexOf(':http');
+      parts = [line.substring(0, idx), line.substring(idx + 1)];
+    } else if (line.indexOf('：http') > 0) {
+      var idx2 = line.indexOf('：http');
+      parts = [line.substring(0, idx2), line.substring(idx2 + 1)];
+    } else {
+      // 尝试用第一个冒号分割
+      var colonIdx = line.indexOf(':');
+      var cnColonIdx = line.indexOf('：');
+      var splitIdx = -1;
+      
+      if (colonIdx > 0 && (cnColonIdx < 0 || colonIdx < cnColonIdx)) {
+        splitIdx = colonIdx;
+      } else if (cnColonIdx > 0) {
+        splitIdx = cnColonIdx;
+      }
+      
+      if (splitIdx > 0) {
+        parts = [line.substring(0, splitIdx), line.substring(splitIdx + 1)];
+      }
+    }
+    
+    if (!parts || parts.length < 2) continue;
+    
+    var name = parts[0].trim();
+    var url = parts[1].trim();
+    
+    if (!name || !url) continue;
+    if (!url.startsWith('http')) continue;
+    
+    // 检查是否已存在
+    var exists = stickerLibrary.some(function(s) { return s.url === url; });
+    if (exists) continue;
+    
+    stickerLibrary.push({
+      id: 'sticker_' + Date.now() + '_' + i,
+      name: name,
+      url: url
+    });
+    addCount++;
+  }
+  
+  if (addCount > 0) {
+    saveStickerLibrary();
+    renderStickerManageList();
+    document.getElementById('stickerBatchInput').value = '';
+    showToast('✅ 已添加 ' + addCount + ' 个表情包');
+  } else {
+    showToast('没有有效的表情包数据', true);
+  }
+}
+
+function addSingleSticker() {
+  var name = prompt('表情包名称（角色会看到这个描述）：');
+  if (!name || !name.trim()) return;
+  
+  var url = prompt('表情包图片链接（https://...）：');
+  if (!url || !url.trim() || !url.startsWith('http')) {
+    showToast('请输入有效的图片链接', true);
+    return;
+  }
+  
+  stickerLibrary.push({
+    id: 'sticker_' + Date.now(),
+    name: name.trim(),
+    url: url.trim()
+  });
+  
+  saveStickerLibrary();
+  renderStickerManageList();
+  showToast('✅ 表情包已添加');
+}
+
+function deleteSticker(id) {
+  stickerLibrary = stickerLibrary.filter(function(s) { return s.id !== id; });
+  saveStickerLibrary();
+  renderStickerManageList();
+  showToast('已删除');
+}
+
+function clearAllStickers() {
+  if (stickerLibrary.length === 0) return;
+  showConfirm('清空表情包', '确定要删除所有 ' + stickerLibrary.length + ' 个表情包吗？', async function() {
+    stickerLibrary = [];
+    await saveStickerLibrary();
+    renderStickerManageList();
+    showToast('已清空');
+  });
+}
+// ===== 角色发送表情包系统 =====
+
+// 根据文本内容和心情，为角色选择合适的表情包
+function pickStickerForChar(responseText) {
+  if (stickerLibrary.length === 0) return null;
+  if (charStickerChance <= 0) return null;
+  
+  // 概率判断
+  if (Math.random() * 100 >= charStickerChance) return null;
+  
+  // 分析回复文本的情绪关键词，尝试匹配表情包名称
+  var text = (responseText || '').toLowerCase();
+  var scored = [];
+  
+  for (var i = 0; i < stickerLibrary.length; i++) {
+    var s = stickerLibrary[i];
+    var sName = (s.name || '').toLowerCase();
+    var score = 0;
+    
+    // 名称直接匹配文本内容（最高优先级）
+    if (text.indexOf(sName) >= 0) {
+      score += 50;
+    }
+    
+    // 基于情绪关键词匹配
+    // 开心类
+    if (/开心|高兴|哈哈|嘿嘿|太好了|棒|赞|喜欢|爱|好耶|耶|nice/i.test(text)) {
+      if (/开心|高兴|笑|哈哈|嘿嘿|快乐|喜|赞|棒|耶|好|爱|可爱|甜|幸福/i.test(sName)) score += 30;
+    }
+    // 难过类
+    if (/难过|伤心|哭|呜|555|委屈|失望|可惜|遗憾/i.test(text)) {
+      if (/难过|伤心|哭|委屈|心碎|失望|可怜|泪|呜|sad/i.test(sName)) score += 30;
+    }
+    // 生气类
+    if (/生气|烦|讨厌|气死|怒|可恶|够了/i.test(text)) {
+      if (/生气|怒|烦|气|讨厌|哼|凶|暴|打/i.test(sName)) score += 30;
+    }
+    // 惊讶类
+    if (/啊[?？!！]|什么|真的吗|不会吧|天哪|我的天|卧槽|握草|woc/i.test(text)) {
+      if (/惊|吃惊|震惊|啊|什么|天哪|卧槽|目瞪口呆|surprised/i.test(sName)) score += 30;
+    }
+    // 卖萌/撒娇
+    if (/嘻嘻|嘿嘿|哼|人家|啦|呀|呢|~|qwq|qaq|owo/i.test(text)) {
+      if (/萌|撒娇|嘻|可爱|卖萌|害羞|捂脸|偷笑|嘿|cute/i.test(sName)) score += 25;
+    }
+    // 无语/尴尬
+    if (/无语|尬|额|呃|嗯\.\.\.|行吧|好吧|随便/i.test(text)) {
+      if (/无语|尴尬|额|呆|懵|黑人问号|白眼|叹气|无奈/i.test(sName)) score += 25;
+    }
+    // 困/累
+    if (/困|累|好累|好困|睡|打哈欠|不想动/i.test(text)) {
+      if (/困|累|睡|哈欠|倒|瘫|疲|躺/i.test(sName)) score += 25;
+    }
+    // 吃
+    if (/吃|饿|好吃|美食|饭|零食/i.test(text)) {
+      if (/吃|饿|馋|美食|饭|零食|好吃|yummy|food/i.test(sName)) score += 25;
+    }
+    // 感谢/感动
+    if (/谢谢|感谢|感动|好感动|太好了/i.test(text)) {
+      if (/谢|感动|感恩|比心|爱你|鞠躬|抱/i.test(sName)) score += 30;
+    }
+    // 告别/晚安
+    if (/再见|拜拜|晚安|明天见|88|bye/i.test(text)) {
+      if (/再见|拜|晚安|挥手|88|bye|明天/i.test(sName)) score += 30;
+    }
+    // 思考
+    if (/嗯|想想|让我想|思考|这个嘛/i.test(text)) {
+      if (/思考|想|嗯|疑问|沉思|摸下巴/i.test(sName)) score += 20;
+    }
+    
+    // 根据心情值加权
+    if (charMood >= 80) {
+      if (/开心|笑|嘿|萌|可爱|耶|比心|爱/i.test(sName)) score += 10;
+    } else if (charMood <= 30) {
+      if (/难过|哭|委屈|叹气|无奈|累/i.test(sName)) score += 10;
+    }
+    
+    // 有一点基础随机分，让没匹配到的也有机会被选中
+    score += Math.random() * 5;
+    
+    scored.push({ index: i, score: score, sticker: s });
+  }
+  
+  // 按分数排序
+  scored.sort(function(a, b) { return b.score - a.score; });
+  
+  // 如果最高分大于10，选最高分的（加一点随机性，前3名里随机选）
+  if (scored[0].score > 10) {
+    var topN = Math.min(3, scored.length);
+    var topCandidates = scored.slice(0, topN).filter(function(s) { return s.score > 8; });
+    if (topCandidates.length > 0) {
+      var pick = topCandidates[Math.floor(Math.random() * topCandidates.length)];
+      return pick.sticker;
+    }
+  }
+  
+  // 没有好的匹配，随机选一个
+  var randomPick = stickerLibrary[Math.floor(Math.random() * stickerLibrary.length)];
+  return randomPick;
+}
+
+// 角色发送表情包消息
+async function charSendSticker(sticker) {
+  if (!sticker) return;
+  
+  var charName = (await dbGet('settings', 'charName'))?.value || 'AI助手';
+  
+  var msg = {
+    role: 'char',
+    name: charName,
+    content: '[表情包：' + sticker.name + ']',
+    msgType: 'sticker',
+    stickerUrl: sticker.url,
+    stickerName: sticker.name,
+    timestamp: Date.now()
+  };
+  
+  var id = await dbAdd('messages', msg);
+  msg.id = id;
+  messages.push(msg);
+  
+  if (activeCharId !== 'default') {
+    await dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
+  }
+  
+  renderMessages();
+  scheduleAutoSave();
+}
+function renderStickerManageList() {
+  var list = document.getElementById('stickerManageList');
+  var countEl = document.getElementById('stickerCount');
+  if (!list) return;
+  
+  if (countEl) countEl.textContent = stickerLibrary.length;
+  
+  if (stickerLibrary.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="icon">😺</div><p>暂无表情包</p></div>';
+    return;
+  }
+  
+  var html = '';
+  for (var i = 0; i < stickerLibrary.length; i++) {
+    var s = stickerLibrary[i];
+    html += '<div class="sticker-manage-item">';
+    html += '<img src="' + escHtml(s.url) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 40 40&quot;><text x=&quot;10&quot; y=&quot;28&quot; font-size=&quot;20&quot;>❌</text></svg>\'">';
+    html += '<div class="smi-info">';
+    html += '<div class="smi-name">' + escHtml(s.name) + '</div>';
+    html += '<div class="smi-url">' + escHtml(s.url.substring(0, 50)) + (s.url.length > 50 ? '...' : '') + '</div>';
+    html += '</div>';
+    html += '<button class="wb-small-btn del" onclick="deleteSticker(\'' + s.id + '\')" title="删除">🗑</button>';
+    html += '</div>';
+  }
+  list.innerHTML = html;
+}
 // ===== 欢迎弹窗系统 =====
-var APP_VERSION = 'v1.5.0';
-var APP_BUILD = 20250101; // 每次更新时修改这个数字，格式：YYYYMMDD
+var APP_VERSION = 'v1.6.0';
+var APP_BUILD = 20250630; // 每次更新时修改这个数字，格式：YYYYMMDD
 
 // 更新日志（每次更新时修改这里）
 var CHANGELOG = [
   {
+    version: 'v1.6.0',
+    build: 20250630,
+    items: [
+      '🖼️ 新增角色头像上传，支持图片头像替代Emoji',
+      '😺 新增表情包系统，可批量导入和在对话中发送',
+      '🔄 新增智能重连系统，每次对话后提示重连确保稳定',
+      '💾 优化数据自动保存，防止APK环境数据丢失',
+      '📤 优化导出功能，支持分享/下载/复制三种方式',
+      '📋 新增剪贴板导入，APK环境更友好'
+    ]
+  },
+  {
     version: 'v1.5.0',
     build: 20250101,
     items: [
-      '🎭 新增多角色/多存档系统，每个角色独立数据',
-      '🗺️ 新增空间可视化星空地图，点击地点直接移动',
-      '🎨 新增8套主题皮肤包（赛博朋克/温馨粉/暗夜蓝等）',
-      '📊 新增数据统计面板（总消息/聊天天数/连续天数等）',
-      '🎭 新增角色情绪系统，心情影响回复风格',
-      '📅 新增纪念日系统，临近时角色自然提起',
-      '⭐ 新增消息收藏功能',
-      '📤 优化数据导出/导入（支持分享/下载/剪贴板）',
-      '💾 优化自动保存机制，防止APK数据丢失',
-      '🔧 顶部状态栏折叠优化，界面更简洁'
+      '🎭 多角色/多存档系统',
+      '🗺️ 空间可视化星空地图',
+      '🎨 8套主题皮肤包',
+      '📊 数据统计面板',
+      '🎭 角色情绪系统',
+      '📅 纪念日系统'
     ]
-  }
+}
 ];
 
 async function checkWelcome() {
