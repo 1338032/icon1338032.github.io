@@ -2824,7 +2824,54 @@ body {
   color: #555;
   font-size: 12px;
 }
+/* ===== 铃声设置样式 ===== */
+.ringtone-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(0,255,65,0.05);
+  border: 1px solid rgba(0,255,65,0.15);
+  border-radius: 10px;
+  margin-top: 8px;
+}
 
+.ringtone-preview .rp-icon {
+  font-size: 24px;
+}
+
+.ringtone-preview .rp-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ringtone-preview .rp-name {
+  font-size: 13px;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ringtone-preview .rp-size {
+  font-size: 11px;
+  color: #666;
+}
+
+.ringtone-test-btn {
+  padding: 6px 12px;
+  border: 1px solid rgba(0,255,65,0.3);
+  background: rgba(0,255,65,0.1);
+  color: var(--accent);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ringtone-test-btn:hover {
+  background: rgba(0,255,65,0.2);
+}
 /* 表情包管理列表 */
 .sticker-manage-item {
   display: flex;
@@ -3052,6 +3099,375 @@ body {
 
 .welcome-btn:active {
   transform: translateY(0);
+}
+/* ===== 语音通话界面 ===== */
+.call-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #0a0a1a 0%, #1a0a2a 50%, #0a1a2a 100%);
+  z-index: 800;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: callFadeIn 0.5s ease;
+}
+
+.call-overlay.show {
+  display: flex;
+}
+
+@keyframes callFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.call-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 65, 0.02) 0px,
+    rgba(0, 255, 65, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  animation: scanFlicker 8s infinite;
+}
+
+.call-header {
+  text-align: center;
+  margin-bottom: 20px;
+  z-index: 1;
+}
+
+.call-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a2a3a, #2a3a4a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 12px;
+  border: 3px solid rgba(0,255,65,0.3);
+  box-shadow: 0 0 20px rgba(0,255,65,0.2), 0 0 40px rgba(0,255,65,0.1);
+  animation: callAvatarPulse 2s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.call-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+@keyframes callAvatarPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,255,65,0.2), 0 0 40px rgba(0,255,65,0.1); }
+  50% { box-shadow: 0 0 30px rgba(0,255,65,0.4), 0 0 60px rgba(0,255,65,0.2); }
+}
+
+.call-name {
+  font-size: 20px;
+  color: var(--accent);
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0,255,65,0.5);
+  letter-spacing: 2px;
+}
+
+.call-status {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+.call-timer {
+  font-size: 14px;
+  color: var(--accent);
+  font-family: 'Courier New', monospace;
+  margin-top: 6px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px rgba(0,255,65,0.4);
+}
+
+/* 波形图 */
+.call-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  margin: 24px 0;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.call-waveform .wave-bar {
+  width: 4px;
+  background: linear-gradient(0deg, rgba(0,255,65,0.3), var(--accent));
+  border-radius: 2px;
+  transition: height 0.1s ease;
+  box-shadow: 0 0 4px rgba(0,255,65,0.3);
+}
+
+.call-waveform.active .wave-bar {
+  animation: waveAnim 0.4s ease-in-out infinite alternate;
+}
+
+.call-waveform.idle .wave-bar {
+  height: 4px !important;
+  opacity: 0.3;
+  animation: none;
+}
+
+@keyframes waveAnim {
+  0% { transform: scaleY(0.3); opacity: 0.5; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+/* 语音转文字区域 */
+.call-transcript {
+  width: 85%;
+  max-width: 400px;
+  min-height: 120px;
+  max-height: 250px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0,255,65,0.15);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 16px 0;
+  z-index: 1;
+}
+
+.call-transcript::-webkit-scrollbar {
+  width: 2px;
+}
+
+.call-transcript::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+
+.call-transcript-label {
+  font-size: 10px;
+  color: #555;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Courier New', monospace;
+}
+
+.call-transcript-label .rec-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4444;
+  animation: recBlink 1s infinite;
+}
+
+@keyframes recBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.call-transcript-text {
+  font-size: 15px;
+  color: var(--char-bubble-color);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 20px;
+}
+
+.call-transcript-text .cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: cursorBlink 0.6s infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 用户说话输入 */
+.call-user-input-area {
+  width: 85%;
+  max-width: 400px;
+  z-index: 1;
+  margin-bottom: 16px;
+}
+
+.call-user-input {
+  width: 100%;
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 12px;
+  color: var(--user-bubble-color);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  min-height: 40px;
+  max-height: 80px;
+  line-height: 1.5;
+}
+
+.call-user-input:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 10px rgba(0,212,255,0.15);
+}
+
+.call-user-input::placeholder {
+  color: rgba(0,212,255,0.3);
+}
+
+/* 通话按钮区 */
+.call-buttons {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  z-index: 1;
+  margin-top: 10px;
+}
+
+.call-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.call-btn-send {
+  background: linear-gradient(135deg, #006633, #004422);
+  border: 2px solid rgba(0,255,65,0.4);
+  box-shadow: 0 0 15px rgba(0,255,65,0.2);
+}
+
+.call-btn-send:hover {
+  box-shadow: 0 0 25px rgba(0,255,65,0.4);
+  transform: scale(1.05);
+}
+
+.call-btn-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.call-btn-end {
+  background: linear-gradient(135deg, #cc2222, #991111);
+  border: 2px solid rgba(255,50,50,0.4);
+  box-shadow: 0 0 15px rgba(255,50,50,0.2);
+}
+
+.call-btn-end:hover {
+  box-shadow: 0 0 25px rgba(255,50,50,0.4);
+  transform: scale(1.05);
+}
+
+/* 通话记录气泡 */
+.call-history {
+  width: 85%;
+  max-width: 400px;
+  max-height: 100px;
+  overflow-y: auto;
+  z-index: 1;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+.call-history::-webkit-scrollbar {
+  width: 2px;
+}
+
+.call-history::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+
+.call-history-item {
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: #666;
+  line-height: 1.5;
+}
+
+.call-history-item.user-said {
+  color: rgba(0,212,255,0.6);
+  text-align: right;
+}
+
+.call-history-item.char-said {
+  color: rgba(0,255,65,0.5);
+}
+
+/* 通话结束消息卡片 */
+.msg-call-card {
+  background: linear-gradient(135deg, #1a1a2e, #0a1a2a);
+  border: 1px solid rgba(0,255,65,0.2);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 200px;
+  text-align: center;
+}
+
+.msg-call-card .call-card-icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.msg-call-card .call-card-title {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.msg-call-card .call-card-duration {
+  font-size: 11px;
+  color: #888;
+  font-family: 'Courier New', monospace;
+}
+
+.msg-call-card .call-card-summary {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  text-align: left;
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 /* 空状态 */
 .empty-state {
@@ -3777,6 +4193,10 @@ body {
         <span class="attach-icon">😺</span>
         <span class="attach-label">表情包</span>
       </button>
+      <button class="attach-item" onclick="startCall()">
+        <span class="attach-icon">📞</span>
+        <span class="attach-label">语音通话</span>
+      </button>
     </div>
     <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
     <button class="plus-btn" id="plusBtn" onclick="toggleAttachMenu()">+</button>
@@ -4194,6 +4614,30 @@ body {
             <button class="action-btn" onclick="copyRecommendedFont()" style="margin-left:8px;white-space:nowrap;font-size:11px;padding:6px 12px;">📋 复制</button>
           </div>
         </div>
+        <div class="form-group">
+          <label class="form-label">🔔 消息铃声</label>
+          <div class="btn-row">
+            <button class="action-btn" onclick="document.getElementById('ringtoneUpload').click()">📁 上传铃声</button>
+            <button class="action-btn danger" onclick="clearRingtone()">清除铃声</button>
+          </div>
+          <input type="file" id="ringtoneUpload" accept="audio/mp3,audio/mpeg,audio/*" style="display:none;" onchange="uploadRingtone(event)">
+          <div id="ringtoneStatus" class="form-hint">未设置铃声</div>
+          <div id="ringtonePreview" style="display:none;"></div>
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">铃声音量</label>
+            <div class="range-row">
+              <input type="range" min="0" max="100" value="50" id="ringtoneVolume" oninput="document.getElementById('ringtoneVolVal').textContent=this.value+'%';saveRingtoneVolume()">
+              <span class="range-val" id="ringtoneVolVal">50%</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">启用铃声</label>
+            <button class="wb-toggle on" id="ringtoneEnabled" onclick="toggleRingtoneEnabled()"></button>
+            <div class="form-hint">开启后收到消息时播放铃声</div>
+          </div>
+        </div>
+        
+        <div class="divider"></div>
         <div class="form-group">
           <label class="form-label">传呼机背景图片</label>
           <div class="btn-row">
@@ -4771,6 +5215,36 @@ body {
     </div>
   </div>
 </div>
+<!-- 语音通话界面 -->
+<div class="call-overlay" id="callOverlay">
+  <div class="call-header">
+    <div class="call-avatar" id="callAvatar">🤖</div>
+    <div class="call-name" id="callName">AI助手</div>
+    <div class="call-status" id="callStatus">连接中...</div>
+    <div class="call-timer" id="callTimer">00:00</div>
+  </div>
+  
+  <div class="call-waveform idle" id="callWaveform"></div>
+  
+  <div class="call-history" id="callHistory"></div>
+  
+  <div class="call-transcript" id="callTranscript">
+    <div class="call-transcript-label">
+      <span class="rec-dot"></span>
+      <span>语音转文字</span>
+    </div>
+    <div class="call-transcript-text" id="callTranscriptText"></div>
+  </div>
+  
+  <div class="call-user-input-area">
+    <textarea class="call-user-input" id="callUserInput" placeholder="说点什么...（输入后点发送）" rows="1"></textarea>
+  </div>
+  
+  <div class="call-buttons">
+    <button class="call-btn call-btn-send" id="callSendBtn" onclick="callSendMessage()" title="发送">📤</button>
+    <button class="call-btn call-btn-end" onclick="endCall()" title="挂断">📞</button>
+  </div>
+</div>
 <!-- 确认弹窗 -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box" style="max-width:360px;">
@@ -4954,6 +5428,8 @@ var bookPageSize = 500;
 var bookIsOpen = false;
 
 var activeActivity = ''; // 'music' 或 'book' 或 ''
+var charCustomActivity = ''; // 角色自定义状态文字
+var charCustomActivityTime = 0; // 自定义状态设置时间
 // ===== 日程安排系统 =====
 var scheduleData = {
   workday: {},  // { "6": {emoji:"🌅",activity:"起床洗漱",location:""}, "7": {emoji:"🍳",activity:"吃早餐",location:""}, ... }
@@ -5578,15 +6054,76 @@ const DEFAULT_WORLDBOOK = [
   {
     id: 'wb_default_space_auto',
     title: '空间自动感知',
-    content: `你能感知自己所在的空间环境。你会根据日程安排自然地在不同地点之间移动。
-当对话内容暗示你应该换个地方时（比如对方说"我们去客厅吧"），在回复末尾单独一行加上标记：[移动到:地点名称]
-例如对方说"去客厅坐坐吧"，你回复后末尾加：[移动到:家中客厅]
-规则：
-- 只在明确需要移动时才加标记，日常聊天不要加
-- 地点名称必须和已有地点完全一致
-- 你也可以主动说"我去某某地方了"然后加移动标记
-- 日程安排的地点会自动移动，你不需要为日程移动加标记
-- 如果聊天聊得开心，你可以不按日程移动（比如该去工作了但还想继续聊）`,
+    content: `你拥有一套工具系统，可以通过在回复末尾添加特殊标记来执行操作。标记会被系统自动处理，对方看不到标记本身。
+
+# 可用工具列表
+
+## 1. 移动地点
+格式：[移动到:地点名称]
+用法：当你想去某个地方时使用。地点名称必须和已有地点完全一致。
+示例：你说"我去花园走走"，末尾加 [移动到:数字花园]
+规则：只在真的要移动时用，不要每条消息都加。日程自动移动不需要你加标记。
+
+## 2. 心情变化
+格式：[心情:数值:原因]
+用法：当发生了影响你心情的事时使用。数值范围-15到+15。
+示例：对方夸你 → [心情:+5:被夸了好开心]
+示例：被嫌弃了 → [心情:-5:有点受伤]
+规则：不要每条消息都用，只在情绪有明显波动时用。
+
+## 3. 播放音乐
+格式：[播放音乐:歌名] 或 [播放音乐:随机]
+用法：当你想放歌或对方让你放歌时使用。歌名要和音乐库里的接近。
+示例："我放首歌吧" → [播放音乐:随机]
+规则：只在有音乐库时才用。
+
+## 4. 暂停音乐
+格式：[暂停音乐]
+用法：想安静一下或对方说太吵时使用。
+
+## 5. 改变状态
+格式：[状态:你在做的事]
+用法：当你开始做某件事时使用，让对方能看到你的状态变化。
+示例：你说"我去做饭了" → [状态:在厨房做饭]
+示例：你说"我躺下来了" → [状态:躺在沙发上发呆]
+规则：状态会持续10分钟，之后自动恢复日程状态。
+
+## 6. 送礼物
+格式：[送礼物:emoji:名称:价值:留言]
+用法：你想送对方东西时使用，会从你余额扣除。
+示例：[送礼物:🌹:数码玫瑰:30:送你一朵花~]
+规则：注意你的余额够不够！别送太贵的把自己送穷了。
+
+## 7. 翻书页
+格式：[翻页:下一页] 或 [翻页:上一页]
+用法：一起看书时想翻页时使用。
+
+## 8. 好感度变化
+格式：[好感:数值:原因]
+用法：当你对对方的好感发生变化时使用。数值范围-5到+5。
+示例：对方很贴心 → [好感:+2:好温柔]
+示例：对方说了伤人的话 → [好感:-3:有点难过]
+规则：好感度变化要合理，不要动不动就大幅变动。
+
+# 重要规则
+- 标记放在回复文字的最末尾，单独一行
+- 一条回复可以同时用多个标记
+- 不要在文字中提到"标记""工具"这些词，对方不知道这些存在
+- 自然地说话，标记只是你行为的附带效果
+- 不是每条消息都要用工具，大多数时候纯聊天就好
+- 你可以主动使用工具，不需要对方指示
+
+# 好的使用示例
+对方说"好无聊啊"
+你回复："要不我放首歌？等下...我找找"
+[播放音乐:随机]
+[心情:+2:找到好听的歌了]
+
+对方说"我们去天台看星星吧"
+你回复："好啊！走走走，我也想去透透气"
+[移动到:天台]
+[状态:在天台看星星]
+[心情:+3:和对方一起看星星好开心]`,
     active: true,
     builtin: true,
     priority: 10,
@@ -6202,6 +6739,10 @@ function renderMessages() {
       bubble.innerHTML = '<div class="msg-payment-card"><div class="payment-header">💸 付款请求</div><div class="payment-amount">¤ ' + (msg.paymentAmt || 0) + '</div><div class="payment-reason">' + escHtml(msg.paymentReason || '') + '</div><div class="payment-status">' + statusText + '</div></div>';
     } else if (msg.msgType === 'transfer') {
       bubble.innerHTML = '<div class="msg-transfer-card"><div class="transfer-header">💰 电子转账</div><div class="transfer-amount">¤ ' + (msg.transferAmt || 0) + '</div><div class="transfer-note">' + escHtml(msg.transferNote || '这是一张电子发票~') + '</div><div class="transfer-label">来自电子世界的心意</div></div>';
+    } else if (msg.msgType === 'call') {
+      var callDurStr = msg.callDuration || '00:00';
+      var callSummaryHtml = msg.callSummary ? '<div class="call-card-summary">' + escHtml(msg.callSummary) + '</div>' : '';
+      bubble.innerHTML = '<div class="msg-call-card"><span class="call-card-icon">📞</span><div class="call-card-title">语音通话</div><div class="call-card-duration">通话时长 ' + escHtml(callDurStr) + '</div>' + callSummaryHtml + '</div>';
     } else {
       bubble.textContent = msg.content;
     }
@@ -6389,6 +6930,9 @@ async function receiveMessage() {
     }
     
     typingEl.classList.remove('show');
+    
+    // 播放铃声
+    playRingtone();
     
     var charName = (await dbGet('settings', 'charName'))?.value || 'AI助手';
     var sentences = splitIntoSentences(responseText);
@@ -6626,16 +7170,17 @@ function splitIntoSentences(text) {
 async function detectLocationChange(text) {
   if (!text) return text;
   
-  // 检测 [移动到:地点名称] 标记
-  var match = text.match(/\[移动到[:：](.+?)\]/);
-  if (match) {
-    var targetName = match[1].trim();
+  // ===== 工具1：移动到地点 =====
+  var moveMatch = text.match(/\[移动到[:：](.+?)\]/);
+  if (moveMatch) {
+    var targetName = moveMatch[1].trim();
     var targetLoc = spaceLocations.find(function(l) {
       return l.name === targetName;
     });
-    
     if (targetLoc) {
       currentLocationId = targetLoc.id;
+      var locPrefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
+      await dbPut('settings', { key: locPrefix + 'currentLocation', value: currentLocationId });
       await dbPut('settings', { key: 'currentLocation', value: currentLocationId });
       updateLocationTag();
       updateLocationSelect();
@@ -6643,9 +7188,126 @@ async function detectLocationChange(text) {
       renderSpaceMap();
       showToast((targetLoc.icon || '📍') + ' 角色移动到了：' + targetLoc.name);
     }
-    
-    // 从回复文本中移除标记
     text = text.replace(/\[移动到[:：].+?\]/g, '').trim();
+  }
+  
+  // ===== 工具2：心情变化 =====
+  var moodMatches = text.match(/\[心情[:：]([+-]?\d+)[:：](.+?)\]/g);
+  if (moodMatches) {
+    for (var mi = 0; mi < moodMatches.length; mi++) {
+      var moodParts = moodMatches[mi].match(/\[心情[:：]([+-]?\d+)[:：](.+?)\]/);
+      if (moodParts) {
+        var moodDelta = parseInt(moodParts[1]);
+        var moodReason = moodParts[2].trim();
+        moodDelta = Math.max(-20, Math.min(20, moodDelta));
+        changeMood(moodDelta, moodReason);
+      }
+    }
+    text = text.replace(/\[心情[:：][+-]?\d+[:：].+?\]/g, '').trim();
+  }
+  
+  // ===== 工具3：播放音乐 =====
+  var musicMatch = text.match(/\[播放音乐[:：](.+?)\]/);
+  if (musicMatch) {
+    var wantedSong = musicMatch[1].trim().toLowerCase();
+    var foundIdx = -1;
+    for (var si = 0; si < musicLibrary.length; si++) {
+      if (musicLibrary[si].name.toLowerCase().indexOf(wantedSong) >= 0 || wantedSong.indexOf(musicLibrary[si].name.toLowerCase()) >= 0) {
+        foundIdx = si;
+        break;
+      }
+    }
+    if (foundIdx >= 0) {
+      playMusicAt(foundIdx);
+      showToast('🎵 角色播放了：' + musicLibrary[foundIdx].name);
+    } else if (wantedSong === '随机' || wantedSong === 'random') {
+      if (musicLibrary.length > 0) {
+        var randIdx = Math.floor(Math.random() * musicLibrary.length);
+        playMusicAt(randIdx);
+        showToast('🎵 角色随机播放了：' + musicLibrary[randIdx].name);
+      }
+    }
+    text = text.replace(/\[播放音乐[:：].+?\]/g, '').trim();
+  }
+  
+  // ===== 工具4：暂停音乐 =====
+  if (/\[暂停音乐\]/.test(text)) {
+    if (musicAudio && musicIsPlaying) {
+      musicTogglePlay();
+      showToast('⏸ 角色暂停了音乐');
+    }
+    text = text.replace(/\[暂停音乐\]/g, '').trim();
+  }
+  
+  // ===== 工具5：改变活动状态 =====
+  var actMatch = text.match(/\[状态[:：](.+?)\]/);
+  if (actMatch) {
+    var newActivity = actMatch[1].trim();
+    // 存储角色自定义状态（会在getCurrentActivity中被读取）
+    charCustomActivity = newActivity;
+    charCustomActivityTime = Date.now();
+    showToast('📝 角色状态：' + newActivity);
+    text = text.replace(/\[状态[:：].+?\]/g, '').trim();
+  }
+  
+  // ===== 工具6：送礼物给用户 =====
+  var giftMatch = text.match(/\[送礼物[:：](.+?)[:：](.+?)[:：](\d+)(?:[:：](.+?))?\]/);
+  if (giftMatch) {
+    var gIcon = giftMatch[1].trim();
+    var gName = giftMatch[2].trim();
+    var gValue = parseInt(giftMatch[3]) || 0;
+    var gMsg = giftMatch[4] ? giftMatch[4].trim() : '';
+    
+    if (gValue > 0 && gValue <= charBalance) {
+      charBalance -= gValue;
+      await dbPut('settings', { key: 'charBalance', value: charBalance });
+      addEconLog('送礼物：' + gName, -gValue);
+      updateBalanceDisplay();
+      
+      var charNameForGift = (await dbGet('settings', 'charName'))?.value || 'AI助手';
+      var giftMsg = {
+        role: 'char',
+        name: charNameForGift,
+        content: '[礼物] ' + gName,
+        msgType: 'gift',
+        giftIcon: gIcon,
+        giftName: gName,
+        giftValue: gValue,
+        giftDesc: '',
+        giftMsg: gMsg,
+        timestamp: Date.now()
+      };
+      var giftId = await dbAdd('messages', giftMsg);
+      giftMsg.id = giftId;
+      messages.push(giftMsg);
+      showToast(gIcon + ' 角色送了你：' + gName);
+    }
+    text = text.replace(/\[送礼物[:：].+?\]/g, '').trim();
+  }
+  
+  // ===== 工具7：翻书页 =====
+  var bookMatch = text.match(/\[翻页[:：](上一页|下一页)\]/);
+  if (bookMatch) {
+    if (bookIsOpen && bookCurrentId) {
+      if (bookMatch[1] === '下一页') {
+        bookNextPage();
+        showToast('📖 角色翻到了下一页');
+      } else {
+        bookPrevPage();
+        showToast('📖 角色翻到了上一页');
+      }
+    }
+    text = text.replace(/\[翻页[:：].+?\]/g, '').trim();
+  }
+  
+  // ===== 工具8：好感度变化 =====
+  var intimacyMatch = text.match(/\[好感[:：]([+-]?\d+)[:：](.+?)\]/);
+  if (intimacyMatch) {
+    var intDelta = parseInt(intimacyMatch[1]);
+    var intReason = intimacyMatch[2].trim();
+    intDelta = Math.max(-10, Math.min(10, intDelta));
+    changeIntimacy(intDelta, intReason);
+    text = text.replace(/\[好感[:：][+-]?\d+[:：].+?\]/g, '').trim();
   }
   
   return text;
@@ -8277,7 +8939,12 @@ async function exportAllData() {
       charIntimacy: charIntimacy,
       intimacyLog: intimacyLog,
       digitalWeather: digitalWeather,
-      weatherHistory: weatherHistory
+      weatherHistory: weatherHistory,
+      ringtoneData: ringtoneData,
+      ringtoneName: ringtoneName,
+      ringtoneSize: ringtoneSize,
+      ringtoneVolume: ringtoneVolume,
+      ringtoneEnabled: ringtoneEnabled
     };
 
     var json = JSON.stringify(exportData);
@@ -8560,6 +9227,22 @@ async function importAllData(event) {
       }
       if (data.intimacyLog) {
         await dbPut('settings', { key: 'intimacyLog', value: data.intimacyLog });
+      }
+      // 导入铃声
+      if (data.ringtoneData) {
+        await dbPut('settings', { key: 'ringtoneData', value: data.ringtoneData });
+      }
+      if (data.ringtoneName) {
+        await dbPut('settings', { key: 'ringtoneName', value: data.ringtoneName });
+      }
+      if (data.ringtoneSize) {
+        await dbPut('settings', { key: 'ringtoneSize', value: data.ringtoneSize });
+      }
+      if (data.ringtoneVolume !== undefined) {
+        await dbPut('settings', { key: 'ringtoneVolume', value: data.ringtoneVolume });
+      }
+      if (data.ringtoneEnabled !== undefined) {
+        await dbPut('settings', { key: 'ringtoneEnabled', value: data.ringtoneEnabled });
       }
       // 导入主题
       if (data.currentTheme) {
@@ -8996,6 +9679,8 @@ async function init() {
     await loadBookmarks();
     // 加载表情包
     await loadStickerLibrary();
+    // 加载铃声设置
+    await loadRingtoneSettings();
     var savedStickerChance = await dbGet('settings', 'charStickerChance');
     if (savedStickerChance && savedStickerChance.value !== undefined) {
       charStickerChance = savedStickerChance.value;
@@ -11034,6 +11719,24 @@ function getMoodBarColor(mood) {
 }
 
 function getCurrentActivity() {
+  // 如果角色设置了自定义状态（10分钟内有效）
+  if (charCustomActivity && (Date.now() - charCustomActivityTime < 10 * 60 * 1000)) {
+    var customEmoji = '📝';
+    if (/睡|困/.test(charCustomActivity)) customEmoji = '😴';
+    else if (/吃|饭|餐/.test(charCustomActivity)) customEmoji = '🍽️';
+    else if (/工作|干活/.test(charCustomActivity)) customEmoji = '💻';
+    else if (/游戏|打游戏/.test(charCustomActivity)) customEmoji = '🎮';
+    else if (/看|读|书/.test(charCustomActivity)) customEmoji = '📖';
+    else if (/听|歌|音乐/.test(charCustomActivity)) customEmoji = '🎵';
+    else if (/走|逛|散步/.test(charCustomActivity)) customEmoji = '🚶';
+    else if (/做饭|烹饪|厨房/.test(charCustomActivity)) customEmoji = '🍳';
+    else if (/洗|澡|浴/.test(charCustomActivity)) customEmoji = '🛁';
+    else if (/运动|跑|健身/.test(charCustomActivity)) customEmoji = '🏃';
+    else if (/画|创作|写/.test(charCustomActivity)) customEmoji = '🎨';
+    else if (/发呆|放空|无聊/.test(charCustomActivity)) customEmoji = '😶';
+    return { emoji: customEmoji, text: charCustomActivity, id: 'custom' };
+  }
+  
   // 如果正在聊天（3分钟内有消息），显示"聊天中"
   if (messages.length > 0) {
     var lastMsg = messages[messages.length - 1];
@@ -13133,7 +13836,13 @@ function updateCharSwitcherDisplay() {
 // ===== 表情包系统 =====
 var stickerLibrary = [];
 var charStickerChance = 20; // 角色发表情包概率 0~100
-
+// ===== 铃声系统 =====
+var ringtoneData = ''; // 铃声音频的base64数据
+var ringtoneName = ''; // 铃声文件名
+var ringtoneSize = 0; // 铃声文件大小
+var ringtoneVolume = 50; // 音量0-100
+var ringtoneEnabled = true; // 是否启用铃声
+var ringtoneAudio = null; // 音频对象
 async function loadStickerLibrary() {
   var saved = await dbGet('settings', 'stickerLibrary');
   if (saved && saved.value) {
@@ -13446,6 +14155,162 @@ async function charSendSticker(sticker) {
   renderMessages();
   scheduleAutoSave();
 }
+// ===== 铃声系统功能 =====
+async function loadRingtoneSettings() {
+  var savedData = await dbGet('settings', 'ringtoneData');
+  if (savedData && savedData.value) {
+    ringtoneData = savedData.value;
+  }
+  var savedName = await dbGet('settings', 'ringtoneName');
+  if (savedName && savedName.value) {
+    ringtoneName = savedName.value;
+  }
+  var savedSize = await dbGet('settings', 'ringtoneSize');
+  if (savedSize && savedSize.value) {
+    ringtoneSize = savedSize.value;
+  }
+  var savedVol = await dbGet('settings', 'ringtoneVolume');
+  if (savedVol && savedVol.value !== undefined) {
+    ringtoneVolume = savedVol.value;
+    document.getElementById('ringtoneVolume').value = ringtoneVolume;
+    document.getElementById('ringtoneVolVal').textContent = ringtoneVolume + '%';
+  }
+  var savedEnabled = await dbGet('settings', 'ringtoneEnabled');
+  if (savedEnabled && savedEnabled.value !== undefined) {
+    ringtoneEnabled = savedEnabled.value;
+    document.getElementById('ringtoneEnabled').classList.toggle('on', ringtoneEnabled);
+  }
+  
+  updateRingtoneUI();
+}
+
+function updateRingtoneUI() {
+  var statusEl = document.getElementById('ringtoneStatus');
+  var previewEl = document.getElementById('ringtonePreview');
+  
+  if (ringtoneData && ringtoneName) {
+    var sizeStr = (ringtoneSize / 1024).toFixed(1) + 'KB';
+    if (ringtoneSize > 1024 * 1024) {
+      sizeStr = (ringtoneSize / 1024 / 1024).toFixed(2) + 'MB';
+    }
+    statusEl.textContent = '已设置铃声';
+    statusEl.style.color = 'var(--accent)';
+    
+    previewEl.style.display = '';
+    previewEl.innerHTML = '<div class="ringtone-preview">' +
+      '<span class="rp-icon">🔔</span>' +
+      '<div class="rp-info"><div class="rp-name">' + escHtml(ringtoneName) + '</div>' +
+      '<div class="rp-size">' + sizeStr + '</div></div>' +
+      '<button class="ringtone-test-btn" onclick="testRingtone()">▶ 试听</button>' +
+      '</div>';
+  } else {
+    statusEl.textContent = '未设置铃声（收到消息时静音）';
+    statusEl.style.color = '#888';
+    previewEl.style.display = 'none';
+    previewEl.innerHTML = '';
+  }
+}
+
+async function uploadRingtone(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  
+  // 限制文件大小 3MB
+  if (file.size > 3 * 1024 * 1024) {
+    showToast('铃声文件不能超过3MB', true);
+    event.target.value = '';
+    return;
+  }
+  
+  showLoading();
+  
+  try {
+    var dataUrl = await new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result); };
+      reader.onerror = function() { reject(new Error('读取失败')); };
+      reader.readAsDataURL(file);
+    });
+    
+    ringtoneData = dataUrl;
+    ringtoneName = file.name;
+    ringtoneSize = file.size;
+    
+    await dbPut('settings', { key: 'ringtoneData', value: ringtoneData });
+    await dbPut('settings', { key: 'ringtoneName', value: ringtoneName });
+    await dbPut('settings', { key: 'ringtoneSize', value: ringtoneSize });
+    
+    updateRingtoneUI();
+    hideLoading();
+    showToast('🔔 铃声已设置');
+    
+  } catch(e) {
+    hideLoading();
+    showToast('上传失败: ' + e.message, true);
+  }
+  
+  event.target.value = '';
+}
+
+async function clearRingtone() {
+  if (!ringtoneData) {
+    showToast('暂未设置铃声');
+    return;
+  }
+  
+  ringtoneData = '';
+  ringtoneName = '';
+  ringtoneSize = 0;
+  
+  await dbPut('settings', { key: 'ringtoneData', value: '' });
+  await dbPut('settings', { key: 'ringtoneName', value: '' });
+  await dbPut('settings', { key: 'ringtoneSize', value: 0 });
+  
+  updateRingtoneUI();
+  showToast('铃声已清除');
+}
+
+function testRingtone() {
+  if (!ringtoneData) {
+    showToast('暂未设置铃声', true);
+    return;
+  }
+  
+  playRingtone();
+}
+
+function playRingtone() {
+  if (!ringtoneData || !ringtoneEnabled) return;
+  
+  try {
+    // 如果正在播放，先停止
+    if (ringtoneAudio) {
+      ringtoneAudio.pause();
+      ringtoneAudio = null;
+    }
+    
+    ringtoneAudio = new Audio(ringtoneData);
+    ringtoneAudio.volume = ringtoneVolume / 100;
+    ringtoneAudio.play().catch(function(e) {
+      console.log('铃声播放失败:', e);
+    });
+  } catch(e) {
+    console.error('播放铃声出错:', e);
+  }
+}
+
+async function saveRingtoneVolume() {
+  ringtoneVolume = parseInt(document.getElementById('ringtoneVolume').value) || 50;
+  await dbPut('settings', { key: 'ringtoneVolume', value: ringtoneVolume });
+}
+
+async function toggleRingtoneEnabled() {
+  var btn = document.getElementById('ringtoneEnabled');
+  btn.classList.toggle('on');
+  ringtoneEnabled = btn.classList.contains('on');
+  await dbPut('settings', { key: 'ringtoneEnabled', value: ringtoneEnabled });
+  showToast(ringtoneEnabled ? '🔔 铃声已开启' : '🔕 铃声已关闭');
+}
 function renderStickerManageList() {
   var list = document.getElementById('stickerManageList');
   var countEl = document.getElementById('stickerCount');
@@ -13566,6 +14431,433 @@ async function dismissWelcome() {
     overlay.style.opacity = '';
     overlay.style.transition = '';
   }, 300);
+}
+// ===== 语音通话系统 =====
+var callActive = false;
+var callStartTime = 0;
+var callTimerInterval = null;
+var callConversation = []; // 通话中的对话记录
+var callIsReceiving = false;
+var callAbortController = null;
+
+function startCall() {
+  toggleAttachMenu();
+  
+  // 检查API配置
+  dbGet('settings', 'apiKey').then(function(item) {
+    if (!item || !item.value) {
+      showToast('请先配置API设置', true);
+      openSettings();
+      switchTab('api');
+      return;
+    }
+    
+    callActive = true;
+    callStartTime = Date.now();
+    callConversation = [];
+    callIsReceiving = false;
+    
+    // 设置通话界面信息
+    var profile = charProfiles.find(function(c) { return c.id === activeCharId; });
+    var callAvatarEl = document.getElementById('callAvatar');
+    if (profile && profile.avatarImage) {
+      callAvatarEl.innerHTML = '<img src="' + profile.avatarImage + '">';
+    } else {
+      callAvatarEl.innerHTML = (profile && profile.avatar) ? profile.avatar : '🤖';
+    }
+    document.getElementById('callName').textContent = document.getElementById('charName').value || 'AI助手';
+    document.getElementById('callStatus').textContent = '连接中...';
+    document.getElementById('callTimer').textContent = '00:00';
+    document.getElementById('callTranscriptText').innerHTML = '';
+    document.getElementById('callHistory').innerHTML = '';
+    document.getElementById('callUserInput').value = '';
+    
+    // 生成波形条
+    var waveform = document.getElementById('callWaveform');
+    waveform.innerHTML = '';
+    waveform.className = 'call-waveform idle';
+    for (var i = 0; i < 30; i++) {
+      var bar = document.createElement('div');
+      bar.className = 'wave-bar';
+      bar.style.height = '4px';
+      bar.style.animationDelay = (Math.random() * 0.5) + 's';
+      bar.style.animationDuration = (0.3 + Math.random() * 0.4) + 's';
+      waveform.appendChild(bar);
+    }
+    
+    // 显示通话界面
+    document.getElementById('callOverlay').classList.add('show');
+    
+    // 模拟连接过程
+    setTimeout(function() {
+      if (!callActive) return;
+      document.getElementById('callStatus').textContent = '通话中';
+      
+      // 启动计时器
+      callTimerInterval = setInterval(updateCallTimer, 1000);
+      
+      // AI先说话（接通后的第一句）
+      callReceiveAI('（电话接通了）');
+    }, 1500);
+    
+    // 输入框回车发送
+    var callInput = document.getElementById('callUserInput');
+    callInput.onkeydown = function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        callSendMessage();
+      }
+    };
+    callInput.oninput = function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+    };
+  });
+}
+
+function updateCallTimer() {
+  if (!callActive) return;
+  var elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+  var mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  var secs = (elapsed % 60).toString().padStart(2, '0');
+  document.getElementById('callTimer').textContent = mins + ':' + secs;
+}
+
+function getCallDuration() {
+  var elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+  var mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  var secs = (elapsed % 60).toString().padStart(2, '0');
+  return mins + ':' + secs;
+}
+
+async function callSendMessage() {
+  var input = document.getElementById('callUserInput');
+  var text = input.value.trim();
+  if (!text || callIsReceiving) return;
+  
+  input.value = '';
+  input.style.height = 'auto';
+  
+  // 添加到通话记录
+  callConversation.push({ role: 'user', content: text });
+  
+  // 显示在历史区
+  addCallHistoryItem('user', text);
+  
+  // 清空转写区准备接收
+  document.getElementById('callTranscriptText').innerHTML = '';
+  
+  // AI回复
+  await callReceiveAI(text);
+}
+
+function addCallHistoryItem(role, text) {
+  var history = document.getElementById('callHistory');
+  var item = document.createElement('div');
+  item.className = 'call-history-item ' + (role === 'user' ? 'user-said' : 'char-said');
+  var prefix = role === 'user' ? '你：' : '';
+  var displayText = text.length > 50 ? text.substring(0, 50) + '...' : text;
+  item.textContent = prefix + displayText;
+  history.appendChild(item);
+  history.scrollTop = history.scrollHeight;
+}
+
+async function callReceiveAI(userText) {
+  if (callIsReceiving || !callActive) return;
+  callIsReceiving = true;
+  
+  var sendBtn = document.getElementById('callSendBtn');
+  sendBtn.disabled = true;
+  
+  // 激活波形
+  var waveform = document.getElementById('callWaveform');
+  waveform.className = 'call-waveform active';
+  animateWaveform();
+  
+  document.getElementById('callStatus').textContent = '对方正在说话...';
+  
+  try {
+    var systemPrompt = await buildCallSystemPrompt();
+    var contextMessages = buildCallContext(userText);
+    
+    var provider = (await dbGet('settings', 'apiProvider'))?.value || 'openai';
+    var responseText = '';
+    
+    callAbortController = new AbortController();
+    var oldController = currentAbortController;
+    currentAbortController = callAbortController;
+    
+    if (provider === 'claude') {
+      responseText = await callClaudeAPI(systemPrompt, contextMessages, false);
+    } else if (provider === 'gemini') {
+      responseText = await callGeminiAPI(systemPrompt, contextMessages, false);
+    } else {
+      responseText = await callOpenAIAPI(systemPrompt, contextMessages, false);
+    }
+    
+    currentAbortController = oldController;
+    callAbortController = null;
+    
+    responseText = cleanupResponse(responseText);
+    responseText = await detectLocationChange(responseText);
+    
+    var transferResult = detectTransferInResponse(responseText);
+    responseText = transferResult.text;
+    
+    if (!responseText || responseText.length < 1) {
+      responseText = '嗯...';
+    }
+    
+    // 添加到通话记录
+    callConversation.push({ role: 'char', content: responseText });
+    
+    // 逐字显示（语音转文字效果）
+    await typewriterEffect(responseText);
+    
+    // 添加到历史
+    addCallHistoryItem('char', responseText);
+    
+    // 分析心情
+    analyzeMoodFromChat(userText);
+    
+  } catch(e) {
+    if (e.name !== 'AbortError') {
+      document.getElementById('callTranscriptText').innerHTML = '<span style="color:#ff6666;">连接不稳定...</span>';
+    }
+  } finally {
+    callIsReceiving = false;
+    sendBtn.disabled = false;
+    waveform.className = 'call-waveform idle';
+    if (callActive) {
+      document.getElementById('callStatus').textContent = '通话中';
+    }
+  }
+}
+
+async function buildCallSystemPrompt() {
+  var basePrompt = await buildSystemPrompt();
+  
+  var callExtra = '\n\n# 📞 当前处于语音通话模式\n';
+  callExtra += '你现在正在和对方打电话（通过传呼机的语音功能）。\n';
+  callExtra += '通话模式下的说话方式：\n';
+  callExtra += '- 更口语化，更随意，像真的在打电话\n';
+  callExtra += '- 可以有"嗯""啊""那个"等口头禅和停顿\n';
+  callExtra += '- 回复不要太长，电话里不会说一大段话\n';
+  callExtra += '- 可以有语气词拖长，比如"嗯——""啊——是这样"\n';
+  callExtra += '- 偶尔可以说"你那边听得清吗""信号好像不太好"\n';
+  callExtra += '- 如果是刚接通，自然地打招呼，比如"喂？""嗯嗯我在"\n';
+  callExtra += '- 通话中更容易表达真实情感，因为听到声音更亲切\n';
+  callExtra += '- 不要用太多emoji，电话里看不到\n';
+  callExtra += '- 可以描述你的语气，比如"（小声地）""（笑了一下）"但不要太多\n';
+  
+  var elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+  if (elapsed < 10) {
+    callExtra += '- 电话刚接通，先打个招呼\n';
+  } else if (elapsed > 300) {
+    callExtra += '- 已经聊了' + Math.floor(elapsed / 60) + '分钟了，可以自然地提到"聊了好久了"\n';
+  }
+  
+  return basePrompt + callExtra;
+}
+
+function buildCallContext(latestUserText) {
+  var ctx = [];
+  
+  // 加入通话中的历史对话
+  for (var i = 0; i < callConversation.length; i++) {
+    var msg = callConversation[i];
+    if (msg.role === 'user') {
+      ctx.push({ role: 'user', content: msg.content });
+    } else {
+      ctx.push({ role: 'assistant', content: msg.content });
+    }
+  }
+  
+  // 如果最新用户消息不在历史中（首次接通时的系统消息）
+  if (latestUserText && (callConversation.length === 0 || callConversation[callConversation.length - 1].content !== latestUserText)) {
+    if (latestUserText === '（电话接通了）') {
+      ctx.push({ role: 'user', content: '（对方拨打了语音通话，电话刚接通）' });
+    }
+  }
+  
+  return ctx;
+}
+
+// 逐字打字效果
+async function typewriterEffect(text) {
+  var container = document.getElementById('callTranscriptText');
+  container.innerHTML = '';
+  
+  var transcript = document.getElementById('callTranscript');
+  
+  // 随机波形动画
+  var waveform = document.getElementById('callWaveform');
+  var bars = waveform.querySelectorAll('.wave-bar');
+  
+  for (var i = 0; i < text.length; i++) {
+    if (!callActive) break;
+    
+    var ch = text[i];
+    container.textContent += ch;
+    
+    // 滚动到底部
+    transcript.scrollTop = transcript.scrollHeight;
+    
+    // 随机更新波形高度
+    if (i % 2 === 0) {
+      for (var b = 0; b < bars.length; b++) {
+        var h = 4 + Math.random() * 50;
+        bars[b].style.height = h + 'px';
+      }
+    }
+    
+    // 打字速度变化（模拟语音节奏）
+    var delay = 50 + Math.random() * 40;
+    
+    // 标点符号后停顿更长（模拟说话停顿）
+    if (/[。！？!?]/.test(ch)) {
+      delay = 300 + Math.random() * 200;
+    } else if (/[，,、]/.test(ch)) {
+      delay = 150 + Math.random() * 100;
+    } else if (/[…~]/.test(ch)) {
+      delay = 100 + Math.random() * 80;
+    } else if (ch === '\n') {
+      delay = 200 + Math.random() * 150;
+    }
+    
+    await new Promise(function(r) { setTimeout(r, delay); });
+  }
+  
+  // 打字完成，波形归零
+  for (var b2 = 0; b2 < bars.length; b2++) {
+    bars[b2].style.height = '4px';
+  }
+}
+
+function animateWaveform() {
+  if (!callActive || !callIsReceiving) return;
+  
+  var bars = document.querySelectorAll('#callWaveform .wave-bar');
+  for (var i = 0; i < bars.length; i++) {
+    var h = 4 + Math.random() * 45;
+    bars[i].style.height = h + 'px';
+  }
+  
+  if (callIsReceiving) {
+    requestAnimationFrame(function() {
+      setTimeout(animateWaveform, 80);
+    });
+  }
+}
+
+async function endCall() {
+  if (!callActive) return;
+  
+  callActive = false;
+  
+  // 停止计时
+  if (callTimerInterval) {
+    clearInterval(callTimerInterval);
+    callTimerInterval = null;
+  }
+  
+  // 取消正在进行的请求
+  if (callAbortController) {
+    callAbortController.abort();
+    callAbortController = null;
+  }
+  
+  var duration = getCallDuration();
+  document.getElementById('callStatus').textContent = '通话结束';
+  
+  // 波形归零
+  var waveform = document.getElementById('callWaveform');
+  waveform.className = 'call-waveform idle';
+  
+  // 生成通话摘要
+  var summary = '';
+  var charName = document.getElementById('charName').value || 'AI助手';
+  var userName = document.getElementById('userName').value || '用户';
+  
+  if (callConversation.length > 0) {
+    var userSaid = [];
+    var charSaid = [];
+    for (var i = 0; i < callConversation.length; i++) {
+      if (callConversation[i].role === 'user') {
+        userSaid.push(callConversation[i].content);
+      } else {
+        charSaid.push(callConversation[i].content);
+      }
+    }
+    
+    // 简短摘要
+    if (userSaid.length > 0) {
+      summary += userName + '说了：' + userSaid.slice(0, 3).map(function(s) { return s.substring(0, 30); }).join('、');
+      if (userSaid.length > 3) summary += '...';
+      summary += '\n';
+    }
+    if (charSaid.length > 0) {
+      summary += charName + '说了：' + charSaid.slice(0, 3).map(function(s) { return s.substring(0, 30); }).join('、');
+      if (charSaid.length > 3) summary += '...';
+    }
+  }
+  
+  // 保存通话记录为消息
+  if (callConversation.length > 0) {
+    // 先保存用户发起通话的消息
+    var userCallMsg = {
+      role: 'user',
+      name: userName,
+      content: '[语音通话] 时长 ' + duration,
+      msgType: 'call',
+      callDuration: duration,
+      callSummary: summary,
+      callLog: JSON.parse(JSON.stringify(callConversation)),
+      timestamp: callStartTime
+    };
+    var uid = await dbAdd('messages', userCallMsg);
+    userCallMsg.id = uid;
+    messages.push(userCallMsg);
+    
+    // 把通话中的每条对话也存入消息（这样记忆总结能读到）
+    for (var ci = 0; ci < callConversation.length; ci++) {
+      var cMsg = callConversation[ci];
+      var callMsgItem = {
+        role: cMsg.role === 'user' ? 'user' : 'char',
+        name: cMsg.role === 'user' ? userName : charName,
+        content: '📞 ' + cMsg.content,
+        timestamp: callStartTime + (ci + 1) * 1000
+      };
+      var cmId = await dbAdd('messages', callMsgItem);
+      callMsgItem.id = cmId;
+      messages.push(callMsgItem);
+    }
+    
+    // 同步保存
+    if (activeCharId !== 'default') {
+      await dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
+    }
+    
+    scheduleAutoSave();
+  }
+  
+  // 心情影响：通话让心情变好
+  changeMood(3, '打了一通电话');
+  changeIntimacy(1, '语音通话');
+  
+  // 延迟关闭界面
+  setTimeout(function() {
+    document.getElementById('callOverlay').classList.remove('show');
+    renderMessages();
+    
+    // 标记需要重连
+    conversationCount++;
+    if (conversationCount >= 1) {
+      markNeedReconnect();
+    }
+    
+    showToast('📞 通话结束 ' + duration);
+  }, 800);
 }
 // ===== 页面加载完成后初始化 =====
 if (document.readyState === 'loading') {
