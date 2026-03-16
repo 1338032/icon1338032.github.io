@@ -225,12 +225,14 @@ body {
 
 .input-area {
   padding: 8px 10px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   background: linear-gradient(0deg, #1a1a30, #16162b);
   border-top: 1px solid #2a2a4a;
   display: flex;
   gap: 6px;
   align-items: flex-end;
   z-index: 2;
+  flex-shrink: 0;
 }
 
 .input-box {
@@ -1701,8 +1703,18 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin: 12px 0;
+  max-height: 240px;
+  overflow-y: auto;
 }
 
+.gift-grid::-webkit-scrollbar {
+  width: 3px;
+}
+
+.gift-grid::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
 .gift-option {
   display: flex;
   flex-direction: column;
@@ -7853,6 +7865,9 @@ async function buildContextMessages() {
 
 // ===== OpenAI API调用 =====
 async function callOpenAIAPI(systemPrompt, contextMessages, streaming) {
+  // 添加超时保护
+  var timeoutMs = 55000; // 55秒超时
+  
   const apiKey = (await dbGet('settings', 'apiKey'))?.value;
   const baseUrl = (await dbGet('settings', 'apiBaseUrl'))?.value;
   const model = (await dbGet('settings', 'modelName'))?.value;
@@ -8015,8 +8030,22 @@ async function handleStreamResponse(response) {
   var buffer = '';
   
   try {
+    var readTimeout = 30000; // 单次读取超时30秒
+    
     while (true) {
-      var result = await reader.read();
+      var readPromise = reader.read();
+      var timeoutPromise = new Promise(function(_, reject) {
+        setTimeout(function() { reject(new Error('读取超时')); }, readTimeout);
+      });
+      
+      var result;
+      try {
+        result = await Promise.race([readPromise, timeoutPromise]);
+      } catch(e) {
+        console.warn('流式读取超时，返回已获取内容');
+        break;
+      }
+      
       if (result.done) break;
       
       buffer += decoder.decode(result.value, { stream: true });
@@ -8045,6 +8074,10 @@ async function handleStreamResponse(response) {
   } catch (e) {
     if (e.name === 'AbortError') throw e;
     console.error('流式读取错误:', e);
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch(e) {}
   }
   
   return fullText;
@@ -8303,6 +8336,8 @@ async function saveWbEntry() {
     if (entry) {
       entry.title = title;
       entry.content = content;
+      // 保留原有优先级，如果没有则设为5
+      if (entry.priority === undefined) entry.priority = 5;
       await dbPut('worldbook', entry);
     }
   } else {
@@ -8312,7 +8347,8 @@ async function saveWbEntry() {
       title: title,
       content: content,
       active: true,
-      builtin: false
+      builtin: false,
+      priority: 5 // 默认优先级
     };
     await dbPut('worldbook', newEntry);
     worldBookEntries.push(newEntry);
@@ -8944,7 +8980,12 @@ async function exportAllData() {
       ringtoneName: ringtoneName,
       ringtoneSize: ringtoneSize,
       ringtoneVolume: ringtoneVolume,
-      ringtoneEnabled: ringtoneEnabled
+      ringtoneEnabled: ringtoneEnabled,
+      spaceLocations: spaceLocations,
+      currentLocationId: currentLocationId,
+      scheduleData: scheduleData,
+      charMood: charMood,
+      moodLastUpdate: moodLastUpdate
     };
 
     var json = JSON.stringify(exportData);
@@ -9244,6 +9285,27 @@ async function importAllData(event) {
       if (data.ringtoneEnabled !== undefined) {
         await dbPut('settings', { key: 'ringtoneEnabled', value: data.ringtoneEnabled });
       }
+      // 导入空间数据
+      if (data.spaceLocations && Array.isArray(data.spaceLocations)) {
+        await dbPut('settings', { key: 'spaceLocations', value: data.spaceLocations });
+      }
+      if (data.currentLocationId) {
+        await dbPut('settings', { key: 'currentLocationId', value: data.currentLocationId });
+      }
+      
+      // 导入日程数据
+      if (data.scheduleData) {
+        await dbPut('settings', { key: 'scheduleData', value: data.scheduleData });
+      }
+      
+      // 导入心情数据
+      if (data.charMood !== undefined) {
+        await dbPut('settings', { key: 'charMood', value: data.charMood });
+      }
+      if (data.moodLastUpdate) {
+        await dbPut('settings', { key: 'moodLastUpdate', value: data.moodLastUpdate });
+      }
+
       // 导入主题
       if (data.currentTheme) {
         await dbPut('settings', { key: 'currentTheme', value: data.currentTheme });
@@ -9455,30 +9517,38 @@ async function editMessage() {
 async function deleteMessage() {
   closeMsgMenu();
   
-  if (currentMsgIndex === null) return;
+  if (currentMsgIndex === null || currentMsgIndex === undefined) return;
+  if (currentMsgIndex < 0 || currentMsgIndex >= messages.length) return;
   
   var idx = currentMsgIndex;
   var msg = messages[idx];
   
+  // 立即清空，防止重复操作
   currentMsgIndex = null;
   currentMsgRole = null;
   
   showConfirm('确认删除', '确定要删除这条消息吗？', async function() {
-    if (msg && msg.id) {
-      try {
+    try {
+      if (msg && msg.id) {
         await dbDelete('messages', msg.id);
-      } catch(e) {
-        console.error('删除失败', e);
       }
+      
+      // 重新获取索引（防止数组变化）
+      var actualIdx = messages.indexOf(msg);
+      if (actualIdx >= 0) {
+        messages.splice(actualIdx, 1);
+      }
+      
+      if (activeCharId !== 'default') {
+        await dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
+      }
+      
+      renderMessages();
+      scheduleAutoSave();
+      showToast('消息已删除');
+    } catch(e) {
+      showToast('删除失败: ' + e.message, true);
     }
-    
-    messages.splice(idx, 1);
-    if (activeCharId !== 'default') {
-      dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
-    }
-    renderMessages();
-    scheduleAutoSave();
-    showToast('消息已删除');
   });
 }
 
@@ -12887,6 +12957,12 @@ async function doSwitchChar(id) {
   
   updateCharSwitcherDisplay();
   updateToggleDisplay();
+  
+  // 刷新消息显示
+  renderMessages();
+  
+  // 标记需要重连
+  markNeedReconnect();
 }
 
 // 关闭角色编辑弹窗
@@ -13617,8 +13693,13 @@ function refreshStatusPanel() {
     annivCard.style.display = 'none';
   }
   // 天气
-  document.getElementById('panelWeatherEmoji').textContent = digitalWeather.emoji;
-  document.getElementById('panelWeatherText').textContent = digitalWeather.name + ' ' + digitalWeather.temp + '°';
+  if (digitalWeather && digitalWeather.emoji) {
+    document.getElementById('panelWeatherEmoji').textContent = digitalWeather.emoji;
+    document.getElementById('panelWeatherText').textContent = (digitalWeather.name || '晴') + ' ' + (digitalWeather.temp || 22) + '°';
+  } else {
+    document.getElementById('panelWeatherEmoji').textContent = '✨';
+    document.getElementById('panelWeatherText').textContent = '晴 22°';
+  }
   // 亲密度
   var intimacyRound = Math.round(charIntimacy);
   document.getElementById('panelIntimacyText').textContent = intimacyRound;
@@ -13967,6 +14048,21 @@ function batchAddStickers() {
     
     if (!name || !url) continue;
     if (!url.startsWith('http')) continue;
+    
+    // URL安全验证
+    try {
+      var urlObj = new URL(url);
+      if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') continue;
+      // 只允许常见图片后缀或无后缀（CDN链接）
+      var path = urlObj.pathname.toLowerCase();
+      var validExt = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i.test(path) || path.indexOf('.') === -1;
+      if (!validExt && !url.includes('imgur') && !url.includes('postimg') && !url.includes('i.pximg')) {
+        // 不是明显的图片链接，跳过
+        continue;
+      }
+    } catch(e) {
+      continue; // 无效URL
+    }
     
     // 检查是否已存在
     var exists = stickerLibrary.some(function(s) { return s.url === url; });
