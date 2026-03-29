@@ -5614,7 +5614,19 @@ body.hide-deco .pager-header {
         </div>
         
         <div class="divider"></div>
-        
+        <div style="background:rgba(0,255,65,0.05);border:1px solid rgba(0,255,65,0.2);border-radius:10px;padding:12px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:13px;color:var(--accent);font-weight:bold;">✏️ 自定义总结提示词</span>
+            <button class="action-btn" onclick="resetSummaryPrompt()" style="font-size:11px;padding:4px 10px;">↩ 恢复默认</button>
+          </div>
+          <div class="form-hint" style="margin-bottom:8px;">自定义AI总结记忆时使用的提示词。留空则使用内置默认提示词。支持变量：{charName}、{userName}、{dialogText}</div>
+          <textarea class="form-textarea" id="customSummaryPrompt" rows="6" placeholder="留空使用默认提示词...&#10;&#10;可用变量：&#10;{charName} - 角色名称&#10;{userName} - 用户名称&#10;{dialogText} - 需要总结的对话内容"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span style="font-size:11px;color:#666;" id="summaryPromptStatus">使用默认提示词</span>
+            <button class="action-btn" style="border-color:var(--accent);color:var(--accent);" onclick="saveSummaryPrompt()">💾 保存提示词</button>
+          </div>
+        </div>
+        <div class="divider"></div>
         <h3 style="font-size:14px;color:var(--accent);margin-bottom:12px;">长期记忆（自动总结）</h3>
         <div class="form-group">
           <label class="form-label">每隔多少轮总结一次</label>
@@ -7882,11 +7894,6 @@ async function sendMessage() {
   msg.id = id;
   messages.push(msg);
   
-  // 同步保存到角色专属存储
-  if (activeCharId !== 'default') {
-    await dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
-  }
-  
   scheduleAutoSave();
   inputBox.value = '';
   inputBox.style.height = 'auto';
@@ -8030,10 +8037,7 @@ async function receiveMessage() {
         }
       }
       
-      // 同步保存到角色专属存储
-      if (activeCharId !== 'default') {
-        await dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
-      }
+      scheduleAutoSave();
       
       appendSingleMessage(msg, messages.length - 1);
       scheduleAutoSave();
@@ -9396,8 +9400,55 @@ async function loadCoreMemory() {
     document.getElementById('coreMemory').value = item.value;
   }
 }
+// ===== 自定义总结提示词 =====
+var customSummaryPrompt = '';
+
+async function saveSummaryPrompt() {
+  var text = document.getElementById('customSummaryPrompt').value.trim();
+  customSummaryPrompt = text;
+  var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
+  await dbPut('settings', { key: prefix + 'customSummaryPrompt', value: text });
+  await dbPut('settings', { key: 'customSummaryPrompt', value: text });
+  updateSummaryPromptStatus();
+  showToast('✅ 总结提示词已保存');
+}
+
+async function loadSummaryPrompt() {
+  var saved = await dbGet('settings', 'customSummaryPrompt');
+  if (saved && saved.value) {
+    customSummaryPrompt = saved.value;
+  } else {
+    customSummaryPrompt = '';
+  }
+  var el = document.getElementById('customSummaryPrompt');
+  if (el) el.value = customSummaryPrompt;
+  updateSummaryPromptStatus();
+}
+
+function resetSummaryPrompt() {
+  document.getElementById('customSummaryPrompt').value = '';
+  customSummaryPrompt = '';
+  var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
+  dbPut('settings', { key: prefix + 'customSummaryPrompt', value: '' });
+  dbPut('settings', { key: 'customSummaryPrompt', value: '' });
+  updateSummaryPromptStatus();
+  showToast('已恢复默认提示词');
+}
+
+function updateSummaryPromptStatus() {
+  var el = document.getElementById('summaryPromptStatus');
+  if (!el) return;
+  if (customSummaryPrompt) {
+    el.textContent = '✅ 使用自定义提示词（' + customSummaryPrompt.length + '字）';
+    el.style.color = 'var(--accent)';
+  } else {
+    el.textContent = '使用默认提示词';
+    el.style.color = '#666';
+  }
+}
 async function loadMemorySettings() {
   await loadCoreMemory();
+  await loadSummaryPrompt();
   const shortMem = await dbGet('settings', 'shortMemory');
   if (shortMem) {
     document.getElementById('shortMemory').value = shortMem.value;
@@ -9435,7 +9486,8 @@ async function updateMemoryStatus() {
   var totalRounds = countConversationRounds();
   var shortMem = parseInt(document.getElementById('shortMemory').value) || 10;
   var longInt = parseInt(document.getElementById('longMemoryInterval').value) || 10;
-  var lastSumRounds = (await dbGet('settings', 'lastSummarizeRounds'))?.value || 0;
+  var sumKeyStatus = (activeCharId === 'default') ? 'lastSummarizeRounds' : 'char_' + activeCharId + '_lastSummarizeRounds';
+  var lastSumRounds = (await dbGet('settings', sumKeyStatus))?.value || 0;
   
   // 超出短期记忆范围的轮数
   var overflowRounds = Math.max(0, totalRounds - shortMem);
@@ -9559,6 +9611,7 @@ function editMemory(id) {
     mem.content = textarea.value.trim();
     await dbPut('memories', mem);
     renderMemoryList();
+    updateMemoryStatus();
     showToast('记忆已更新');
   };
 }
@@ -9568,6 +9621,7 @@ async function deleteMemory(id) {
     await dbDelete('memories', id);
     memoryEntries = memoryEntries.filter(m => m.id !== id);
     renderMemoryList();
+    updateMemoryStatus();
     showToast('记忆已删除');
   });
 }
@@ -9581,11 +9635,12 @@ async function checkAutoSummarize() {
   
   var rounds = countConversationRounds();
   
-  var lastSumRounds = (await dbGet('settings', 'lastSummarizeRounds'))?.value || 0;
+  var sumKey = (activeCharId === 'default') ? 'lastSummarizeRounds' : 'char_' + activeCharId + '_lastSummarizeRounds';
+  var lastSumRounds = (await dbGet('settings', sumKey))?.value || 0;
   var sinceLastSum = rounds - lastSumRounds;
   
   if (rounds > shortMem && sinceLastSum >= longInt) {
-    await dbPut('settings', { key: 'lastSummarizeRounds', value: rounds });
+    await dbPut('settings', { key: sumKey, value: rounds });
     
     // 自动总结，带重试
     var success = false;
@@ -9604,7 +9659,7 @@ async function checkAutoSummarize() {
     
     if (!success) {
       // 回退总结轮数标记，让下次可以重试
-      await dbPut('settings', { key: 'lastSummarizeRounds', value: lastSumRounds });
+      await dbPut('settings', { key: sumKey, value: lastSumRounds });
       showToast('⚠️ 自动记忆总结失败，请手动总结', true);
       // 3秒后再弹一次更明显的提示
       setTimeout(function() {
@@ -9620,8 +9675,25 @@ async function checkAutoSummarize() {
 async function manualSummarize(isAuto) {
   var shortMem = (await dbGet('settings', 'shortMemory'))?.value || 10;
   
+  // 按轮数计算短期记忆保留的消息数量
+  var keepCount = 0;
+  var roundCount = 0;
+  for (var mi = messages.length - 1; mi >= 0; mi--) {
+    if (messages[mi].role === 'user') {
+      roundCount++;
+      if (roundCount >= shortMem) {
+        keepCount = messages.length - mi;
+        break;
+      }
+    }
+  }
+  if (roundCount < shortMem) {
+    // 总轮数还不够短期记忆，不需要总结
+    keepCount = messages.length;
+  }
+  
   // 取超出短期记忆的部分
-  const toSummarize = messages.slice(0, -shortMem * 5);
+  const toSummarize = messages.slice(0, messages.length - keepCount);
   
   if (toSummarize.length === 0) {
     if (!isAuto) showToast('没有需要总结的对话', true);
@@ -9650,24 +9722,45 @@ async function manualSummarize(isAuto) {
     
     const charName = (await dbGet('settings', 'charName'))?.value || 'AI助手';
     const userName = (await dbGet('settings', 'userName'))?.value || '用户';
-    const summaryPrompt = `你是${charName}，请用第一人称"我"的视角，回忆并总结以下和${userName}的对话。
+    
+    var summaryPrompt = '';
+    
+    if (customSummaryPrompt) {
+      // 使用自定义提示词，替换变量
+      summaryPrompt = customSummaryPrompt
+        .replace(/\{charName\}/g, charName)
+        .replace(/\{userName\}/g, userName)
+        .replace(/\{dialogText\}/g, dialogText);
+    } else {
+      // 使用默认提示词
+      summaryPrompt = `你是${charName}。用第一人称提炼以下和${userName}的对话要点。
 
-要求：
-- 用"我"来称呼自己，用"${userName}"或"对方"来称呼对话者
-- 像写日记一样，记录你的理解、感受和思考
-- 包含重要的事实信息（对方的喜好、经历、约定等）
-- 包含你对这段对话的感受（开心、担心、好奇等）
-- 记录任何值得记住的承诺或约定
-- 用简洁但有温度的语言
+格式要求（严格遵守）：
+每条记忆用一行，格式为：[类型] 内容 (情绪)
+类型包括：事实/约定/偏好/关系/事件/感受
 
-示例格式：
-- 今天${userName}告诉我他喜欢猫，我觉得很开心，因为我们有了共同话题
-- 对方似乎最近工作压力很大，我有点担心，下次要多关心一下
-- 我们约好了周末一起看电影，我很期待
+规则：
+- 每条不超过30字，用最少的字传递最多信息
+- 事实类：只记关键信息，如"${userName}养了只橘猫叫团子"
+- 约定类：记清时间和内容，如"约好周六晚一起看电影"
+- 偏好类：如"${userName}讨厌香菜/喜欢下雨天"
+- 感受类：用括号附带你的一个情绪词，如(开心)(心疼)(好奇)
+- 不要写完整句子，不要用"我觉得""我认为"这种废话
+- 不要重复已知信息，只记新内容
+- 最多输出15条，没有重要信息的闲聊直接跳过
 
-以下是需要总结的对话内容：
+示例输出：
+[偏好] ${userName}对花生过敏 (记住了)
+[事实] ${userName}最近换了新工作，在互联网公司 (为TA高兴)
+[约定] 周末一起看《你的名字》 (期待)
+[关系] ${userName}说想我了，主动表达了在乎 (脸红)
+[事件] ${userName}今天被老板骂了心情很差 (心疼)
+[感受] 聊到凌晨两点都不想挂，好久没这么开心 (舍不得)
+
+以下是需要提炼的对话：
 
 ${dialogText}`;
+    }
     
     const summaryMessages = [
       { role: 'user', content: summaryPrompt }
@@ -9735,7 +9828,8 @@ ${dialogText}`;
       
       // 更新总结轮数
       var currentRounds = countConversationRounds();
-      await dbPut('settings', { key: 'lastSummarizeRounds', value: currentRounds });
+      var sumKeyManual = (activeCharId === 'default') ? 'lastSummarizeRounds' : 'char_' + activeCharId + '_lastSummarizeRounds';
+      await dbPut('settings', { key: sumKeyManual, value: currentRounds });
       
       if (isAuto) {
         showToast('🧠 自动记忆总结完成');
@@ -10860,38 +10954,51 @@ async function init() {
     updateLoginText('正在打开数据库...');
     await openDB();
     
-    // 加载消息
-    const msgs = await dbGetAll('messages');
+    // 先加载角色档案和活跃角色ID，再决定加载哪个角色的消息
+    var savedActiveId = await dbGet('settings', 'activeCharId');
+    var tempActiveId = (savedActiveId && savedActiveId.value) ? savedActiveId.value : 'default';
     
-    // 修复旧数据：给没有id的消息补上id并写回数据库
-    for (let i = 0; i < msgs.length; i++) {
-      if (!msgs[i].id) {
-        // 用timestamp作为临时id，然后重新保存到数据库获得真实id
-        const oldMsg = msgs[i];
-        const newMsg = {
-          role: oldMsg.role,
-          name: oldMsg.name,
-          content: oldMsg.content,
-          timestamp: oldMsg.timestamp,
-          imageData: oldMsg.imageData
-        };
-        
-        // 如果旧消息有id字段但值为undefined/null，先删除它
-        if ('id' in oldMsg) {
-          try {
-            await dbDelete('messages', oldMsg.id);
-          } catch(e) {
-            // 忽略删除失败
+    // 尝试从角色专属key加载消息
+    var charMsgKey = (tempActiveId === 'default') ? '' : 'char_' + tempActiveId + '_';
+    var savedCharMsgs = null;
+    if (charMsgKey) {
+      savedCharMsgs = await dbGet('settings', charMsgKey + 'messages');
+    }
+    
+    if (savedCharMsgs && savedCharMsgs.value && savedCharMsgs.value.length > 0) {
+      // 从角色专属存储加载
+      messages = savedCharMsgs.value;
+    } else {
+      // 从全局messages store加载（兼容旧数据和default角色）
+      const msgs = await dbGetAll('messages');
+      
+      // 修复旧数据：给没有id的消息补上id
+      for (let i = 0; i < msgs.length; i++) {
+        if (!msgs[i].id) {
+          const oldMsg = msgs[i];
+          const newMsg = {
+            role: oldMsg.role,
+            name: oldMsg.name,
+            content: oldMsg.content,
+            timestamp: oldMsg.timestamp,
+            imageData: oldMsg.imageData
+          };
+          if ('id' in oldMsg) {
+            try { await dbDelete('messages', oldMsg.id); } catch(e) {}
           }
+          const newId = await dbAdd('messages', newMsg);
+          msgs[i].id = newId;
         }
-        
-        // 重新添加获得新id
-        const newId = await dbAdd('messages', newMsg);
-        msgs[i].id = newId;
+      }
+      
+      messages = msgs.sort((a, b) => a.timestamp - b.timestamp);
+      
+      // 如果是default角色且有消息，保存一份到专属key
+      if (tempActiveId === 'default' && messages.length > 0) {
+        await dbPut('settings', { key: 'messages', value: messages });
       }
     }
     
-    messages = msgs.sort((a, b) => a.timestamp - b.timestamp);
     renderMessages();
     
     // 加载设置
@@ -13952,10 +14059,13 @@ async function switchToChar(id) {
 async function saveCurrentCharData() {
   var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
   
-  // 保存消息
-  await dbPut('settings', { key: prefix + 'messages', value: messages });
-  // 同步到无前缀key（兼容）
-  await dbPut('settings', { key: 'messages', value: messages });
+  // 保存消息到角色专属key
+  if (prefix) {
+    await dbPut('settings', { key: prefix + 'messages', value: messages });
+  } else {
+    // default角色保存到 'messages' key
+    await dbPut('settings', { key: 'messages', value: messages });
+  }
   // 保存世界书
   await dbPut('settings', { key: prefix + 'worldbook', value: worldBookEntries });
   
@@ -14000,17 +14110,25 @@ async function doSwitchChar(id) {
   var prefix = id === 'default' ? '' : 'char_' + id + '_';
   
   // 加载消息
-  var savedMsgs = await dbGet('settings', prefix + 'messages');
-  if (savedMsgs && savedMsgs.value) {
+  var savedMsgs = null;
+  if (prefix) {
+    savedMsgs = await dbGet('settings', prefix + 'messages');
+  }
+  if (savedMsgs && savedMsgs.value && Array.isArray(savedMsgs.value)) {
     messages = savedMsgs.value;
-  } else {
-    // 如果是default且没有前缀数据，从messages store加载
-    if (id === 'default') {
+  } else if (id === 'default') {
+    // default角色：先尝试从settings中的'messages'key读
+    var defaultMsgs = await dbGet('settings', 'messages');
+    if (defaultMsgs && defaultMsgs.value && Array.isArray(defaultMsgs.value) && defaultMsgs.value.length > 0) {
+      messages = defaultMsgs.value;
+    } else {
+      // 兼容旧数据：从messages store加载
       var dbMsgs = await dbGetAll('messages');
       messages = dbMsgs.sort(function(a, b) { return a.timestamp - b.timestamp; });
-    } else {
-      messages = [];
     }
+  } else {
+    // 非default角色且没有数据 = 新角色，空消息列表
+    messages = [];
   }
   renderMessages();
   
@@ -14118,13 +14236,14 @@ async function doSwitchChar(id) {
   var savedCharPrompt = await dbGet('settings', prefix + 'charPrompt');
   var savedUserPrompt = await dbGet('settings', prefix + 'userPrompt');
   var savedCoreMemory = await dbGet('settings', prefix + 'coreMemory');
-  
+  var savedSumPrompt = await dbGet('settings', prefix + 'customSummaryPrompt');
   document.getElementById('charName').value = (savedCharName && savedCharName.value) ? savedCharName.value : (id === 'default' ? 'AI助手' : '');
   document.getElementById('userName').value = (savedUserName && savedUserName.value) ? savedUserName.value : '用户';
   document.getElementById('charPrompt').value = (savedCharPrompt && savedCharPrompt.value) ? savedCharPrompt.value : '';
   document.getElementById('userPrompt').value = (savedUserPrompt && savedUserPrompt.value) ? savedUserPrompt.value : '';
   document.getElementById('coreMemory').value = (savedCoreMemory && savedCoreMemory.value) ? savedCoreMemory.value : '';
-  
+  customSummaryPrompt = (savedSumPrompt && savedSumPrompt.value) ? savedSumPrompt.value : '';
+  if (document.getElementById('customSummaryPrompt')) document.getElementById('customSummaryPrompt').value = customSummaryPrompt;
   // 如果是新角色且有角色档案名，自动填入charName
   if (!savedCharName) {
     var profile = charProfiles.find(function(c) { return c.id === id; });
