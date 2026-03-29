@@ -4414,7 +4414,7 @@ body {
   100% { width: 18px; }
 }
 .login-screen.fade-out {
-  animation: fadeOutLogin 0.8s ease-out forwards;
+  animation: fadeOutLogin 0.5s ease-out forwards;
 }
 
 @keyframes fadeOutLogin {
@@ -5587,6 +5587,22 @@ body.hide-deco .pager-header {
 
         <div class="divider"></div>
 
+                <div style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:12px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;color:var(--accent2);font-weight:bold;">📊 记忆状态</div>
+              <div style="font-size:12px;color:#aaa;margin-top:4px;" id="memoryStatusText">计算中...</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:20px;font-weight:bold;color:var(--accent2);" id="unsummarizedCount">0</div>
+              <div style="font-size:10px;color:#888;">轮未总结</div>
+            </div>
+          </div>
+          <div style="width:100%;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-top:8px;">
+            <div id="memoryProgressBar" style="height:100%;border-radius:2px;transition:width 0.5s,background 0.5s;width:0%;background:var(--accent2);"></div>
+          </div>
+          <div style="font-size:10px;color:#666;margin-top:4px;text-align:right;" id="memoryProgressText">0/0 轮</div>
+        </div>
         <h3 style="font-size:14px;color:var(--accent);margin-bottom:12px;">短期记忆</h3>
         <div class="form-group">
           <label class="form-label">保留最新对话轮数</label>
@@ -7093,6 +7109,9 @@ function switchTab(tab) {
   if (tab === 'bookmark') {
     renderBookmarkList();
   }
+  if (tab === 'memory') {
+    updateMemoryStatus();
+  }
   if (tab === 'data') {
     renderStatsPanel();
   }
@@ -7568,13 +7587,22 @@ function appendSingleMessage(msg, index) {
   var emptyState = document.getElementById('emptyState');
   if (emptyState) emptyState.remove();
 
-  // 日期分隔线检查
+    // 日期分隔线检查 - 使用全局变量追踪最后日期，避免重复
   var msgDate = new Date(msg.timestamp);
   var dateStr = msgDate.getFullYear() + '/' + (msgDate.getMonth() + 1) + '/' + msgDate.getDate();
-  var lastDateEl = chatArea.querySelector('[data-date]:last-of-type');
-  var lastDateStr = lastDateEl ? lastDateEl.dataset.date : '';
+  
+  if (!window._lastAppendedDate) {
+    // 初始化：从chatArea中找最后一个日期分隔线
+    var allDateDivs = chatArea.querySelectorAll('[data-date]');
+    if (allDateDivs.length > 0) {
+      window._lastAppendedDate = allDateDivs[allDateDivs.length - 1].dataset.date;
+    } else {
+      window._lastAppendedDate = '';
+    }
+  }
 
-  if (dateStr !== lastDateStr) {
+  if (dateStr !== window._lastAppendedDate) {
+    window._lastAppendedDate = dateStr;
     var today = new Date();
     var todayStr = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
     var yesterday = new Date(today.getTime() - 86400000);
@@ -7671,6 +7699,9 @@ function appendSingleMessage(msg, index) {
 function renderMessages() {
   const chatArea = document.getElementById('chatArea');
   const emptyState = document.getElementById('emptyState');
+  
+  // 重置日期追踪变量
+  window._lastAppendedDate = '';
   
   document.removeEventListener('click', closeMsgMenuHandler);
   document.removeEventListener('touchend', closeMsgMenuHandler);
@@ -9387,7 +9418,70 @@ async function loadMemorySettings() {
   memoryEntries = await dbGetAll('memories');
   renderMemoryList();
 }
+// ===== 记忆状态计算 =====
+function countConversationRounds() {
+  var rounds = 0;
+  var lastRole = null;
+  for (var i = 0; i < messages.length; i++) {
+    if (messages[i].role === 'user' && lastRole !== 'user') {
+      rounds++;
+    }
+    lastRole = messages[i].role;
+  }
+  return rounds;
+}
 
+async function updateMemoryStatus() {
+  var totalRounds = countConversationRounds();
+  var shortMem = parseInt(document.getElementById('shortMemory').value) || 10;
+  var longInt = parseInt(document.getElementById('longMemoryInterval').value) || 10;
+  var lastSumRounds = (await dbGet('settings', 'lastSummarizeRounds'))?.value || 0;
+  
+  // 超出短期记忆范围的轮数
+  var overflowRounds = Math.max(0, totalRounds - shortMem);
+  // 上次总结后新增的轮数
+  var unsummarized = Math.max(0, totalRounds - lastSumRounds);
+  // 距离下次自动总结还差多少轮
+  var untilNextSum = Math.max(0, longInt - (totalRounds - lastSumRounds));
+  
+  var statusEl = document.getElementById('memoryStatusText');
+  var countEl = document.getElementById('unsummarizedCount');
+  var barEl = document.getElementById('memoryProgressBar');
+  var progressTextEl = document.getElementById('memoryProgressText');
+  
+  if (countEl) countEl.textContent = unsummarized;
+  
+  if (statusEl) {
+    if (totalRounds === 0) {
+      statusEl.textContent = '暂无对话记录';
+    } else if (unsummarized >= longInt) {
+      statusEl.innerHTML = '⚠️ 已达总结阈值！下次接收消息时自动总结';
+      statusEl.style.color = '#ffaa33';
+    } else if (unsummarized > longInt * 0.7) {
+      statusEl.textContent = '即将触发自动总结（还差' + untilNextSum + '轮）';
+      statusEl.style.color = '#ffcc44';
+    } else {
+      statusEl.textContent = '总对话' + totalRounds + '轮，短期记忆保留' + shortMem + '轮，每' + longInt + '轮自动总结';
+      statusEl.style.color = '#aaa';
+    }
+  }
+  
+  if (barEl) {
+    var pct = longInt > 0 ? Math.min(100, (unsummarized / longInt) * 100) : 0;
+    barEl.style.width = pct + '%';
+    if (pct >= 100) {
+      barEl.style.background = '#ffaa33';
+    } else if (pct >= 70) {
+      barEl.style.background = '#ffcc44';
+    } else {
+      barEl.style.background = 'var(--accent2)';
+    }
+  }
+  
+  if (progressTextEl) {
+    progressTextEl.textContent = unsummarized + '/' + longInt + ' 轮（上次总结于第' + lastSumRounds + '轮）';
+  }
+}
 function renderMemoryList() {
   const list = document.getElementById('memoryList');
   
@@ -9479,43 +9573,62 @@ async function deleteMemory(id) {
 }
 
 async function checkAutoSummarize() {
-  const autoSum = (await dbGet('settings', 'autoSummarize'))?.value ?? true;
+  var autoSum = (await dbGet('settings', 'autoSummarize'))?.value ?? true;
   if (!autoSum) return;
   
-  const shortMem = (await dbGet('settings', 'shortMemory'))?.value || 10;
-  const longInt = (await dbGet('settings', 'longMemoryInterval'))?.value || 10;
+  var shortMem = (await dbGet('settings', 'shortMemory'))?.value || 10;
+  var longInt = (await dbGet('settings', 'longMemoryInterval'))?.value || 10;
   
-  // 计算对话轮数（user+char为一轮）
-  let rounds = 0;
-  let lastRole = null;
-  for (const msg of messages) {
-    if (msg.role === 'user' && lastRole !== 'user') {
-      rounds++;
-    }
-    lastRole = msg.role;
-  }
+  var rounds = countConversationRounds();
   
-// 如果超出短期记忆且达到总结间隔
-  // 检查上次总结时的轮数
   var lastSumRounds = (await dbGet('settings', 'lastSummarizeRounds'))?.value || 0;
-  if (rounds > shortMem && (rounds - lastSumRounds) >= longInt) {
+  var sinceLastSum = rounds - lastSumRounds;
+  
+  if (rounds > shortMem && sinceLastSum >= longInt) {
     await dbPut('settings', { key: 'lastSummarizeRounds', value: rounds });
-    await manualSummarize();
+    
+    // 自动总结，带重试
+    var success = false;
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        await manualSummarize(true); // 传true表示是自动模式
+        success = true;
+        break;
+      } catch(e) {
+        console.error('自动总结第' + (attempt+1) + '次尝试失败:', e);
+        if (attempt < 1) {
+          await new Promise(function(r) { setTimeout(r, 2000); });
+        }
+      }
+    }
+    
+    if (!success) {
+      // 回退总结轮数标记，让下次可以重试
+      await dbPut('settings', { key: 'lastSummarizeRounds', value: lastSumRounds });
+      showToast('⚠️ 自动记忆总结失败，请手动总结', true);
+      // 3秒后再弹一次更明显的提示
+      setTimeout(function() {
+        showConfirm('⚠️ 记忆总结失败', '自动记忆总结未能完成（可能是API连接问题）。\n\n已积累 ' + sinceLastSum + ' 轮未总结对话。\n\n建议：\n1. 检查网络连接\n2. 点击下方按钮手动总结\n3. 或等待下次自动总结重试', function() {
+          openSettings();
+          switchTab('memory');
+        });
+      }, 3000);
+    }
   }
 }
 
-async function manualSummarize() {
-  const shortMem = (await dbGet('settings', 'shortMemory'))?.value || 10;
+async function manualSummarize(isAuto) {
+  var shortMem = (await dbGet('settings', 'shortMemory'))?.value || 10;
   
   // 取超出短期记忆的部分
   const toSummarize = messages.slice(0, -shortMem * 5);
   
   if (toSummarize.length === 0) {
-    showToast('没有需要总结的对话', true);
+    if (!isAuto) showToast('没有需要总结的对话', true);
     return;
   }
   
-  showLoading();
+  if (!isAuto) showLoading();
   
   try {
     const apiKey = (await dbGet('settings', 'apiKey'))?.value;
@@ -9619,13 +9732,34 @@ ${dialogText}`;
       memEntry.id = memId;
       memoryEntries.push(memEntry);
       renderMemoryList();
-      showToast('✅ 记忆总结完成');
+      
+      // 更新总结轮数
+      var currentRounds = countConversationRounds();
+      await dbPut('settings', { key: 'lastSummarizeRounds', value: currentRounds });
+      
+      if (isAuto) {
+        showToast('🧠 自动记忆总结完成');
+      } else {
+        showToast('✅ 记忆总结完成');
+      }
+      
+      // 更新记忆状态面板
+      updateMemoryStatus();
+    } else {
+      if (isAuto) {
+        throw new Error('AI返回了空的总结内容');
+      } else {
+        showToast('总结结果为空，请重试', true);
+      }
     }
     
   } catch (e) {
+    if (isAuto) {
+      throw e; // 自动模式下抛出让checkAutoSummarize处理
+    }
     showToast('总结失败: ' + e.message, true);
   } finally {
-    hideLoading();
+    if (!isAuto) hideLoading();
   }
 }
 
@@ -10861,19 +10995,21 @@ async function init() {
     // 运行开机自检动画
     await runBootSequence();
     updateLoginText('SYSTEM READY');
-    setTimeout(() => {
-      const loginScreen = document.getElementById('loginScreen');
-      const mainContainer = document.getElementById('mainContainer');
+    // 快速过渡到主界面
+    var fadeDelay = (messages.length > 0) ? 100 : 300;
+    setTimeout(function() {
+      var loginScreen = document.getElementById('loginScreen');
+      var mainContainer = document.getElementById('mainContainer');
       if (loginScreen) {
         loginScreen.classList.add('fade-out');
-        setTimeout(() => {
+        setTimeout(function() {
           loginScreen.style.display = 'none';
           if (mainContainer) {
             mainContainer.style.opacity = '1';
           }
-        }, 800);
+        }, 500);
       }
-    }, 500);
+    }, fadeDelay);
     
     // 检查是否需要显示欢迎弹窗
     await checkWelcome();
@@ -16513,30 +16649,70 @@ async function runBootSequence() {
   var loadingText = document.getElementById('loadingText');
   if (!container) return;
   
-  // 停止CSS动画，改为JS控制进度条
   if (loadingBar) {
     loadingBar.style.animation = 'none';
     loadingBar.style.width = '0%';
     loadingBar.style.background = 'linear-gradient(90deg, rgba(0,255,65,0.6), rgba(0,255,65,1), rgba(0,255,65,0.6))';
     loadingBar.style.boxShadow = '0 0 15px rgba(0,255,65,0.8)';
-    loadingBar.style.transition = 'width 0.3s ease';
+    loadingBar.style.transition = 'width 0.15s ease';
   }
   
+  // 检查是否是重启（有数据的情况下快速加载）
+  var isReload = false;
+  try {
+    var quickState = localStorage.getItem('pager_state');
+    var quickBackup = localStorage.getItem('pager_quick_backup');
+    if (quickState || quickBackup || messages.length > 0) {
+      isReload = true;
+    }
+  } catch(e) {}
+  
+  if (isReload) {
+    // ===== 快速加载模式 =====
+    var fastLines = [
+      { text: '> PAGER SYSTEM v1.6.0 <span class="boot-ok">[QUICK BOOT]</span>', delay: 80, pct: 20 },
+      { text: '> RESTORING SESSION... <span class="boot-ok">[OK]</span>', delay: 100, pct: 50 },
+      { text: '> SIGNAL LOCK......... <span class="boot-ok">[LOCKED]</span>', delay: 80, pct: 75 },
+      { text: '> BATTERY............. <span class="boot-ok">[' + pagerBattery + '%]</span>', delay: 60, pct: 90 },
+      { text: '> <span class="boot-ok">WELCOME BACK, OPERATOR</span>', delay: 80, pct: 100 }
+    ];
+    
+    for (var fi = 0; fi < fastLines.length; fi++) {
+      var fLine = document.createElement('div');
+      fLine.className = 'boot-line-item';
+      fLine.innerHTML = fastLines[fi].text;
+      fLine.style.animationDelay = '0s';
+      container.appendChild(fLine);
+      container.parentElement.scrollTop = container.parentElement.scrollHeight;
+      if (loadingBar) loadingBar.style.width = fastLines[fi].pct + '%';
+      if (loadingText) {
+        if (fastLines[fi].pct < 50) loadingText.textContent = 'QUICK BOOT...';
+        else if (fastLines[fi].pct < 90) loadingText.textContent = 'RESTORING...';
+        else loadingText.textContent = 'SYSTEM READY';
+      }
+      await new Promise(function(r) { setTimeout(r, fastLines[fi].delay); });
+    }
+    
+    await new Promise(function(r) { setTimeout(r, 150); });
+    return;
+  }
+  
+  // ===== 首次加载模式（完整自检）=====
   var lines = [
-    { text: '> PAGER SYSTEM v1.6.0', delay: 200, pct: 5 },
-    { text: '> ROM CHECK.......... <span class="boot-ok">[OK]</span>', delay: 350, pct: 12 },
-    { text: '> RAM 64KB........... <span class="boot-ok">[OK]</span>', delay: 250, pct: 20 },
-    { text: '> FLASH STORAGE...... <span class="boot-ok">[OK]</span>', delay: 300, pct: 28 },
-    { text: '> DISPLAY INIT....... <span class="boot-ok">[OK]</span>', delay: 200, pct: 35 },
-    { text: '> ANTENNA CALIBRATE.. <span class="boot-ok">[OK]</span>', delay: 400, pct: 45 },
-    { text: '> SEARCHING SIGNAL...', delay: 500, pct: 55 },
-    { text: '> FREQUENCY 147.520MHz <span class="boot-ok">[LOCKED]</span>', delay: 350, pct: 63 },
-    { text: '> PAGER NET CONNECT.. <span class="boot-ok">[ONLINE]</span>', delay: 250, pct: 72 },
-    { text: '> LOADING USER DATA..', delay: 400, pct: 80 },
-    { text: '> DECRYPTING CHANNEL. <span class="boot-ok">[SECURE]</span>', delay: 300, pct: 88 },
-    { text: '> BATTERY............<span class="boot-ok">[' + pagerBattery + '%]</span>', delay: 150, pct: 93 },
-    { text: '> ALL SYSTEMS GO', delay: 250, pct: 97 },
-    { text: '> <span class="boot-ok">WELCOME BACK, OPERATOR</span>', delay: 300, pct: 100 }
+    { text: '> PAGER SYSTEM v1.6.0', delay: 150, pct: 5 },
+    { text: '> ROM CHECK.......... <span class="boot-ok">[OK]</span>', delay: 200, pct: 12 },
+    { text: '> RAM 64KB........... <span class="boot-ok">[OK]</span>', delay: 150, pct: 20 },
+    { text: '> FLASH STORAGE...... <span class="boot-ok">[OK]</span>', delay: 200, pct: 28 },
+    { text: '> DISPLAY INIT....... <span class="boot-ok">[OK]</span>', delay: 150, pct: 35 },
+    { text: '> ANTENNA CALIBRATE.. <span class="boot-ok">[OK]</span>', delay: 250, pct: 45 },
+    { text: '> SEARCHING SIGNAL...', delay: 300, pct: 55 },
+    { text: '> FREQUENCY 147.520MHz <span class="boot-ok">[LOCKED]</span>', delay: 200, pct: 63 },
+    { text: '> PAGER NET CONNECT.. <span class="boot-ok">[ONLINE]</span>', delay: 150, pct: 72 },
+    { text: '> LOADING USER DATA..', delay: 250, pct: 80 },
+    { text: '> DECRYPTING CHANNEL. <span class="boot-ok">[SECURE]</span>', delay: 200, pct: 88 },
+    { text: '> BATTERY............<span class="boot-ok">[' + pagerBattery + '%]</span>', delay: 100, pct: 93 },
+    { text: '> ALL SYSTEMS GO', delay: 150, pct: 97 },
+    { text: '> <span class="boot-ok">WELCOME, NEW OPERATOR</span>', delay: 200, pct: 100 }
   ];
   
   for (var i = 0; i < lines.length; i++) {
@@ -16545,16 +16721,8 @@ async function runBootSequence() {
     lineEl.innerHTML = lines[i].text;
     lineEl.style.animationDelay = '0s';
     container.appendChild(lineEl);
-    
-    // 保持滚动到底部
     container.parentElement.scrollTop = container.parentElement.scrollHeight;
-    
-    // 同步更新进度条
-    if (loadingBar) {
-      loadingBar.style.width = lines[i].pct + '%';
-    }
-    
-    // 同步更新加载文字
+    if (loadingBar) loadingBar.style.width = lines[i].pct + '%';
     if (loadingText) {
       if (lines[i].pct < 30) loadingText.textContent = 'HARDWARE CHECK...';
       else if (lines[i].pct < 55) loadingText.textContent = 'CALIBRATING...';
@@ -16562,11 +16730,10 @@ async function runBootSequence() {
       else if (lines[i].pct < 95) loadingText.textContent = 'LOADING DATA...';
       else loadingText.textContent = 'SYSTEM READY';
     }
-    
     await new Promise(function(r) { setTimeout(r, lines[i].delay); });
   }
   
-  await new Promise(function(r) { setTimeout(r, 400); });
+  await new Promise(function(r) { setTimeout(r, 200); });
 }
 // ===== 页面加载完成后初始化 =====
 if (document.readyState === 'loading') {
