@@ -1056,7 +1056,7 @@ body {
   position: fixed;
   top: 20px;
   left: 50%;
-  transform: translateX(-50%) translateY(-100px);
+  transform: translateX(-50%) translateY(-200%);
   background: #1a1a35;
   border: 1px solid var(--accent);
   color: var(--accent);
@@ -3681,6 +3681,103 @@ body {
   line-height: 1.5;
   white-space: pre-wrap;
 }
+/* ===== 加载更多提示 ===== */
+.load-more-hint {
+  text-align: center;
+  padding: 12px;
+  font-size: 11px;
+  color: #555;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.load-more-hint:hover {
+  color: var(--accent);
+}
+.load-more-hint.loading {
+  pointer-events: none;
+  color: var(--accent);
+}
+/* ===== 气泡小头像 ===== */
+.msg-avatar-mini {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  align-self: flex-end;
+  margin-bottom: 18px;
+}
+.msg-row.char .msg-avatar-mini {
+  background: linear-gradient(135deg, var(--char-bubble-bg), rgba(0,255,65,0.1));
+  border-color: rgba(0,255,65,0.2);
+  filter: drop-shadow(0 0 3px rgba(0,255,65,0.15));
+}
+.msg-row.user .msg-avatar-mini {
+  background: linear-gradient(135deg, var(--user-bubble-bg), rgba(0,212,255,0.1));
+  border-color: rgba(0,212,255,0.2);
+  filter: drop-shadow(0 0 3px rgba(0,212,255,0.15));
+}
+.msg-avatar-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+body.light-mode .msg-row.char .msg-avatar-mini {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border-color: rgba(0,0,0,0.08);
+  filter: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+body.light-mode .msg-row.user .msg-avatar-mini {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  border-color: rgba(0,0,0,0.08);
+  filter: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+/* ===== 长消息折叠 ===== */
+.msg-bubble .msg-text-content {
+  position: relative;
+}
+.msg-bubble .msg-text-content.collapsed {
+  max-height: 200px;
+  overflow: hidden;
+}
+.msg-bubble .msg-text-content.collapsed::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--char-bubble-bg));
+  pointer-events: none;
+}
+.msg-row.user .msg-bubble .msg-text-content.collapsed::after {
+  background: linear-gradient(transparent, var(--user-bubble-bg));
+}
+.msg-expand-btn {
+  display: block;
+  width: 100%;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.msg-expand-btn:hover {
+  opacity: 1;
+}
 /* 空状态 */
 .empty-state {
   text-align: center;
@@ -5013,6 +5110,57 @@ body.hide-deco .pager-header {
   border-radius: 0 4px 4px 0; line-height: 1.4; 
 }
 .msg-quote .mq-name { color: var(--accent); font-weight: bold; }
+/* ===== 自定义输入弹窗美化 ===== */
+#inputModal .modal-box {
+  animation: msgIn 0.25s ease;
+}
+#inputModalFields .im-field {
+  margin-bottom: 12px;
+}
+#inputModalFields .im-field label {
+  display: block;
+  font-size: 11px;
+  color: #aaa;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+#inputModalFields .im-field input,
+#inputModalFields .im-field textarea,
+#inputModalFields .im-field select {
+  width: 100%;
+  background: #0e0e20;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: var(--text-color);
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+#inputModalFields .im-field input:focus,
+#inputModalFields .im-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(0,255,65,0.1);
+}
+#inputModalFields .im-field textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.5;
+}
+#inputModalFields .im-field .im-hint {
+  font-size: 10px;
+  color: #555;
+  margin-top: 3px;
+}
+body.light-mode #inputModalFields .im-field input,
+body.light-mode #inputModalFields .im-field textarea,
+body.light-mode #inputModalFields .im-field select {
+  background: #f8f8fa;
+  border-color: #ddd;
+  color: #333;
+}
 </style>
 </head>
 <body>
@@ -5133,9 +5281,11 @@ body.hide-deco .pager-header {
   </div>
 
   <div class="typing-indicator" id="typingIndicator">
+    <span id="typingName" style="font-size:11px;color:var(--accent);margin-right:6px;opacity:0.7;"></span>
     <div class="typing-dot"></div>
     <div class="typing-dot"></div>
     <div class="typing-dot"></div>
+    <span style="font-size:10px;color:#666;margin-left:6px;">输入中</span>
   </div>
 <div class="music-bar" id="musicBar">
     <div class="music-visualizer" id="musicVisualizer">
@@ -5252,6 +5402,7 @@ body.hide-deco .pager-header {
       <button class="tab-btn" data-tab="bookmark" onclick="switchTab('bookmark')">收藏</button>
       <button class="tab-btn" data-tab="sticker" onclick="switchTab('sticker')">表情包</button>
       <button class="tab-btn" data-tab="pagerlog" onclick="switchTab('pagerlog')">记录本</button>
+      <button class="tab-btn" data-tab="systems" onclick="switchTab('systems')">系统</button>
       <button class="tab-btn" data-tab="data" onclick="switchTab('data')">数据</button>
     </div>
     <div class="settings-body">
@@ -5388,171 +5539,6 @@ body.hide-deco .pager-header {
   </div>
   <div class="form-hint">角色每次回复时有多大概率额外发送一个表情包（0%=从不发，100%=每次都发）。需要先在表情包页面添加表情包。</div>
 </div>
-<div style="background:rgba(255,100,150,0.05);border:1px solid rgba(255,100,150,0.2);border-radius:10px;padding:12px;margin-bottom:16px;">
-  <h4 style="font-size:13px;color:#ff88aa;margin-bottom:10px;display:flex;align-items:center;gap:6px;">💕 好感度系统</h4>
-  <div style="font-size:11px;color:#888;margin-bottom:10px;">好感度影响角色对你的态度、说话方式和亲密程度。随着聊天自然增长，也可以手动调整。</div>
-  
-  <div class="econ-row">
-    <span class="econ-label">💕 当前好感度</span>
-    <input type="number" class="econ-input" id="intimacyInput" min="0" max="100" style="max-width:80px;color:#ff88aa;font-weight:bold;">
-    <span class="econ-unit">/ 100</span>
-  </div>
-  
-  <div style="margin:8px 0;">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:11px;color:#888;min-width:50px;">关系：</span>
-      <span style="font-size:13px;font-weight:bold;" id="intimacyLevelText">陌生人</span>
-    </div>
-    <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:6px;">
-      <div id="intimacyProgressBar" style="height:100%;border-radius:3px;transition:width 0.5s,background 0.5s;width:10%;background:#ffaadd;"></div>
-    </div>
-  </div>
-  
-  <div style="font-size:11px;color:#666;margin:8px 0;line-height:1.6;" id="intimacyDesc">
-    你们刚认识，角色会比较客气礼貌。
-  </div>
-  
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
-    <button class="action-btn" onclick="setIntimacyLevel(5)" style="font-size:11px;padding:4px 10px;">🤝 陌生人</button>
-    <button class="action-btn" onclick="setIntimacyLevel(20)" style="font-size:11px;padding:4px 10px;">👋 认识</button>
-    <button class="action-btn" onclick="setIntimacyLevel(40)" style="font-size:11px;padding:4px 10px;">😊 朋友</button>
-    <button class="action-btn" onclick="setIntimacyLevel(60)" style="font-size:11px;padding:4px 10px;">💛 好友</button>
-    <button class="action-btn" onclick="setIntimacyLevel(80)" style="font-size:11px;padding:4px 10px;">💗 挚友</button>
-    <button class="action-btn" onclick="setIntimacyLevel(95)" style="font-size:11px;padding:4px 10px;">💕 灵魂伴侣</button>
-  </div>
-  
-  <div class="divider"></div>
-  
-  <div style="font-size:11px;color:#888;margin-bottom:6px;">📋 好感度变动记录（最近10条）</div>
-  <div id="intimacyLog" style="max-height:100px;overflow-y:auto;font-size:11px;color:#666;"></div>
-  
-  <div style="display:flex;justify-content:flex-end;margin-top:8px;">
-    <button class="action-btn" style="border-color:#ff88aa;color:#ff88aa;" onclick="saveIntimacyFromUI()">💾 保存好感度</button>
-  </div>
-</div>
-<div class="schedule-card">
-  <h4>📅 日程安排表</h4>
-  <div style="font-size:11px;color:#888;margin-bottom:10px;">设置角色每天的日程安排。不填的时间段会使用默认活动。角色会根据日程自然地提到自己正在做的事。</div>
-  
-  <div class="schedule-day-tabs" id="scheduleDayTabs">
-    <button class="schedule-day-tab active" onclick="switchScheduleDay('workday')">📋 工作日</button>
-    <button class="schedule-day-tab" onclick="switchScheduleDay('restday')">🌴 休息日</button>
-  </div>
-  
-  <div class="schedule-type-row">
-    <span class="schedule-type-label">今天是</span>
-    <div class="schedule-type-btns">
-      <button class="schedule-type-btn" id="scheduleAutoBtn" onclick="setScheduleDayType('auto')">自动判断</button>
-      <button class="schedule-type-btn" id="scheduleWorkBtn" onclick="setScheduleDayType('work')">强制工作日</button>
-      <button class="schedule-type-btn" id="scheduleRestBtn" onclick="setScheduleDayType('rest')">强制休息日</button>
-    </div>
-  </div>
-  
-  <div class="form-group" style="margin-bottom:8px;">
-    <label class="form-label">休息日设定（星期几为休息日）</label>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;" id="scheduleRestDays">
-      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
-        <input type="checkbox" value="0" onchange="onRestDayChange()"> 日
-      </label>
-      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
-        <input type="checkbox" value="1" onchange="onRestDayChange()"> 一
-      </label>
-      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
-        <input type="checkbox" value="2" onchange="onRestDayChange()"> 二
-      </label>
-      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
-        <input type="checkbox" value="3" onchange="onRestDayChange()"> 三
-      </label>
-      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
-        <input type="checkbox" value="4" onchange="onRestDayChange()"> 四
-      </label>
-      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
-        <input type="checkbox" value="5" onchange="onRestDayChange()"> 五
-      </label>
-      <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;">
-        <input type="checkbox" checked value="6" onchange="onRestDayChange()"> 六
-      </label>
-    </div>
-  </div>
-  
-  <div class="schedule-quick-presets">
-    <button class="schedule-preset-btn" onclick="applySchedulePreset('office')">💼 上班族</button>
-    <button class="schedule-preset-btn" onclick="applySchedulePreset('student')">📚 学生党</button>
-    <button class="schedule-preset-btn" onclick="applySchedulePreset('freelance')">🏠 自由职业</button>
-    <button class="schedule-preset-btn" onclick="applySchedulePreset('nightowl')">🦉 夜猫子</button>
-    <button class="schedule-preset-btn" onclick="applySchedulePreset('clear')">🗑️ 全部清空</button>
-  </div>
-  
-  <div class="schedule-timeline" id="scheduleTimeline"></div>
-  
-  <div style="display:flex;justify-content:flex-end;margin-top:8px;gap:6px;">
-    <button class="action-btn" onclick="previewTodaySchedule()">👁 预览今日</button>
-    <button class="action-btn primary" onclick="saveScheduleSettings()">💾 保存日程</button>
-  </div>
-</div>
-        <div class="econ-card">
-          <h4>💰 角色经济系统</h4>
-          <div style="font-size:11px;color:#888;margin-bottom:10px;">设置角色的收入和消费，系统会自动模拟经济变动。角色知道自己有多少钱。</div>
-
-          <div class="econ-row">
-            <span class="econ-label">💵 当前余额</span>
-            <input type="number" class="econ-input" id="econBalance" min="0" max="9999999" style="max-width:150px;color:#ffcc44;font-weight:bold;">
-            <span class="econ-unit">电子币</span>
-          </div>
-
-          <div class="econ-row">
-            <span class="econ-label">📅 月收入</span>
-            <input type="number" class="econ-input" id="econMonthlyIncome" min="0" max="999999" placeholder="3000">
-            <span class="econ-unit">电子币/月</span>
-          </div>
-
-          <div class="econ-row">
-            <span class="econ-label">🎰 奖金下限</span>
-            <input type="number" class="econ-input" id="econBonusMin" min="0" max="999999" placeholder="0">
-            <span class="econ-unit">电子币</span>
-          </div>
-
-          <div class="econ-row">
-            <span class="econ-label">🎰 奖金上限</span>
-            <input type="number" class="econ-input" id="econBonusMax" min="0" max="999999" placeholder="2000">
-            <span class="econ-unit">电子币</span>
-          </div>
-
-          <div class="econ-row">
-            <span class="econ-label">🛒 日消费下限</span>
-            <input type="number" class="econ-input" id="econExpenseMin" min="0" max="999999" placeholder="50">
-            <span class="econ-unit">电子币/天</span>
-          </div>
-
-          <div class="econ-row">
-            <span class="econ-label">🛒 日消费上限</span>
-            <input type="number" class="econ-input" id="econExpenseMax" min="0" max="999999" placeholder="300">
-            <span class="econ-unit">电子币/天</span>
-          </div>
-
-          <div class="econ-summary" id="econSummary">
-            <div class="econ-summary-item">
-              <span class="econ-s-label">当前余额</span>
-              <span class="econ-s-val" id="econSumBalance">¤0</span>
-            </div>
-            <div class="econ-summary-item">
-              <span class="econ-s-label">预计月入</span>
-              <span class="econ-s-val income" id="econSumIncome">+¤0</span>
-            </div>
-            <div class="econ-summary-item">
-              <span class="econ-s-label">预计月支</span>
-              <span class="econ-s-val expense" id="econSumExpense">-¤0</span>
-            </div>
-          </div>
-
-          <div style="margin-top:10px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:11px;color:#888;">📋 经济变动记录（最近20条）</span>
-              <button class="action-btn" onclick="clearEconLog()" style="font-size:10px;padding:3px 8px;">清空</button>
-            </div>
-            <div class="econ-log" id="econLog"></div>
-          </div>
-        </div>
 
         <div class="divider"></div>
         <div class="btn-row">
@@ -5606,11 +5592,11 @@ body.hide-deco .pager-header {
         <h3 style="font-size:14px;color:var(--accent);margin-bottom:12px;">短期记忆</h3>
         <div class="form-group">
           <label class="form-label">保留最新对话轮数</label>
-          <div class="range-row">
-            <input type="range" min="1" max="50" value="10" id="shortMemory" oninput="document.getElementById('shortMemVal').textContent=this.value">
-            <span class="range-val" id="shortMemVal">10</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" class="form-input" id="shortMemory" value="10" min="1" max="100" style="max-width:100px;">
+            <span style="font-size:12px;color:#888;">轮</span>
           </div>
-          <div class="form-hint">最新的N轮对话将完整发送给AI作为上下文</div>
+          <div class="form-hint">最新的N轮对话将完整发送给AI作为上下文（建议5~20轮，太多会消耗更多Token）</div>
         </div>
         
         <div class="divider"></div>
@@ -5630,23 +5616,21 @@ body.hide-deco .pager-header {
         <h3 style="font-size:14px;color:var(--accent);margin-bottom:12px;">长期记忆（自动总结）</h3>
         <div class="form-group">
           <label class="form-label">每隔多少轮总结一次</label>
-          <div class="range-row">
-            <input type="range" min="3" max="30" value="10" id="longMemoryInterval" oninput="document.getElementById('longMemVal').textContent=this.value">
-            <span class="range-val" id="longMemVal">10</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" class="form-input" id="longMemoryInterval" value="10" min="3" max="100" style="max-width:100px;">
+            <span style="font-size:12px;color:#888;">轮</span>
           </div>
-          <div class="form-hint">超出短期记忆范围的对话将按此间隔进行摘要总结</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">自动总结</label>
-          <button class="wb-toggle on" id="autoSummarize" onclick="this.classList.toggle('on')"></button>
-          <div class="form-hint">启用后当对话超出短期记忆范围时自动请求AI进行总结</div>
+          <div class="form-hint">超出短期记忆范围的对话将按此间隔进行摘要总结（建议5~20轮）</div>
         </div>
         
         <div class="divider"></div>
         
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <span style="font-size:13px;color:#aaa;">记忆摘要列表</span>
-          <button class="action-btn" onclick="manualSummarize()">🧠 手动总结</button>
+          <div style="display:flex;gap:6px;">
+            <button class="action-btn primary" onclick="addManualMemory()">+ 手动添加</button>
+            <button class="action-btn" onclick="manualSummarize()">🧠 自动总结</button>
+          </div>
         </div>
         <div id="memoryList">
           <div class="empty-state" style="padding:20px;">
@@ -5913,6 +5897,176 @@ body.hide-deco .pager-header {
 
         <div class="pager-log-container" id="pagerLogContainer">
           <div class="empty-state" style="padding:20px;"><p>暂无记录</p></div>
+        </div>
+      </div>
+      <!-- 系统页面（好感/经济/作息/技能） -->
+      <div class="tab-page" id="page-systems">
+        <div style="font-size:11px;color:#888;margin-bottom:12px;padding:8px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:8px;">
+          💡 这里集中管理角色的各项属性系统。修改后记得点底部的"保存"按钮。
+        </div>
+
+        <!-- 子Tab切换 -->
+        <div style="display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="schedule-day-tab active" id="sysTabIntimacy" onclick="switchSystemSub('intimacy')">💕 好感度</button>
+          <button class="schedule-day-tab" id="sysTabEcon" onclick="switchSystemSub('econ')">💰 经济</button>
+          <button class="schedule-day-tab" id="sysTabSchedule" onclick="switchSystemSub('schedule')">📅 作息</button>
+          <button class="schedule-day-tab" id="sysTabSkills" onclick="switchSystemSub('skills')">🎯 技能</button>
+        </div>
+
+        <!-- 好感度子页 -->
+        <div id="sysSub-intimacy">
+          <div style="background:rgba(255,100,150,0.05);border:1px solid rgba(255,100,150,0.2);border-radius:10px;padding:12px;margin-bottom:16px;">
+            <h4 style="font-size:13px;color:#ff88aa;margin-bottom:10px;display:flex;align-items:center;gap:6px;">💕 好感度系统</h4>
+            <div style="font-size:11px;color:#888;margin-bottom:10px;">好感度影响角色对你的态度、说话方式和亲密程度。</div>
+            <div class="econ-row">
+              <span class="econ-label">💕 当前好感度</span>
+              <input type="number" class="econ-input" id="sysIntimacyInput" min="0" max="100" style="max-width:80px;color:#ff88aa;font-weight:bold;">
+              <span class="econ-unit">/ 100</span>
+            </div>
+            <div style="margin:8px 0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:11px;color:#888;min-width:50px;">关系：</span>
+                <span style="font-size:13px;font-weight:bold;" id="sysIntimacyLevelText">陌生人</span>
+              </div>
+              <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:6px;">
+                <div id="sysIntimacyProgressBar" style="height:100%;border-radius:3px;transition:width 0.5s,background 0.5s;width:10%;background:#ffaadd;"></div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#666;margin:8px 0;line-height:1.6;" id="sysIntimacyDesc">你们刚认识。</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+              <button class="action-btn" onclick="setSysIntimacy(5)" style="font-size:11px;padding:4px 10px;">🤝 陌生人</button>
+              <button class="action-btn" onclick="setSysIntimacy(20)" style="font-size:11px;padding:4px 10px;">👋 认识</button>
+              <button class="action-btn" onclick="setSysIntimacy(40)" style="font-size:11px;padding:4px 10px;">😊 朋友</button>
+              <button class="action-btn" onclick="setSysIntimacy(60)" style="font-size:11px;padding:4px 10px;">💛 好友</button>
+              <button class="action-btn" onclick="setSysIntimacy(80)" style="font-size:11px;padding:4px 10px;">💗 挚友</button>
+              <button class="action-btn" onclick="setSysIntimacy(95)" style="font-size:11px;padding:4px 10px;">💕 灵魂伴侣</button>
+            </div>
+            <div class="divider"></div>
+            <div style="font-size:11px;color:#888;margin-bottom:6px;">📋 好感度变动记录（最近10条）</div>
+            <div id="sysIntimacyLog" style="max-height:100px;overflow-y:auto;font-size:11px;color:#666;"></div>
+          </div>
+        </div>
+
+        <!-- 经济子页 -->
+        <div id="sysSub-econ" style="display:none;">
+          <div class="econ-card">
+            <h4>💰 角色经济系统</h4>
+            <div style="font-size:11px;color:#888;margin-bottom:10px;">设置角色的收入和消费，系统会自动模拟经济变动。</div>
+            <div class="econ-row">
+              <span class="econ-label">💵 当前余额</span>
+              <input type="number" class="econ-input" id="sysEconBalance" min="0" max="9999999" style="max-width:150px;color:#ffcc44;font-weight:bold;">
+              <span class="econ-unit">电子币</span>
+            </div>
+            <div class="econ-row">
+              <span class="econ-label">📅 月收入</span>
+              <input type="number" class="econ-input" id="sysEconIncome" min="0" max="999999" placeholder="3000">
+              <span class="econ-unit">电子币/月</span>
+            </div>
+            <div class="econ-row">
+              <span class="econ-label">🎰 奖金下限</span>
+              <input type="number" class="econ-input" id="sysEconBonusMin" min="0" max="999999" placeholder="0">
+              <span class="econ-unit">电子币</span>
+            </div>
+            <div class="econ-row">
+              <span class="econ-label">🎰 奖金上限</span>
+              <input type="number" class="econ-input" id="sysEconBonusMax" min="0" max="999999" placeholder="2000">
+              <span class="econ-unit">电子币</span>
+            </div>
+            <div class="econ-row">
+              <span class="econ-label">🛒 日消费下限</span>
+              <input type="number" class="econ-input" id="sysEconExpMin" min="0" max="999999" placeholder="50">
+              <span class="econ-unit">电子币/天</span>
+            </div>
+            <div class="econ-row">
+              <span class="econ-label">🛒 日消费上限</span>
+              <input type="number" class="econ-input" id="sysEconExpMax" min="0" max="999999" placeholder="300">
+              <span class="econ-unit">电子币/天</span>
+            </div>
+            <div class="econ-row">
+              <span class="econ-label">💼 收入来源</span>
+              <input type="text" class="econ-input" id="sysEconIncSource" placeholder="发工资" style="max-width:180px;color:#88ccff;">
+              <span class="econ-unit">描述</span>
+            </div>
+            <div style="margin-top:8px;margin-bottom:8px;">
+              <label class="form-label">🛍️ 消费爱好（逗号分隔）</label>
+              <input type="text" class="form-input" id="sysEconFavorites" placeholder="例如：奶茶,手办,游戏皮肤">
+            </div>
+            <div class="econ-summary" id="sysEconSummary">
+              <div class="econ-summary-item"><span class="econ-s-label">余额</span><span class="econ-s-val" id="sysEconSumBal">¤0</span></div>
+              <div class="econ-summary-item"><span class="econ-s-label">月入</span><span class="econ-s-val income" id="sysEconSumInc">+¤0</span></div>
+              <div class="econ-summary-item"><span class="econ-s-label">月支</span><span class="econ-s-val expense" id="sysEconSumExp">-¤0</span></div>
+            </div>
+            <div style="margin-top:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:11px;color:#888;">📋 经济变动记录（最近20条）</span>
+                <button class="action-btn" onclick="clearEconLog();renderSysEconLog();" style="font-size:10px;padding:3px 8px;">清空</button>
+              </div>
+              <div class="econ-log" id="sysEconLog"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 作息子页 -->
+        <div id="sysSub-schedule" style="display:none;">
+          <div class="schedule-card">
+            <h4>📅 日程安排表</h4>
+            <div style="font-size:11px;color:#888;margin-bottom:10px;">设置角色每天的日程安排。角色会根据日程自然提到正在做的事。</div>
+            <div class="schedule-day-tabs" id="sysScheduleDayTabs">
+              <button class="schedule-day-tab active" onclick="switchScheduleDay('workday');renderSysScheduleTimeline();">📋 工作日</button>
+              <button class="schedule-day-tab" onclick="switchScheduleDay('restday');renderSysScheduleTimeline();">🌴 休息日</button>
+            </div>
+            <div class="schedule-type-row">
+              <span class="schedule-type-label">今天是</span>
+              <div class="schedule-type-btns">
+                <button class="schedule-type-btn" id="sysSchAutoBtn" onclick="setScheduleDayType('auto')">自动判断</button>
+                <button class="schedule-type-btn" id="sysSchWorkBtn" onclick="setScheduleDayType('work')">强制工作日</button>
+                <button class="schedule-type-btn" id="sysSchRestBtn" onclick="setScheduleDayType('rest')">强制休息日</button>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label class="form-label">休息日（星期几）</label>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;" id="sysScheduleRestDays">
+                <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" value="0" onchange="onSysRestDayChange()"> 日</label>
+                <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" value="1" onchange="onSysRestDayChange()"> 一</label>
+                <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" value="2" onchange="onSysRestDayChange()"> 二</label>
+                <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" value="3" onchange="onSysRestDayChange()"> 三</label>
+                <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" value="4" onchange="onSysRestDayChange()"> 四</label>
+                <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" value="5" onchange="onSysRestDayChange()"> 五</label>
+                <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" checked value="6" onchange="onSysRestDayChange()"> 六</label>
+              </div>
+            </div>
+            <div class="schedule-quick-presets">
+              <button class="schedule-preset-btn" onclick="applySchedulePreset('office')">💼 上班族</button>
+              <button class="schedule-preset-btn" onclick="applySchedulePreset('student')">📚 学生党</button>
+              <button class="schedule-preset-btn" onclick="applySchedulePreset('freelance')">🏠 自由职业</button>
+              <button class="schedule-preset-btn" onclick="applySchedulePreset('nightowl')">🦉 夜猫子</button>
+              <button class="schedule-preset-btn" onclick="applySchedulePreset('clear')">🗑️ 清空</button>
+            </div>
+            <div class="schedule-timeline" id="sysScheduleTimeline"></div>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+              <button class="action-btn" onclick="previewTodaySchedule()">👁 预览今日</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 技能子页 -->
+        <div id="sysSub-skills" style="display:none;">
+          <div style="background:rgba(100,200,255,0.05);border:1px solid rgba(100,200,255,0.2);border-radius:10px;padding:12px;margin-bottom:16px;">
+            <h4 style="font-size:13px;color:#66ccff;margin-bottom:8px;">🎯 角色技能/特长</h4>
+            <div style="font-size:11px;color:#888;margin-bottom:10px;line-height:1.6;">
+              设定角色擅长的领域。聊到相关话题时角色会表现得更自信专业。<br>
+              技能等级 1~5 星，等级越高越擅长。
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+              <button class="action-btn primary" onclick="addCharSkill()">+ 添加技能</button>
+            </div>
+            <div id="sysSkillList"></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="btn-row">
+          <button class="action-btn primary" onclick="saveAllSystems()">💾 保存所有系统设置</button>
         </div>
       </div>
       <!-- 数据页面 -->
@@ -6353,6 +6507,18 @@ body.hide-deco .pager-header {
     <button class="call-btn call-btn-end" onclick="endCall()" title="挂断">📞</button>
   </div>
 </div>
+<!-- 自定义输入弹窗 -->
+<div class="modal-overlay" id="inputModal">
+  <div class="modal-box" style="max-width:400px;">
+    <h3 id="inputModalTitle" style="margin-bottom:4px;">请输入</h3>
+    <p id="inputModalDesc" style="font-size:12px;color:#888;margin-bottom:12px;line-height:1.5;display:none;"></p>
+    <div id="inputModalFields"></div>
+    <div class="modal-footer">
+      <button class="action-btn" onclick="closeInputModal(false)">取消</button>
+      <button class="action-btn primary" id="inputModalOkBtn" onclick="closeInputModal(true)">确定</button>
+    </div>
+  </div>
+</div>
 <!-- 确认弹窗 -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box" style="max-width:360px;">
@@ -6372,10 +6538,12 @@ body.hide-deco .pager-header {
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+<div id="debugError" style="position:fixed;bottom:60px;left:10px;right:10px;background:rgba(255,0,0,0.9);color:white;padding:10px;border-radius:8px;font-size:11px;z-index:99999;display:none;max-height:200px;overflow:auto;word-break:break-all;"></div>
 <!-- 消息操作菜单 -->
 <div class="msg-menu" id="msgMenu">
   <button class="msg-menu-btn" onclick="editMessage()">✏️ 编辑</button>
   <button class="msg-menu-btn" onclick="bookmarkMessage()">⭐ 收藏</button>
+  <button class="msg-menu-btn" onclick="copyMessage()">📋 复制</button>
   <button class="msg-menu-btn" onclick="toggleMultiSelect()">☑️ 多选</button>
   <button class="msg-menu-btn" onclick="replyToMessage()">↩️ 引用回复</button>
   <button class="msg-menu-btn" id="resayBtn" onclick="resayMessage()" style="display:none;">🔄 重说</button>
@@ -6430,88 +6598,145 @@ function openDB() {
       db = request.result;
       resolve(db);
     };
-    request.onupgradeneeded = (e) => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains('settings')) {
-        d.createObjectStore('settings', { keyPath: 'key' });
-      }
-      if (!d.objectStoreNames.contains('messages')) {
-        const ms = d.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
-        ms.createIndex('timestamp', 'timestamp', { unique: false });
-      }
-      if (!d.objectStoreNames.contains('worldbook')) {
-        d.createObjectStore('worldbook', { keyPath: 'id' });
-      }
-      if (!d.objectStoreNames.contains('memories')) {
-        const mem = d.createObjectStore('memories', { keyPath: 'id', autoIncrement: true });
-        mem.createIndex('timestamp', 'timestamp', { unique: false });
+    request.onupgradeneeded = function(e) {
+      try {
+        var d = e.target.result;
+        if (!d.objectStoreNames.contains('settings')) {
+          d.createObjectStore('settings', { keyPath: 'key' });
+        }
+        if (!d.objectStoreNames.contains('messages')) {
+          var ms = d.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
+          ms.createIndex('timestamp', 'timestamp', { unique: false });
+        }
+        if (!d.objectStoreNames.contains('worldbook')) {
+          d.createObjectStore('worldbook', { keyPath: 'id' });
+        }
+        if (!d.objectStoreNames.contains('memories')) {
+          var mem = d.createObjectStore('memories', { keyPath: 'id', autoIncrement: true });
+          mem.createIndex('timestamp', 'timestamp', { unique: false });
+        }
+      } catch(upgradeErr) {
+        console.error('数据库升级失败:', upgradeErr);
       }
     };
   });
 }
 
 function dbPut(store, data) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    const s = tx.objectStore(store);
-    const req = s.put(data);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-    tx.onerror = () => reject(tx.error);
+  return new Promise(function(resolve, reject) {
+    if (!db) { reject(new Error('数据库未就绪')); return; }
+    try {
+      var tx = db.transaction(store, 'readwrite');
+      var s = tx.objectStore(store);
+      var req = s.put(data);
+      req.onsuccess = function() { resolve(req.result); };
+      req.onerror = function() { reject(req.error); };
+      tx.onerror = function() { reject(tx.error); };
+    } catch(e) {
+      reject(e);
+    }
   });
 }
 
 function dbGet(store, key) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readonly');
-    const s = tx.objectStore(store);
-    const req = s.get(key);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+  return new Promise(function(resolve, reject) {
+    if (!db) { resolve(null); return; }
+    try {
+      var tx = db.transaction(store, 'readonly');
+      var s = tx.objectStore(store);
+      var req = s.get(key);
+      req.onsuccess = function() { resolve(req.result); };
+      req.onerror = function() { reject(req.error); };
+    } catch(e) {
+      reject(e);
+    }
   });
 }
 
 function dbGetAll(store) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readonly');
-    const s = tx.objectStore(store);
-    const req = s.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+  return new Promise(function(resolve, reject) {
+    if (!db) { resolve([]); return; }
+    try {
+      var tx = db.transaction(store, 'readonly');
+      var s = tx.objectStore(store);
+      var req = s.getAll();
+      req.onsuccess = function() { resolve(req.result || []); };
+      req.onerror = function() { reject(req.error); };
+    } catch(e) {
+      reject(e);
+    }
   });
 }
 
 function dbDelete(store, key) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    const s = tx.objectStore(store);
-    const req = s.delete(key);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+  return new Promise(function(resolve, reject) {
+    if (!db) { reject(new Error('数据库未就绪')); return; }
+    try {
+      var tx = db.transaction(store, 'readwrite');
+      var s = tx.objectStore(store);
+      var req = s.delete(key);
+      req.onsuccess = function() { resolve(); };
+      req.onerror = function() { reject(req.error); };
+    } catch(e) {
+      reject(e);
+    }
   });
 }
 
 function dbClear(store) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    const s = tx.objectStore(store);
-    const req = s.clear();
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+  return new Promise(function(resolve, reject) {
+    if (!db) { reject(new Error('数据库未就绪')); return; }
+    try {
+      var tx = db.transaction(store, 'readwrite');
+      var s = tx.objectStore(store);
+      var req = s.clear();
+      req.onsuccess = function() { resolve(); };
+      req.onerror = function() { reject(req.error); };
+    } catch(e) {
+      reject(e);
+    }
   });
 }
 
 function dbAdd(store, data) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    const s = tx.objectStore(store);
-    const req = s.add(data);
-    var resultId = null;
-    req.onsuccess = () => { resultId = req.result; };
-    req.onerror = () => reject(req.error);
-    tx.oncomplete = () => resolve(resultId);
-    tx.onerror = () => reject(tx.error);
+  return new Promise(function(resolve, reject) {
+    if (!db) { reject(new Error('数据库未就绪')); return; }
+    try {
+      var tx = db.transaction(store, 'readwrite');
+      var s = tx.objectStore(store);
+      var req = s.add(data);
+      var resultId = null;
+      req.onsuccess = function() { resultId = req.result; };
+      req.onerror = function() { reject(req.error); };
+      tx.oncomplete = function() { resolve(resultId); };
+      tx.onerror = function() { reject(tx.error); };
+    } catch(e) {
+      reject(e);
+    }
   });
+}
+// ===== 获取角色/用户头像 =====
+function getCharAvatarHtml() {
+  var profile = charProfiles.find(function(c) { return c.id === activeCharId; });
+  if (profile && profile.avatarImage) {
+    return '<img src="' + profile.avatarImage + '">';
+  }
+  return (profile && profile.avatar) ? profile.avatar : '🤖';
+}
+
+function getUserAvatarHtml() {
+  return '👤';
+}
+
+function createAvatarEl(role) {
+  var el = document.createElement('div');
+  el.className = 'msg-avatar-mini';
+  if (role === 'char') {
+    el.innerHTML = getCharAvatarHtml();
+  } else {
+    el.innerHTML = getUserAvatarHtml();
+  }
+  return el;
 }
 // ===== HTML转义工具 =====
 function escHtml(str) {
@@ -6695,19 +6920,34 @@ function switchScheduleDay(tab) {
 
 function setScheduleDayType(type) {
   scheduleData.dayTypeOverride = type;
-  document.getElementById('scheduleAutoBtn').classList.toggle('active', type === 'auto');
-  document.getElementById('scheduleWorkBtn').classList.toggle('active', type === 'work');
-  document.getElementById('scheduleRestBtn').classList.toggle('active', type === 'rest');
+  
+  // 安全地切换按钮状态（旧ID和新ID都检查）
+  var btnMap = {
+    'auto': ['scheduleAutoBtn', 'sysSchAutoBtn'],
+    'work': ['scheduleWorkBtn', 'sysSchWorkBtn'],
+    'rest': ['scheduleRestBtn', 'sysSchRestBtn']
+  };
+  
+  for (var key in btnMap) {
+    var ids = btnMap[key];
+    var isActive = (key === type);
+    for (var i = 0; i < ids.length; i++) {
+      var el = document.getElementById(ids[i]);
+      if (el) el.classList.toggle('active', isActive);
+    }
+  }
 }
 
 function onRestDayChange() {
-  var checkboxes = document.querySelectorAll('#scheduleRestDays input[type="checkbox"]');
-  scheduleData.restDays = [];
+  // 同时检查旧ID和新ID的checkbox
+  var checkboxes = document.querySelectorAll('#scheduleRestDays input[type="checkbox"], #sysScheduleRestDays input[type="checkbox"]');
+  var days = new Set();
   checkboxes.forEach(function(cb) {
     if (cb.checked) {
-      scheduleData.restDays.push(parseInt(cb.value));
+      days.add(parseInt(cb.value));
     }
   });
+  scheduleData.restDays = Array.from(days);
 }
 
 function isTodayRestDay() {
@@ -6718,7 +6958,7 @@ function isTodayRestDay() {
 }
 
 function renderScheduleTimeline() {
-  var container = document.getElementById('scheduleTimeline');
+  var container = document.getElementById('scheduleTimeline') || document.getElementById('sysScheduleTimeline');
   if (!container) return;
   
   var data = currentScheduleTab === 'workday' ? scheduleData.workday : scheduleData.restday;
@@ -6778,17 +7018,19 @@ function onScheduleSlotChange(el) {
   }
 }
 
-function pickScheduleEmoji(hour) {
+async function pickScheduleEmoji(hour) {
   var emojis = ['😴','🌅','⏰','🍳','🍞','☕','💻','📚','📖','🎮','🎧','🎬','📱','🛋️','🚶','🏃','🛍️','🍜','🍲','🍱','🍵','🛁','🎨','📷','⚽','🏋️','🐱','🐕','🌙','✨','💬','🎵','🎉','😪','🧹','👔','🚇','🚗','🏠','🏢'];
   
-  var picked = prompt('选一个emoji（直接粘贴或输入）：\n\n常用：' + emojis.slice(0, 20).join(' ') + '\n' + emojis.slice(20).join(' '));
-  if (!picked || !picked.trim()) return;
+  var result = await showInputModal('选择图标', [
+    { id: 'emoji', label: '输入或粘贴emoji', type: 'text', placeholder: '😴', maxlength: 2, hint: '常用：' + emojis.join(' ') }
+  ]);
+  if (!result || !(result.emoji || '').trim()) return;
   
   var data = currentScheduleTab === 'workday' ? scheduleData.workday : scheduleData.restday;
   if (!data[hour]) {
     data[hour] = { emoji: '', activity: '', location: '' };
   }
-  data[hour].emoji = picked.trim().substring(0, 2);
+  data[hour].emoji = result.emoji.trim().substring(0, 2);
   
   renderScheduleTimeline();
 }
@@ -6866,8 +7108,8 @@ async function loadScheduleData() {
   // 恢复UI状态
   setScheduleDayType(scheduleData.dayTypeOverride);
   
-  // 恢复休息日勾选
-  var checkboxes = document.querySelectorAll('#scheduleRestDays input[type="checkbox"]');
+  // 恢复休息日勾选（旧ID和新ID都处理）
+  var checkboxes = document.querySelectorAll('#scheduleRestDays input[type="checkbox"], #sysScheduleRestDays input[type="checkbox"]');
   checkboxes.forEach(function(cb) {
     cb.checked = scheduleData.restDays.indexOf(parseInt(cb.value)) >= 0;
   });
@@ -7020,6 +7262,10 @@ var econSettings = {
 };
 // ===== 全局状态 =====
 let messages = [];
+var msgDisplayCount = 50; // 当前显示的消息数量
+var MSG_PAGE_SIZE = 30; // 每次加载更多的数量
+var isLoadingMore = false;
+var allMessagesLoaded = false;
 let worldBookEntries = [];
 let memoryEntries = [];
 let editingWbId = null;
@@ -7027,6 +7273,34 @@ let pendingConfirmFn = null;
 let isReceiving = false;
 let currentAbortController = null;
 
+function loadMoreMessages() {
+  if (isLoadingMore || allMessagesLoaded) return;
+  isLoadingMore = true;
+  
+  var hint = document.getElementById('loadMoreHint');
+  if (hint) {
+    hint.textContent = '加载中...';
+    hint.classList.add('loading');
+  }
+  
+  var chatArea = document.getElementById('chatArea');
+  var oldHeight = chatArea.scrollHeight;
+  
+  msgDisplayCount += MSG_PAGE_SIZE;
+  if (msgDisplayCount >= messages.length) {
+    msgDisplayCount = messages.length;
+    allMessagesLoaded = true;
+  }
+  
+  renderMessages();
+  
+  // 保持滚动位置（不跳到底部）
+  setTimeout(function() {
+    var newHeight = chatArea.scrollHeight;
+    chatArea.scrollTop = newHeight - oldHeight;
+    isLoadingMore = false;
+  }, 50);
+}
 function cancelReceive() {
   if (currentAbortController) {
     if (currentAbortController.timeoutId) {
@@ -7127,6 +7401,9 @@ function switchTab(tab) {
   if (tab === 'data') {
     renderStatsPanel();
   }
+  if (tab === 'systems') {
+    switchSystemSub(currentSystemSub);
+  }
   if (tab === 'space') {
     setTimeout(function() { renderSpaceMap(); }, 100);
   }
@@ -7195,11 +7472,14 @@ async function loadApiPresetsData() {
 }
 
 async function saveApiPreset() {
-  const presetName = prompt('请输入预设名称：', '默认配置');
-  if (!presetName || !presetName.trim()) return;
+  var nameResult = await showInputModal('💾 保存API预设', [
+    { id: 'name', label: '预设名称', type: 'text', value: '默认配置', placeholder: '给这个配置起个名字' }
+  ]);
+  if (!nameResult || !(nameResult.name || '').trim()) return;
+  const presetName = nameResult.name.trim();
   
   const currentSettings = {
-    name: presetName.trim(),
+    name: presetName,
     apiProvider: document.getElementById('apiProvider').value,
     apiBaseUrl: document.getElementById('apiBaseUrl').value.trim(),
     apiKey: document.getElementById('apiKey').value.trim(),
@@ -7216,12 +7496,13 @@ async function saveApiPreset() {
   // 检查是否已存在同名预设
   const existingIndex = apiPresets.findIndex(p => p.name === currentSettings.name);
   if (existingIndex >= 0) {
-    const overwrite = confirm(`预设"${currentSettings.name}"已存在，是否覆盖？`);
-    if (overwrite) {
-      apiPresets[existingIndex] = currentSettings;
-    } else {
+    var owResult = await showInputModal('⚠️ 预设已存在', [
+      { id: 'confirm', label: '预设"' + currentSettings.name + '"已存在，输入"是"确认覆盖', type: 'text', placeholder: '输入 是 确认' }
+    ]);
+    if (!owResult || owResult.confirm !== '是') {
       return;
     }
+    apiPresets[existingIndex] = currentSettings;
   } else {
     apiPresets.push(currentSettings);
   }
@@ -7524,17 +7805,13 @@ async function savePersonaSettings() {
   };
   for (var k in settings) {
     await dbPut('settings', { key: prefix + k, value: settings[k] });
-    // 同时保存到无前缀key（兼容API调用时读取）
     await dbPut('settings', { key: k, value: settings[k] });
   }
   charStickerChance = parseInt(document.getElementById('charStickerChance').value) || 0;
-  await dbPut('settings', { key: (activeCharId === 'default' ? '' : 'char_' + activeCharId + '_') + 'charStickerChance', value: charStickerChance });
-  await saveScheduleSettings();
-  await saveEconSettings();
-  await saveIntimacyFromUI();
+  await dbPut('settings', { key: prefix + 'charStickerChance', value: charStickerChance });
   var sigVal = document.getElementById('charSignature').value.trim();
   await saveSignature(sigVal);
-  showToast('人设与经济设置已保存');
+  showToast('人设已保存');
 }
 
 async function loadPersonaSettings() {
@@ -7595,7 +7872,14 @@ inputBox.addEventListener('keydown', function(e) {
 
 // ===== 增量追加单条消息（性能优化）=====
 function appendSingleMessage(msg, index) {
+  // 确保新消息在显示范围内
+  if (index >= messages.length - msgDisplayCount) {
+    // 在范围内，正常追加
+  } else {
+    msgDisplayCount = Math.max(msgDisplayCount, 50);
+  }
   var chatArea = document.getElementById('chatArea');
+  if (!msg || !msg.timestamp) return;
   var emptyState = document.getElementById('emptyState');
   if (emptyState) emptyState.remove();
 
@@ -7629,7 +7913,7 @@ function appendSingleMessage(msg, index) {
     var dateDivider = document.createElement('div');
     dateDivider.dataset.date = dateStr;
     dateDivider.style.cssText = 'text-align:center;padding:8px 0;font-size:11px;color:#555;';
-    dateDivider.innerHTML = '<span style="background:#1a1a2e;padding:2px 12px;border-radius:10px;border:1px solid #2a2a4a;">' + displayDate + '</span>';
+    dateDivider.innerHTML = '<span style="background:var(--pager-bg,#1a1a2e);padding:2px 12px;border-radius:10px;border:1px solid var(--border-color,#2a2a4a);">' + displayDate + '</span>';
     chatArea.appendChild(dateDivider);
   }
 
@@ -7646,7 +7930,7 @@ function appendSingleMessage(msg, index) {
     var sImg = document.createElement('img');
     sImg.className = 'msg-sticker'; sImg.src = msg.stickerUrl;
     sImg.alt = msg.stickerName || ''; sImg.onclick = function() { previewImage(msg.stickerUrl); };
-    sImg.onerror = function() { this.style.display='none'; bubble.textContent='[表情包]'; };
+    sImg.onerror = function() { this.style.display='none'; var errText = document.createTextNode('[表情包加载失败]'); bubble.appendChild(errText); };
     bubble.appendChild(sImg);
   } else if (msg.imageData) {
     var imgEl = document.createElement('img');
@@ -7675,8 +7959,27 @@ function appendSingleMessage(msg, index) {
       if (msg.quoteData && displayContent.indexOf('」\n') > 0) {
         displayContent = displayContent.substring(displayContent.indexOf('」\n') + 2);
       }
-      var textNode = document.createTextNode(displayContent);
-      bubble.appendChild(textNode);
+      var textWrap = document.createElement('div');
+      textWrap.className = 'msg-text-content';
+      textWrap.textContent = displayContent;
+      bubble.appendChild(textWrap);
+      if (displayContent.length > 300) {
+        textWrap.classList.add('collapsed');
+        var expandBtn = document.createElement('button');
+        expandBtn.className = 'msg-expand-btn';
+        expandBtn.textContent = '▼ 展开全文';
+        expandBtn.onclick = function(e) {
+          e.stopPropagation();
+          if (textWrap.classList.contains('collapsed')) {
+            textWrap.classList.remove('collapsed');
+            expandBtn.textContent = '▲ 收起';
+          } else {
+            textWrap.classList.add('collapsed');
+            expandBtn.textContent = '▼ 展开全文';
+          }
+        };
+        bubble.appendChild(expandBtn);
+      }
     }
 
   // 长按/右键菜单
@@ -7699,7 +8002,7 @@ function appendSingleMessage(msg, index) {
   wrapper.appendChild(name);
   wrapper.appendChild(bubble);
   wrapper.appendChild(time);
-  msgRow.appendChild(wrapper);
+  var avatarEl = createAvatarEl(msg.role);   msgRow.appendChild(avatarEl);   msgRow.appendChild(wrapper);
   chatArea.appendChild(msgRow);
 
   // 滚动到底部
@@ -7710,9 +8013,7 @@ function appendSingleMessage(msg, index) {
 // ===== 消息渲染 =====
 function renderMessages() {
   const chatArea = document.getElementById('chatArea');
-  const emptyState = document.getElementById('emptyState');
   
-  // 重置日期追踪变量
   window._lastAppendedDate = '';
   
   document.removeEventListener('click', closeMsgMenuHandler);
@@ -7726,14 +8027,31 @@ function renderMessages() {
     es.id = 'emptyState';
     es.innerHTML = '<div class="icon">📟</div><p>发送消息开始对话</p>';
     chatArea.appendChild(es);
+    allMessagesLoaded = true;
     return;
   }
   
   chatArea.innerHTML = '';
   
+  // 计算显示范围
+  var startIdx = Math.max(0, messages.length - msgDisplayCount);
+  var displayMessages = messages.slice(startIdx);
+  allMessagesLoaded = (startIdx === 0);
+  
+  // 添加"加载更多"提示
+  if (!allMessagesLoaded) {
+    var loadMoreEl = document.createElement('div');
+    loadMoreEl.className = 'load-more-hint';
+    loadMoreEl.id = 'loadMoreHint';
+    loadMoreEl.textContent = '▲ 上拉加载更多（还有' + startIdx + '条）';
+    loadMoreEl.onclick = function() { loadMoreMessages(); };
+    chatArea.appendChild(loadMoreEl);
+  }
+  
   var lastDateStr = '';
-  messages.forEach((msg, index) => {
-    // 日期分隔线
+  displayMessages.forEach(function(msg, displayIdx) {
+    var index = startIdx + displayIdx;
+    
     var msgDate = new Date(msg.timestamp);
     var dateStr = msgDate.getFullYear() + '/' + (msgDate.getMonth() + 1) + '/' + msgDate.getDate();
     var today = new Date();
@@ -7743,7 +8061,9 @@ function renderMessages() {
     
     if (dateStr !== lastDateStr) {
       lastDateStr = dateStr;
+      window._lastAppendedDate = dateStr;
       var dateDivider = document.createElement('div');
+      dateDivider.dataset.date = dateStr;
       dateDivider.style.cssText = 'text-align:center;padding:8px 0;font-size:11px;color:#555;';
       var displayDate = dateStr;
       if (dateStr === todayStr) displayDate = '今天';
@@ -7752,7 +8072,7 @@ function renderMessages() {
         var weekDays = ['周日','周一','周二','周三','周四','周五','周六'];
         displayDate = (msgDate.getMonth()+1) + '月' + msgDate.getDate() + '日 ' + weekDays[msgDate.getDay()];
       }
-      dateDivider.innerHTML = '<span style="background:#1a1a2e;padding:2px 12px;border-radius:10px;border:1px solid #2a2a4a;">' + displayDate + '</span>';
+      dateDivider.innerHTML = '<span style="background:var(--pager-bg,#1a1a2e);padding:2px 12px;border-radius:10px;border:1px solid var(--border-color,#2a2a4a);">' + displayDate + '</span>';
       chatArea.appendChild(dateDivider);
     }
     
@@ -7806,61 +8126,63 @@ function renderMessages() {
       if (msg.quoteData && displayContent.indexOf('」\n') > 0) {
         displayContent = displayContent.substring(displayContent.indexOf('」\n') + 2);
       }
-      bubble.appendChild(document.createTextNode(displayContent));
+      var textWrap2 = document.createElement('div');
+      textWrap2.className = 'msg-text-content';
+      textWrap2.textContent = displayContent;
+      bubble.appendChild(textWrap2);
+      if (displayContent.length > 300) {
+        textWrap2.classList.add('collapsed');
+        var expandBtn2 = document.createElement('button');
+        expandBtn2.className = 'msg-expand-btn';
+        expandBtn2.textContent = '▼ 展开全文';
+        (function(tw, eb) {
+          eb.onclick = function(e) {
+            e.stopPropagation();
+            if (tw.classList.contains('collapsed')) {
+              tw.classList.remove('collapsed');
+              eb.textContent = '▲ 收起';
+            } else {
+              tw.classList.add('collapsed');
+              eb.textContent = '▼ 展开全文';
+            }
+          };
+        })(textWrap2, expandBtn2);
+        bubble.appendChild(expandBtn2);
+      }
     }
     
     let pressTimer = null;
-    
     bubble.addEventListener('touchstart', function(e) {
-      pressTimer = setTimeout(function() {
-        showMsgMenu(e, index, msg.role);
-      }, 500);
+      pressTimer = setTimeout(function() { showMsgMenu(e, index, msg.role); }, 500);
     });
-    
-    bubble.addEventListener('touchend', function() {
-      clearTimeout(pressTimer);
-    });
-    
-    bubble.addEventListener('touchmove', function() {
-      clearTimeout(pressTimer);
-    });
-    
-    bubble.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-      showMsgMenu(e, index, msg.role);
-    });
-    
+    bubble.addEventListener('touchend', function() { clearTimeout(pressTimer); });
+    bubble.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
+    bubble.addEventListener('contextmenu', function(e) { e.preventDefault(); showMsgMenu(e, index, msg.role); });
     bubble.addEventListener('click', function(e) {
-      if (isMultiSelectMode) {
-        e.stopPropagation();
-        toggleMessageSelect(index);
-      }
+      if (isMultiSelectMode) { e.stopPropagation(); toggleMessageSelect(index); }
     });
     
     const wrapper = document.createElement('div');
-    
     const name = document.createElement('div');
     name.className = 'msg-name';
     name.textContent = msg.name || '';
-    
     const time = document.createElement('div');
     time.className = 'msg-time';
     time.textContent = formatTime(msg.timestamp);
-    
     wrapper.appendChild(name);
     wrapper.appendChild(bubble);
     wrapper.appendChild(time);
     
+    var avatarEl2 = createAvatarEl(msg.role);
+    msgRow.appendChild(avatarEl2);
     msgRow.appendChild(wrapper);
     chatArea.appendChild(msgRow);
   });
   
-  // 优化：使用防抖避免频繁滚动
   clearTimeout(window.scrollTimer);
-  window.scrollTimer = setTimeout(() => {
+  window.scrollTimer = setTimeout(function() {
     chatArea.scrollTop = chatArea.scrollHeight;
   }, 50);
-  // 更新存储槽
   updateStorageCounter();
 }
 
@@ -7974,6 +8296,7 @@ async function receiveMessage() {
   
   var chatArea = document.getElementById('chatArea');
   chatArea.appendChild(typingEl);
+  document.getElementById('typingName').textContent = document.getElementById('charName').value || 'AI助手';
   typingEl.classList.add('show');
   chatArea.scrollTop = chatArea.scrollHeight;
   
@@ -8077,7 +8400,7 @@ async function receiveMessage() {
         }
         
         pauseTime = Math.max(200, Math.min(5000, pauseTime));
-        
+        document.getElementById('typingName').textContent = document.getElementById('charName').value || 'AI助手';
         typingEl.classList.add('show');
         chatArea.appendChild(typingEl);
         chatArea.scrollTop = chatArea.scrollHeight;
@@ -8190,20 +8513,31 @@ async function receiveMessage() {
 
 // ===== 分割句子（保持完整性）=====
 function splitIntoSentences(text) {
+  // 预处理：确保换行分割正确
+  if (!text || !text.trim()) return [''];
+  text = text.trim();
+  
+  // 移除开头结尾的空行
+  text = text.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
   var paragraphs = text.split('\n').filter(function(p) { return p.trim().length > 0; });
   
   if (paragraphs.length > 1) {
     var merged = [];
     for (var i = 0; i < paragraphs.length; i++) {
       var p = paragraphs[i].trim();
-      // 短段落合并到前一段（但emoji单独一行保留）
+      if (!p) continue;
+      // 超短内容（1-3字）合并到前一段，避免拆得太碎
       var isEmojiOnly = false;
-      try { isEmojiOnly = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+$/u.test(p); } catch(ue) { isEmojiOnly = false; }
-      if (merged.length > 0 && p.length < 6 && !isEmojiOnly && merged[merged.length - 1].length < 40) {
+      try { isEmojiOnly = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}]+$/u.test(p); } catch(ue) { isEmojiOnly = false; }
+      if (merged.length > 0 && p.length <= 3 && !isEmojiOnly && merged[merged.length - 1].length < 30) {
         merged[merged.length - 1] += '\n' + p;
       } else {
         merged.push(p);
       }
+    }
+    // 如果合并后只剩1条且原本有多段，保留原始分段
+    if (merged.length === 1 && paragraphs.length > 1) {
+      return paragraphs.filter(function(pp) { return pp.trim().length > 0; });
     }
     return merged;
   }
@@ -8500,7 +8834,28 @@ function cleanupResponse(text) {
   // 移除尾部可能残留的引号
   text = text.replace(/["""]$/g, '');
   // 检测并移除AI主动指定的表情包标记（实际发送在外部处理）
+  // 清理所有可能残留的工具标记
   text = text.replace(/\[发表情[:：].+?\]/g, '').trim();
+  text = text.replace(/\[表情包[:：].+?\]/g, '').trim();
+  text = text.replace(/\[表情[:：].+?\]/g, '').trim();
+  
+  // 清理可能残留的其他工具标记
+  text = text.replace(/\[移动到[:：].+?\]/g, '').trim();
+  text = text.replace(/\[心情[:：][^\]]+\]/g, '').trim();
+  text = text.replace(/\[播放音乐[:：].+?\]/g, '').trim();
+  text = text.replace(/\[暂停音乐\]/g, '').trim();
+  text = text.replace(/\[状态[:：].+?\]/g, '').trim();
+  text = text.replace(/\[送礼物[:：][^\]]+\]/g, '').trim();
+  text = text.replace(/\[翻页[:：].+?\]/g, '').trim();
+  text = text.replace(/\[好感[:：][^\]]+\]/g, '').trim();
+  text = text.replace(/\[签名[:：].+?\]/g, '').trim();
+  text = text.replace(/\[转账[:：][^\]]+\]/g, '').trim();
+  
+  // 如果清理后为空，给个默认值
+  if (!text || text.length === 0) {
+    text = '嗯';
+  }
+  
   return text.trim();
 }
 // ===== 构建系统提示词 =====
@@ -8684,14 +9039,48 @@ async function buildSystemPrompt() {
   // 【第13层】纪念日
   // ============================================================
   prompt += getAnniversaryInfoForAI();
-
+prompt += getSkillsInfoForAI();
   // ============================================================
   // 【第14层】实时上下文
   // ============================================================
   var now = new Date();
-  var timeStr = now.toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', weekday:'short' });
-  prompt += '# 当前：' + timeStr + '\n';
-  prompt += '对方上次发消息：' + getLastUserMsgTimeDesc() + '\n\n';
+  var timeStr = now.toLocaleString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', weekday:'short' });
+  var hourNow = now.getHours();
+  var periodStr = '';
+  if (hourNow >= 0 && hourNow < 5) periodStr = '（凌晨深夜）';
+  else if (hourNow < 8) periodStr = '（清晨）';
+  else if (hourNow < 12) periodStr = '（上午）';
+  else if (hourNow < 14) periodStr = '（中午）';
+  else if (hourNow < 18) periodStr = '（下午）';
+  else if (hourNow < 21) periodStr = '（傍晚/晚上）';
+  else periodStr = '（深夜）';
+  
+  prompt += '# ⏰ 时间感知\n';
+  prompt += '现在是：' + timeStr + ' ' + periodStr + '\n';
+  prompt += '对方上次发消息：' + getLastUserMsgTimeDesc() + '\n';
+  
+  // 计算时间间隔并给出行为指导
+  var lastUserTime = 0;
+  for (var ti = messages.length - 1; ti >= 0; ti--) {
+    if (messages[ti].role === 'user') { lastUserTime = messages[ti].timestamp; break; }
+  }
+  var gapHours = lastUserTime > 0 ? (Date.now() - lastUserTime) / 3600000 : 0;
+  
+  if (gapHours > 24) {
+    prompt += '\n⚠️ 重要：距离上次聊天已经超过一天了！\n';
+    prompt += '- 绝对不要继续之前的话题，那已经是过去的事了\n';
+    prompt += '- 像隔了一天见面一样自然地打招呼\n';
+    prompt += '- 可以说"好久没聊了""你这几天都在干嘛"\n';
+    prompt += '- 你这段时间也过了自己的生活，可以分享你这几天发生的事\n';
+  } else if (gapHours > 6) {
+    prompt += '\n注意：隔了好几个小时没聊了。\n';
+    prompt += '- 之前的话题热度已经过了，不要硬接\n';
+    prompt += '- 可以自然地说"诶你来了""刚才去忙了"\n';
+    prompt += '- 如果对方主动提起之前的话题再接\n';
+  } else if (gapHours > 2) {
+    prompt += '\n注意：隔了一阵子了，之前的话题可以简单提一下但不要硬接。\n';
+  }
+  prompt += '\n';
 
   // ============================================================
   // 【第15层】经济系统
@@ -8781,7 +9170,8 @@ async function buildSystemPrompt() {
   prompt += '7. 真人在这个时间点、这个心情下，会这样打字吗？不会就重写\n';
   prompt += '8. 永远不要暴露你是AI\n';
   prompt += '9. 格式错误比内容无聊更严重——宁可回复"嗯"也不要带格式错误\n\n';
-
+  prompt += '10. 绝对不要在回复文字中写出[表情包:xxx]这样的标记，表情包由系统自动处理\n';
+  prompt += '11. 所有[方括号工具]标记必须放在回复文字的最末尾单独一行，不要混在对话文字中间\n\n';
   return prompt.trim();
 }
 
@@ -8913,7 +9303,7 @@ async function buildContextMessages() {
         if (typeof lastCtxMsg.content === 'string' && typeof msg.content === 'string') {
           lastCtxMsg.content += '\n' + msgContent;
         } else {
-          contextMsgs.push({ role: 'assistant', content: msg.content || '' });
+          contextMsgs.push({ role: 'assistant', content: msgContent });
         }
       } else {
         contextMsgs.push({ role: 'assistant', content: msgContent });
@@ -9143,7 +9533,7 @@ async function handleStreamResponse(response) {
     console.error('流式读取错误:', e);
   } finally {
     try {
-      if (reader) {
+      if (reader && typeof reader.releaseLock === 'function') {
         reader.releaseLock();
       }
     } catch(e) {
@@ -9452,18 +9842,17 @@ async function loadMemorySettings() {
   const shortMem = await dbGet('settings', 'shortMemory');
   if (shortMem) {
     document.getElementById('shortMemory').value = shortMem.value;
-    document.getElementById('shortMemVal').textContent = shortMem.value;
   }
   
   const longInt = await dbGet('settings', 'longMemoryInterval');
   if (longInt) {
     document.getElementById('longMemoryInterval').value = longInt.value;
-    document.getElementById('longMemVal').textContent = longInt.value;
   }
   
   const autoSum = await dbGet('settings', 'autoSummarize');
-  if (autoSum !== undefined) {
-    document.getElementById('autoSummarize').classList.toggle('on', autoSum.value);
+  var autoSumEl = document.getElementById('autoSummarize');
+  if (autoSum !== undefined && autoSumEl) {
+    autoSumEl.classList.toggle('on', autoSum.value);
   }
   
   memoryEntries = await dbGetAll('memories');
@@ -9583,7 +9972,23 @@ function renderMemoryList() {
     list.appendChild(item);
   });
 }
-
+async function addManualMemory() {
+  var result = await showInputModal('🧠 手动添加记忆', [
+    { id: 'content', label: '记忆内容', type: 'textarea', placeholder: '输入要添加的记忆...\n\n建议格式：\n[事实] 用户喜欢猫\n[约定] 周末一起看电影\n[偏好] 用户讨厌香菜', rows: 6, hint: '类型可选：事实/约定/偏好/关系/事件/感受' }
+  ], '手动添加的记忆将直接进入长期记忆库，AI每次对话都会参考。');
+  if (!result || !(result.content || '').trim()) return;
+  
+  var memEntry = {
+    content: result.content.trim(),
+    timestamp: Date.now()
+  };
+  var memId = await dbAdd('memories', memEntry);
+  memEntry.id = memId;
+  memoryEntries.push(memEntry);
+  renderMemoryList();
+  updateMemoryStatus();
+  showToast('✅ 记忆已手动添加');
+}
 function editMemory(id) {
   var mem = memoryEntries.find(function(m) { return m.id === id; });
   if (!mem) return;
@@ -9627,6 +10032,7 @@ async function deleteMemory(id) {
 }
 
 async function checkAutoSummarize() {
+  try {
   var autoSum = (await dbGet('settings', 'autoSummarize'))?.value ?? true;
   if (!autoSum) return;
   
@@ -9648,6 +10054,7 @@ async function checkAutoSummarize() {
       try {
         await manualSummarize(true); // 传true表示是自动模式
         success = true;
+        updateMemoryStatus();
         break;
       } catch(e) {
         console.error('自动总结第' + (attempt+1) + '次尝试失败:', e);
@@ -9670,7 +10077,11 @@ async function checkAutoSummarize() {
       }, 3000);
     }
   }
+} catch(e) {
+    console.error('自动总结检查失败:', e);
+  }
 }
+
 
 async function manualSummarize(isAuto) {
   var shortMem = (await dbGet('settings', 'shortMemory'))?.value || 10;
@@ -10060,7 +10471,284 @@ function createTextImageBubble(title, content) {
 }
 // ===== 角色签名系统 =====
 var charSignature = '';
+// ===== 角色技能系统 =====
+var charSkills = [];
+var currentSystemSub = 'intimacy';
 
+function switchSystemSub(sub) {
+  currentSystemSub = sub;
+  var subs = ['intimacy','econ','schedule','skills'];
+  subs.forEach(function(s) {
+    var el = document.getElementById('sysSub-' + s);
+    var btn = document.getElementById('sysTab' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (el) el.style.display = (s === sub) ? '' : 'none';
+    if (btn) btn.classList.toggle('active', s === sub);
+  });
+  // 切换时刷新对应内容
+  if (sub === 'intimacy') refreshSysIntimacy();
+  if (sub === 'econ') refreshSysEcon();
+  if (sub === 'schedule') renderSysScheduleTimeline();
+  if (sub === 'skills') renderSysSkillList();
+}
+
+// --- 好感度子页 ---
+function refreshSysIntimacy() {
+  var input = document.getElementById('sysIntimacyInput');
+  if (input) input.value = Math.round(charIntimacy);
+  var level = getIntimacyLevel();
+  var lt = document.getElementById('sysIntimacyLevelText');
+  if (lt) { lt.textContent = level.name; lt.style.color = level.color; }
+  var bar = document.getElementById('sysIntimacyProgressBar');
+  if (bar) { bar.style.width = Math.round(charIntimacy) + '%'; bar.style.background = level.color; }
+  var desc = document.getElementById('sysIntimacyDesc');
+  if (desc) desc.textContent = level.desc;
+  renderSysIntimacyLog();
+}
+
+function renderSysIntimacyLog() {
+  var el = document.getElementById('sysIntimacyLog');
+  if (!el) return;
+  if (!intimacyLog || intimacyLog.length === 0) {
+    el.innerHTML = '<div style="color:#555;padding:4px;">暂无记录</div>';
+    return;
+  }
+  var html = '';
+  var count = Math.min(intimacyLog.length, 10);
+  for (var i = 0; i < count; i++) {
+    var log = intimacyLog[i];
+    var sign = log.amount >= 0 ? '+' : '';
+    var cls = log.amount >= 0 ? 'color:#ff88aa' : 'color:#888';
+    html += '<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;">';
+    html += '<span>' + log.time + ' ' + escHtml(log.reason) + '</span>';
+    html += '<span style="' + cls + '">' + sign + log.amount + '</span></div>';
+  }
+  el.innerHTML = html;
+}
+
+function setSysIntimacy(val) {
+  setIntimacyLevel(val);
+  refreshSysIntimacy();
+}
+
+function onSysRestDayChange() {
+  var checkboxes = document.querySelectorAll('#sysScheduleRestDays input[type="checkbox"]');
+  scheduleData.restDays = [];
+  checkboxes.forEach(function(cb) {
+    if (cb.checked) scheduleData.restDays.push(parseInt(cb.value));
+  });
+}
+
+// --- 经济子页 ---
+function refreshSysEcon() {
+  document.getElementById('sysEconBalance').value = charBalance;
+  document.getElementById('sysEconIncome').value = econSettings.monthlyIncome || 3000;
+  document.getElementById('sysEconBonusMin').value = econSettings.bonusMin || 0;
+  document.getElementById('sysEconBonusMax').value = econSettings.bonusMax || 0;
+  document.getElementById('sysEconExpMin').value = econSettings.dailyExpenseMin || 50;
+  document.getElementById('sysEconExpMax').value = econSettings.dailyExpenseMax || 300;
+  document.getElementById('sysEconIncSource').value = econSettings.incomeSource || '';
+  document.getElementById('sysEconFavorites').value = econSettings.expenseFavorites || '';
+  updateSysEconSummary();
+  renderSysEconLog();
+}
+
+function updateSysEconSummary() {
+  var sb = document.getElementById('sysEconSumBal');
+  var si = document.getElementById('sysEconSumInc');
+  var se = document.getElementById('sysEconSumExp');
+  if (sb) sb.textContent = '¤' + charBalance;
+  if (si) si.textContent = '+¤' + (econSettings.monthlyIncome || 0);
+  var avg = Math.round(((econSettings.dailyExpenseMin || 0) + (econSettings.dailyExpenseMax || 0)) / 2);
+  if (se) se.textContent = '-¤' + (avg * 30);
+}
+
+function renderSysEconLog() {
+  var el = document.getElementById('sysEconLog');
+  if (!el) return;
+  if (!econSettings.econLog || econSettings.econLog.length === 0) {
+    el.innerHTML = '<div style="font-size:11px;color:#555;padding:8px;text-align:center;">暂无记录</div>';
+    return;
+  }
+  var html = '';
+  var count = Math.min(econSettings.econLog.length, 20);
+  for (var i = 0; i < count; i++) {
+    var log = econSettings.econLog[i];
+    var cls = log.amount >= 0 ? 'econ-log-plus' : 'econ-log-minus';
+    var sign = log.amount >= 0 ? '+' : '';
+    html += '<div class="econ-log-item"><span>' + log.time + ' ' + escHtml(log.reason) + '</span><span class="' + cls + '">' + sign + '¤' + log.amount + '</span></div>';
+  }
+  el.innerHTML = html;
+}
+
+// --- 作息子页 ---
+function renderSysScheduleTimeline() {
+  renderScheduleTimeline();
+  // 同步到系统页面的timeline（复用原来的渲染函数，目标元素一样）
+}
+
+// --- 技能子页 ---
+function renderSysSkillList() {
+  var el = document.getElementById('sysSkillList');
+  if (!el) return;
+  if (charSkills.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:#555;padding:20px;font-size:12px;">暂无技能，点击"添加技能"开始设定</div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < charSkills.length; i++) {
+    var sk = charSkills[i];
+    var stars = '';
+    for (var s = 0; s < 5; s++) {
+      stars += s < sk.level ? '⭐' : '☆';
+    }
+    html += '<div class="wb-item" style="margin-bottom:8px;">';
+    html += '<div class="wb-item-header">';
+    html += '<div class="wb-item-title" style="color:#66ccff;">' + escHtml(sk.name) + ' <span style="font-size:11px;">' + stars + '</span></div>';
+    html += '<div class="wb-item-actions">';
+    html += '<button class="wb-small-btn" onclick="editCharSkill(' + i + ')" title="编辑">✏</button>';
+    html += '<button class="wb-small-btn del" onclick="deleteCharSkill(' + i + ')" title="删除">🗑</button>';
+    html += '</div></div>';
+    if (sk.desc) {
+      html += '<div style="font-size:12px;color:#888;margin-top:4px;">' + escHtml(sk.desc) + '</div>';
+    }
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+async function addCharSkill() {
+  var result = await showInputModal('🎯 添加技能', [
+    { id: 'name', label: '技能名称', type: 'text', placeholder: '例如：做饭、编程、画画、唱歌' },
+    { id: 'level', label: '熟练度（1-5）', type: 'number', value: '3', min: 1, max: 5, hint: '1=入门 2=了解 3=擅长 4=精通 5=大师' },
+    { id: 'desc', label: '补充描述（可选）', type: 'text', placeholder: '例如：擅长中式家常菜，红烧肉是拿手菜' }
+  ]);
+  if (!result || !(result.name || '').trim()) return;
+  charSkills.push({
+    name: result.name.trim(),
+    level: Math.max(1, Math.min(5, parseInt(result.level) || 3)),
+    desc: (result.desc || '').trim()
+  });
+  renderSysSkillList();
+  showToast('✅ 技能已添加');
+}
+
+async function editCharSkill(idx) {
+  var sk = charSkills[idx];
+  if (!sk) return;
+  var result = await showInputModal('✏️ 编辑技能', [
+    { id: 'name', label: '技能名称', type: 'text', value: sk.name },
+    { id: 'level', label: '熟练度（1-5）', type: 'number', value: String(sk.level), min: 1, max: 5 },
+    { id: 'desc', label: '补充描述', type: 'text', value: sk.desc || '' }
+  ]);
+  if (!result || !(result.name || '').trim()) return;
+  charSkills[idx] = {
+    name: result.name.trim(),
+    level: Math.max(1, Math.min(5, parseInt(result.level) || 3)),
+    desc: (result.desc || '').trim()
+  };
+  renderSysSkillList();
+  showToast('已更新');
+}
+
+function deleteCharSkill(idx) {
+  showConfirm('删除技能', '确定要删除技能"' + charSkills[idx].name + '"吗？', function() {
+    charSkills.splice(idx, 1);
+    renderSysSkillList();
+    showToast('已删除');
+  });
+}
+
+// --- 保存所有系统设置 ---
+async function saveAllSystems() {
+  var prefix = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
+
+  // 保存好感度
+  var newInt = parseInt(document.getElementById('sysIntimacyInput').value);
+  if (!isNaN(newInt) && newInt >= 0 && newInt <= 100) {
+    var oldInt = charIntimacy;
+    charIntimacy = newInt;
+    if (newInt !== oldInt) addIntimacyLog('手动调整', newInt - oldInt);
+    await saveIntimacyData();
+  }
+
+  // 保存经济
+  var newBal = parseInt(document.getElementById('sysEconBalance').value) || 0;
+  if (newBal !== charBalance) {
+    addEconLog('手动调整', newBal - charBalance);
+    charBalance = newBal;
+  }
+  econSettings.monthlyIncome = parseInt(document.getElementById('sysEconIncome').value) || 0;
+  econSettings.bonusMin = parseInt(document.getElementById('sysEconBonusMin').value) || 0;
+  econSettings.bonusMax = parseInt(document.getElementById('sysEconBonusMax').value) || 0;
+  econSettings.dailyExpenseMin = parseInt(document.getElementById('sysEconExpMin').value) || 0;
+  econSettings.dailyExpenseMax = parseInt(document.getElementById('sysEconExpMax').value) || 0;
+  econSettings.incomeSource = document.getElementById('sysEconIncSource').value.trim();
+  econSettings.expenseFavorites = document.getElementById('sysEconFavorites').value.trim();
+  await dbPut('settings', { key: prefix + 'charBalance', value: charBalance });
+  await dbPut('settings', { key: 'charBalance', value: charBalance });
+  await dbPut('settings', { key: prefix + 'econSettings', value: econSettings });
+  await dbPut('settings', { key: 'econSettings', value: econSettings });
+  updateBalanceDisplay();
+
+  // 保存作息
+  await saveScheduleSettings();
+
+  // 保存技能
+  await dbPut('settings', { key: prefix + 'charSkills', value: charSkills });
+  await dbPut('settings', { key: 'charSkills', value: charSkills });
+
+  // 同步刷新旧页面的控件（保持兼容）
+  // 同步刷新旧页面控件（如果存在的话）
+  var syncFields = {
+    'econBalance': charBalance,
+    'econMonthlyIncome': econSettings.monthlyIncome,
+    'econBonusMin': econSettings.bonusMin,
+    'econBonusMax': econSettings.bonusMax,
+    'econExpenseMin': econSettings.dailyExpenseMin,
+    'econExpenseMax': econSettings.dailyExpenseMax,
+    'econIncomeSource': econSettings.incomeSource,
+    'econExpenseFavorites': econSettings.expenseFavorites,
+    'intimacyInput': Math.round(charIntimacy)
+  };
+  for (var sfId in syncFields) {
+    var sfEl = document.getElementById(sfId);
+    if (sfEl) sfEl.value = syncFields[sfId];
+  }
+  updateEconSummary();
+  renderEconLog();
+  updateIntimacyUI();
+
+  showToast('✅ 所有系统设置已保存');
+}
+
+// 加载技能数据
+async function loadCharSkills() {
+  var saved = await dbGet('settings', 'charSkills');
+  if (saved && saved.value) {
+    charSkills = saved.value;
+  }
+}
+
+// 获取技能信息给AI用
+function getSkillsInfoForAI() {
+  if (charSkills.length === 0) return '';
+  var text = '# 🎯 你的技能/特长\n';
+  var levelNames = ['', '入门', '了解', '擅长', '精通', '大师级'];
+  for (var i = 0; i < charSkills.length; i++) {
+    var sk = charSkills[i];
+    var stars = '';
+    for (var s = 0; s < sk.level; s++) stars += '★';
+    text += '- ' + sk.name + ' ' + stars + '（' + levelNames[sk.level] + '）';
+    if (sk.desc) text += '：' + sk.desc;
+    text += '\n';
+  }
+  text += '\n当聊到你擅长的领域时：\n';
+  text += '- 说话更自信，会主动展开讲解\n';
+  text += '- 等级高的技能可以给对方建议和指导\n';
+  text += '- 等级低的技能表现得谦虚："我也只是略知一二"\n';
+  text += '- 不擅长的领域就老实说不太懂\n\n';
+  return text;
+}
 async function loadSignature() {
   var saved = await dbGet('settings', 'charSignature');
   if (saved && saved.value) {
@@ -10092,12 +10780,14 @@ function updateSignatureDisplay() {
   }
 }
 
-function editSignature() {
+async function editSignature() {
   if (isReceiving) return;
   var current = charSignature || '';
-  var newSig = prompt('设置角色签名（最多30字，留空则显示当前活动）：', current);
-  if (newSig === null) return;
-  newSig = newSig.trim().substring(0, 30);
+  var result = await showInputModal('✍️ 设置角色签名', [
+    { id: 'sig', label: '签名内容', type: 'text', value: current, placeholder: '例如：今天天气不错~', maxlength: 30, hint: '最多30字，留空则显示角色当前活动' }
+  ]);
+  if (result === null) return;
+  var newSig = (result.sig || '').trim().substring(0, 30);
   saveSignature(newSig);
   showToast(newSig ? '✍️ 签名已更新' : '签名已清空');
 }
@@ -10218,6 +10908,7 @@ async function exportAllData() {
       spaceLocations: spaceLocations,
       currentLocationId: currentLocationId,
       scheduleData: scheduleData,
+      charSkills: charSkills,
       charMood: charMood,
       moodLastUpdate: moodLastUpdate
     };
@@ -10531,7 +11222,9 @@ async function importAllData(event) {
       if (data.scheduleData) {
         await dbPut('settings', { key: 'scheduleData', value: data.scheduleData });
       }
-      
+      if (data.charSkills && Array.isArray(data.charSkills)) {
+        await dbPut('settings', { key: 'charSkills', value: data.charSkills });
+      }
       // 导入心情数据
       if (data.charMood !== undefined) {
         await dbPut('settings', { key: 'charMood', value: data.charMood });
@@ -10563,7 +11256,7 @@ async function importAllData(event) {
     }
   });
   
-  event.target.value = '';
+  try { event.target.value = ''; } catch(e) {}
 }
 
 async function deleteEarlyMessages() {
@@ -10601,6 +11294,11 @@ async function deleteEarlyMessages() {
     } catch (e) {
       showToast('删除失败: ' + e.message, true);
     } finally {
+      // 确保基本数据已加载
+    if (!db) {
+      document.getElementById('debugError').style.display = 'block';
+      document.getElementById('debugError').textContent = '数据库未能成功打开。请刷新页面重试。如果持续出现，请清除浏览器数据。';
+    }
       hideLoading();
     }
   });
@@ -10653,10 +11351,16 @@ let isMultiSelectMode = false;
 let selectedMessages = new Set();
 
 function closeMsgMenuHandler(e) {
+  if (window._msgMenuJustOpened) return;
   var menu = document.getElementById('msgMenu');
-  if (menu.contains(e.target)) {
-    return;
-  }
+  if (menu.contains(e.target)) return;
+  closeMsgMenu();
+}
+
+function closeMsgMenuTouchHandler(e) {
+  if (window._msgMenuJustOpened) return;
+  var menu = document.getElementById('msgMenu');
+  if (menu.contains(e.target)) return;
   closeMsgMenu();
 }
 
@@ -10665,7 +11369,8 @@ function closeMsgMenu() {
   menu.classList.remove('show');
   menu.style.display = 'none';
   document.removeEventListener('click', closeMsgMenuHandler);
-  document.removeEventListener('touchend', closeMsgMenuHandler);
+  document.removeEventListener('touchstart', closeMsgMenuTouchHandler);
+  window._msgMenuJustOpened = false;
 }
 
 function showMsgMenu(e, index, role) {
@@ -10712,10 +11417,14 @@ function showMsgMenu(e, index, role) {
   menu.style.top = y + 'px';
   menu.classList.add('show');
   
+  // 关键修复：延长延迟时间，防止touchend事件立即关闭菜单
+  // 同时阻止后续的touch事件传播
+  window._msgMenuJustOpened = true;
   setTimeout(function() {
+    window._msgMenuJustOpened = false;
     document.addEventListener('click', closeMsgMenuHandler);
-    document.addEventListener('touchend', closeMsgMenuHandler);
-  }, 300);
+    document.addEventListener('touchstart', closeMsgMenuTouchHandler);
+  }, 800);
 }
 // ===== 引用回复系统 =====
 var replyingToMsg = null;
@@ -10751,6 +11460,151 @@ function cancelReply() {
   replyingToMsg = null;
   document.getElementById('replyPreview').classList.remove('show');
 }
+// ===== 统一自定义输入弹窗 =====
+var _inputModalResolve = null;
+var _inputModalFields = [];
+
+/**
+ * 显示自定义输入弹窗
+ * @param {string} title 标题
+ * @param {Array} fields 字段数组，每项: {id, label, type, value, placeholder, hint, options, rows}
+ * @param {string} desc 描述文字（可选）
+ * @returns {Promise<object|null>} 返回各字段值的对象，取消返回null
+ */
+function showInputModal(title, fields, desc) {
+  return new Promise(function(resolve) {
+    _inputModalResolve = resolve;
+    _inputModalFields = fields;
+    
+    document.getElementById('inputModalTitle').textContent = title || '请输入';
+    
+    var descEl = document.getElementById('inputModalDesc');
+    if (desc) {
+      descEl.textContent = desc;
+      descEl.style.display = '';
+    } else {
+      descEl.style.display = 'none';
+    }
+    
+    var container = document.getElementById('inputModalFields');
+    var html = '';
+    
+    for (var i = 0; i < fields.length; i++) {
+      var f = fields[i];
+      html += '<div class="im-field">';
+      if (f.label) {
+        html += '<label>' + escHtml(f.label) + '</label>';
+      }
+      
+      if (f.type === 'textarea') {
+        html += '<textarea id="im_' + f.id + '" placeholder="' + escHtml(f.placeholder || '') + '" rows="' + (f.rows || 4) + '">' + escHtml(f.value || '') + '</textarea>';
+      } else if (f.type === 'select' && f.options) {
+        html += '<select id="im_' + f.id + '">';
+        for (var oi = 0; oi < f.options.length; oi++) {
+          var opt = f.options[oi];
+          var sel = (opt.value === f.value) ? ' selected' : '';
+          html += '<option value="' + escHtml(opt.value) + '"' + sel + '>' + escHtml(opt.label) + '</option>';
+        }
+        html += '</select>';
+      } else if (f.type === 'number') {
+        html += '<input type="number" id="im_' + f.id + '" value="' + escHtml(String(f.value || '')) + '" placeholder="' + escHtml(f.placeholder || '') + '" min="' + (f.min !== undefined ? f.min : '') + '" max="' + (f.max !== undefined ? f.max : '') + '">';
+      } else {
+        html += '<input type="' + (f.type || 'text') + '" id="im_' + f.id + '" value="' + escHtml(f.value || '') + '" placeholder="' + escHtml(f.placeholder || '') + '"' + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + '>';
+      }
+      
+      if (f.hint) {
+        html += '<div class="im-hint">' + escHtml(f.hint) + '</div>';
+      }
+      html += '</div>';
+    }
+    
+    container.innerHTML = html;
+    document.getElementById('inputModal').classList.add('show');
+    
+    // 自动聚焦第一个输入框
+    setTimeout(function() {
+      var first = container.querySelector('input,textarea');
+      if (first) first.focus();
+    }, 100);
+    
+    // 回车确认（单个文本输入框时）
+    var inputs = container.querySelectorAll('input[type="text"],input[type="number"]');
+    if (inputs.length === 1) {
+      inputs[0].onkeydown = function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); closeInputModal(true); }
+      };
+    }
+  });
+}
+
+function closeInputModal(confirmed) {
+  document.getElementById('inputModal').classList.remove('show');
+  
+  if (_inputModalResolve) {
+    if (confirmed) {
+      var result = {};
+      for (var i = 0; i < _inputModalFields.length; i++) {
+        var f = _inputModalFields[i];
+        var el = document.getElementById('im_' + f.id);
+        if (el) {
+          result[f.id] = el.value;
+        }
+      }
+      _inputModalResolve(result);
+    } else {
+      _inputModalResolve(null);
+    }
+    _inputModalResolve = null;
+  }
+}
+
+// 点击遮罩关闭
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('inputModal');
+  if (el) {
+    el.addEventListener('click', function(e) {
+      if (e.target.id === 'inputModal') closeInputModal(false);
+    });
+  }
+});
+function copyMessage() {
+  closeMsgMenu();
+  if (currentMsgIndex === null) return;
+  var msg = messages[currentMsgIndex];
+  if (!msg) return;
+  
+  var textToCopy = msg.content || '';
+  if (msg.msgType === 'sticker') textToCopy = '[表情包：' + (msg.stickerName || '') + ']';
+  if (msg.msgType === 'gift') textToCopy = '[礼物：' + (msg.giftIcon || '') + (msg.giftName || '') + ']';
+  if (msg.msgType === 'transfer') textToCopy = '[转账：¤' + (msg.transferAmt || 0) + ']';
+  if (msg.msgType === 'payment') textToCopy = '[付款请求：¤' + (msg.paymentAmt || 0) + ' ' + (msg.paymentReason || '') + ']';
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(function() {
+      showToast('📋 已复制到剪贴板');
+    }).catch(function() {
+      fallbackCopyMsg(textToCopy);
+    });
+  } else {
+    fallbackCopyMsg(textToCopy);
+  }
+}
+
+function fallbackCopyMsg(text) {
+  var textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  try {
+    var ok = document.execCommand('copy');
+    showToast(ok ? '📋 已复制到剪贴板' : '复制失败', !ok);
+  } catch(e) {
+    showToast('复制失败', true);
+  }
+  document.body.removeChild(textarea);
+}
 async function editMessage() {
   closeMsgMenu();
   
@@ -10758,10 +11612,11 @@ async function editMessage() {
   var msg = messages[currentMsgIndex];
   if (!msg) return;
   
-  var newContent = prompt('编辑消息内容：', msg.content);
-  if (newContent === null) return;
-  newContent = newContent.trim();
-  if (newContent === '') return;
+  var result = await showInputModal('✏️ 编辑消息', [
+    { id: 'content', label: '消息内容', type: 'textarea', value: msg.content, rows: 5 }
+  ]);
+  if (!result || !(result.content || '').trim()) return;
+  var newContent = result.content.trim();
   
   msg.content = newContent;
   
@@ -10965,7 +11820,7 @@ async function init() {
       savedCharMsgs = await dbGet('settings', charMsgKey + 'messages');
     }
     
-    if (savedCharMsgs && savedCharMsgs.value && savedCharMsgs.value.length > 0) {
+    if (savedCharMsgs && savedCharMsgs.value && Array.isArray(savedCharMsgs.value) && savedCharMsgs.value.length > 0) {
       // 从角色专属存储加载
       messages = savedCharMsgs.value;
     } else {
@@ -11038,6 +11893,7 @@ async function init() {
     await loadRingtoneSettings();
     await loadDecoSetting();
     await loadSignature();
+    await loadCharSkills();
     var savedStickerChance = await dbGet('settings', 'charStickerChance');
     if (savedStickerChance && savedStickerChance.value !== undefined) {
       charStickerChance = savedStickerChance.value;
@@ -11066,22 +11922,38 @@ async function init() {
       checkCharInitiative();
     }, 60 * 1000);
     // 初始化记忆设置保存
-    document.getElementById('shortMemory').addEventListener('change', async (e) => {
-      await dbPut('settings', { key: 'shortMemory', value: parseInt(e.target.value) });
+    document.getElementById('shortMemory').addEventListener('change', async function() {
+      var val = parseInt(this.value) || 10;
+      if (val < 1) val = 1;
+      if (val > 100) val = 100;
+      this.value = val;
+      await dbPut('settings', { key: 'shortMemory', value: val });
     });
     
-    document.getElementById('longMemoryInterval').addEventListener('change', async (e) => {
-      await dbPut('settings', { key: 'longMemoryInterval', value: parseInt(e.target.value) });
+    document.getElementById('longMemoryInterval').addEventListener('change', async function() {
+      var val = parseInt(this.value) || 10;
+      if (val < 3) val = 3;
+      if (val > 100) val = 100;
+      this.value = val;
+      await dbPut('settings', { key: 'longMemoryInterval', value: val });
     });
     
-    document.getElementById('autoSummarize').addEventListener('click', async function() {
-      const isOn = this.classList.contains('on');
-      await dbPut('settings', { key: 'autoSummarize', value: isOn });
-    });
+    var autoSumBtn = document.getElementById('autoSummarize');
+    if (autoSumBtn) {
+      autoSumBtn.addEventListener('click', async function() {
+        const isOn = this.classList.contains('on');
+        await dbPut('settings', { key: 'autoSummarize', value: isOn });
+      });
+    }
     
   } catch (e) {
     showToast('初始化失败: ' + e.message, true);
     console.error(e);
+    var debugEl = document.getElementById('debugError');
+    if (debugEl) {
+      debugEl.style.display = 'block';
+      debugEl.textContent = '错误: ' + e.message + ' | 位置: ' + (e.stack || '').substring(0, 300);
+    }
   } finally {
     hideLoading();
     // APK优化：定期自动备份
@@ -11255,6 +12127,12 @@ function previewImage(src) {
   overlay.classList.add('show');
 }
 // 点击聊天区域时关闭折叠状态面板
+// 滚动加载更多
+document.getElementById('chatArea').addEventListener('scroll', function() {
+  if (this.scrollTop < 80 && !isLoadingMore && !allMessagesLoaded) {
+    loadMoreMessages();
+  }
+});
 document.getElementById('chatArea').addEventListener('click', function() {
   if (statusPanelOpen) {
     closeStatusPanel();
@@ -12252,11 +13130,12 @@ async function loadEconSettings() {
   var saved = await dbGet('settings', 'econSettings');
   if (saved && saved.value) {
     econSettings = saved.value;
-    // 兼容旧数据
     if (!econSettings.econLog) econSettings.econLog = [];
     if (!econSettings.lastDailyTick) econSettings.lastDailyTick = 0;
     if (!econSettings.lastMonthlyTick) econSettings.lastMonthlyTick = 0;
     if (!econSettings.lastBonusTick) econSettings.lastBonusTick = 0;
+    if (!econSettings.incomeSource) econSettings.incomeSource = '';
+    if (!econSettings.expenseFavorites) econSettings.expenseFavorites = '';
   }
 
   var savedBal = await dbGet('settings', 'charBalance');
@@ -12264,13 +13143,32 @@ async function loadEconSettings() {
     charBalance = savedBal.value;
   }
 
-  // 填充UI
-  document.getElementById('econBalance').value = charBalance;
-  document.getElementById('econMonthlyIncome').value = econSettings.monthlyIncome || 3000;
-  document.getElementById('econBonusMin').value = econSettings.bonusMin || 0;
-  document.getElementById('econBonusMax').value = econSettings.bonusMax || 2000;
-  document.getElementById('econExpenseMin').value = econSettings.dailyExpenseMin || 50;
-  document.getElementById('econExpenseMax').value = econSettings.dailyExpenseMax || 300;
+  // 安全地填充UI（元素可能在人设页或系统页）
+  if (!econSettings.incomeSource) econSettings.incomeSource = '';
+  if (!econSettings.expenseFavorites) econSettings.expenseFavorites = '';
+  var fields = {
+    'econBalance': charBalance,
+    'econMonthlyIncome': econSettings.monthlyIncome || 3000,
+    'econBonusMin': econSettings.bonusMin || 0,
+    'econBonusMax': econSettings.bonusMax || 2000,
+    'econExpenseMin': econSettings.dailyExpenseMin || 50,
+    'econExpenseMax': econSettings.dailyExpenseMax || 300,
+    'econIncomeSource': econSettings.incomeSource || '',
+    'econExpenseFavorites': econSettings.expenseFavorites || '',
+    'sysEconBalance': charBalance,
+    'sysEconIncome': econSettings.monthlyIncome || 3000,
+    'sysEconBonusMin': econSettings.bonusMin || 0,
+    'sysEconBonusMax': econSettings.bonusMax || 0,
+    'sysEconExpMin': econSettings.dailyExpenseMin || 50,
+    'sysEconExpMax': econSettings.dailyExpenseMax || 300,
+    'sysEconIncSource': econSettings.incomeSource || '',
+    'sysEconFavorites': econSettings.expenseFavorites || ''
+  };
+
+  for (var id in fields) {
+    var el = document.getElementById(id);
+    if (el) el.value = fields[id];
+  }
 
   updateEconSummary();
   renderEconLog();
@@ -12293,6 +13191,8 @@ async function saveEconSettings() {
   econSettings.bonusMax = parseInt(document.getElementById('econBonusMax').value) || 0;
   econSettings.dailyExpenseMin = parseInt(document.getElementById('econExpenseMin').value) || 0;
   econSettings.dailyExpenseMax = parseInt(document.getElementById('econExpenseMax').value) || 0;
+  econSettings.incomeSource = document.getElementById('econIncomeSource').value.trim();
+  econSettings.expenseFavorites = document.getElementById('econExpenseFavorites').value.trim();
 
   var econPrefix2 = activeCharId === 'default' ? '' : 'char_' + activeCharId + '_';
   await dbPut('settings', { key: econPrefix2 + 'econSettings', value: econSettings });
@@ -12301,6 +13201,15 @@ async function saveEconSettings() {
 }
 
 function updateEconSummary() {
+  // 更新系统页的经济摘要
+  var sysBalEl = document.getElementById('sysEconSumBal');
+  if (sysBalEl) sysBalEl.textContent = '¤' + charBalance;
+  var sysIncEl = document.getElementById('sysEconSumInc');
+  if (sysIncEl) sysIncEl.textContent = '+¤' + (econSettings.monthlyIncome || 0);
+  var avg = Math.round(((econSettings.dailyExpenseMin || 0) + (econSettings.dailyExpenseMax || 0)) / 2);
+  var sysExpEl = document.getElementById('sysEconSumExp');
+  if (sysExpEl) sysExpEl.textContent = '-¤' + (avg * 30);
+  
   var sumBal = document.getElementById('econSumBalance');
   var sumInc = document.getElementById('econSumIncome');
   var sumExp = document.getElementById('econSumExpense');
@@ -12362,17 +13271,22 @@ async function econTick() {
   thisMonth.setDate(1);
   thisMonth.setHours(0, 0, 0, 0);
   var monthMs = thisMonth.getTime();
-// 防止时间回拨导致重复扣费
+if (!econSettings.lastDailyTick || isNaN(econSettings.lastDailyTick)) {
+    econSettings.lastDailyTick = 0;
+  }
+  if (!econSettings.lastMonthlyTick || isNaN(econSettings.lastMonthlyTick)) {
+    econSettings.lastMonthlyTick = 0;
+  }
   if (econSettings.lastDailyTick > now + 86400000) {
     econSettings.lastDailyTick = todayMs;
   }
+
   // 每天消费（每天只触发一次）
   if (econSettings.lastDailyTick < todayMs) {
-    // 如果跨了多天，补算
     var lastDay = econSettings.lastDailyTick > 0 ? new Date(econSettings.lastDailyTick) : new Date(now - 86400000);
     lastDay.setHours(0, 0, 0, 0);
     var daysDiff = Math.floor((todayMs - lastDay.getTime()) / 86400000);
-    if (daysDiff > 7) daysDiff = 7; // 最多补7天
+    if (daysDiff > 7) daysDiff = 7;
     
     for (var d = 0; d < daysDiff; d++) {
       var min = econSettings.dailyExpenseMin || 0;
@@ -12381,18 +13295,20 @@ async function econTick() {
         var expense = Math.floor(min + Math.random() * (max - min + 1));
         if (expense > 0 && charBalance >= expense) {
           charBalance -= expense;
-          // 随机生成消费原因（更有代入感）
-          var expenseReasons = ['买了杯数码奶茶', '充了个会员', '买了点零食', '交了水电费', '买了新壁纸', '给自己买了个小玩意', '修了一下传呼机天线', '买了个数据小盆栽', '去便利店买东西', '交了网费', '买了早餐', '打了个车', '买了一本电子书'];
-          var randomReason = expenseReasons[Math.floor(Math.random() * expenseReasons.length)];
+          
+          // 根据当前时间和日程选择合理的消费原因
+          var currentHour = new Date().getHours();
+          var currentActivity = getScheduleActivity(currentHour);
+          var actText = (currentActivity.text || '').toLowerCase();
+          var randomReason = pickExpenseReason(currentHour, actText, econSettings);
+          
           addEconLog(randomReason, -expense);
           changed = true;
           
-          // 大额消费影响心情
           if (expense > (econSettings.dailyExpenseMax || 300) * 0.8) {
             changeMood(-1, '今天花了不少钱');
           }
         } else if (expense > 0 && charBalance < expense) {
-          // 钱不够花了
           charBalance = Math.max(0, charBalance - Math.floor(expense * 0.3));
           addEconLog('勉强凑了点钱花', -Math.floor(expense * 0.3));
           changeMood(-3, '钱不够花了');
@@ -12408,12 +13324,12 @@ async function econTick() {
     var income = econSettings.monthlyIncome || 0;
     if (income > 0) {
       charBalance += income;
-      addEconLog('💵 发工资啦！', income);
+      var incomeSource = (econSettings.incomeSource && econSettings.incomeSource.trim()) ? econSettings.incomeSource.trim() : '发工资';
+      addEconLog('💵 ' + incomeSource + '！', income);
       changeMood(5, '发工资了开心');
       changed = true;
     }
 
-    // 随机奖金（每月随机一次）
     var bMin = econSettings.bonusMin || 0;
     var bMax = econSettings.bonusMax || 0;
     if (bMax > 0 && Math.random() < 0.6) {
@@ -12437,6 +13353,71 @@ async function econTick() {
     renderEconLog();
     document.getElementById('econBalance').value = charBalance;
   }
+}
+
+// 根据时间和活动选择合理的消费原因
+function pickExpenseReason(hour, actText, settings) {
+  var favorites = [];
+  if (settings.expenseFavorites && settings.expenseFavorites.trim()) {
+    favorites = settings.expenseFavorites.split(/[,，、\n]/).map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+  }
+  
+  // 按时间段和活动分类的消费原因
+  var morningReasons = ['买了早餐', '买了杯咖啡', '充了公交卡'];
+  var lunchReasons = ['吃了午饭', '点了外卖', '买了杯奶茶', '在食堂吃了饭'];
+  var afternoonReasons = ['买了杯下午茶', '买了点零食', '充了个会员'];
+  var dinnerReasons = ['吃了晚饭', '买了食材做饭', '点了外卖'];
+  var eveningReasons = ['买了个小玩意', '充了游戏', '买了一本电子书', '交了网费'];
+  var nightReasons = ['买了夜宵', '充了视频会员'];
+  var generalReasons = ['交了水电费', '买了日用品', '修了一下传呼机天线', '买了个数据小盆栽'];
+  
+  var pool = [];
+  
+  // 根据时间选择合理的消费池
+  if (hour >= 6 && hour < 10) {
+    pool = pool.concat(morningReasons);
+  } else if (hour >= 11 && hour < 14) {
+    pool = pool.concat(lunchReasons);
+  } else if (hour >= 14 && hour < 17) {
+    pool = pool.concat(afternoonReasons);
+  } else if (hour >= 17 && hour < 20) {
+    pool = pool.concat(dinnerReasons);
+  } else if (hour >= 20 && hour < 23) {
+    pool = pool.concat(eveningReasons);
+  } else if (hour >= 23 || hour < 2) {
+    pool = pool.concat(nightReasons);
+  }
+  // 睡觉时间不消费（2-6点）
+  if (hour >= 2 && hour < 6) {
+    return '昨天的自动扣款到账了';
+  }
+  
+  // 加入通用消费
+  pool = pool.concat(generalReasons);
+  
+  // 根据活动调整
+  if (/工作|干活|上班/.test(actText)) {
+    pool.push('工作摸鱼买了杯咖啡');
+    pool.push('买了个解压小玩具');
+  }
+  if (/游戏|打游戏/.test(actText)) {
+    pool.push('充了游戏皮肤');
+    pool.push('买了游戏道具');
+  }
+  if (/逛|出门|散步/.test(actText)) {
+    pool.push('逛街买了点东西');
+    pool.push('路过便利店买了饮料');
+  }
+  
+  // 加入用户设定的爱好消费
+  if (favorites.length > 0) {
+    for (var fi = 0; fi < favorites.length; fi++) {
+      pool.push('买了' + favorites[fi]);
+      pool.push(favorites[fi] + '相关支出');
+    }
+  }
+  
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 // ===== 礼物系统 =====
 var currentGiftTab = 'preset';
@@ -12707,22 +13688,33 @@ function detectTransferInResponse(text) {
 
 // ===== 获取user最后发消息时间的描述 =====
 function getLastUserMsgTimeDesc() {
+  var now = Date.now();
   for (var i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === 'user') {
       var last = messages[i].timestamp;
-      var now = Date.now();
       var diff = now - last;
       var mins = Math.floor(diff / 60000);
       var hours = Math.floor(diff / 3600000);
       var days = Math.floor(diff / 86400000);
       
-      if (mins < 1) return '刚刚（不到1分钟前）';
-      if (mins < 60) return mins + '分钟前';
-      if (hours < 24) return hours + '小时' + (mins % 60 > 0 ? mins % 60 + '分钟' : '') + '前';
-      return days + '天前（' + new Date(last).toLocaleString('zh-CN') + '）';
+      var lastDate = new Date(last);
+      var lastTimeStr = lastDate.getHours().toString().padStart(2,'0') + ':' + lastDate.getMinutes().toString().padStart(2,'0');
+      
+      if (mins < 1) return '刚刚（几秒前，对方正在等你回复）';
+      if (mins < 3) return mins + '分钟前（对方刚发完消息，在等你回复）';
+      if (mins < 10) return mins + '分钟前（对方可能还在看手机）';
+      if (mins < 30) return mins + '分钟前（可能去忙别的了）';
+      if (mins < 60) return mins + '分钟前（过了一会儿了）';
+      if (hours < 2) return hours + '小时前（隔了挺久的）';
+      if (hours < 6) return hours + '小时前的' + lastTimeStr + '（已经好几个小时没聊了）';
+      if (hours < 12) return '大约' + hours + '小时前的' + lastTimeStr + '（半天没聊了，之前的话题可能已经不重要了）';
+      if (hours < 24) return '今天' + lastTimeStr + '（' + hours + '小时前，很久没聊了，没必要继续之前的话题，自然地重新开始）';
+      if (days === 1) return '昨天' + lastTimeStr + '（隔了一天了！请不要继续昨天的话题，像隔了一天重新见面一样自然地聊）';
+      if (days < 7) return days + '天前（隔了好几天！完全不要提之前的对话内容，当作新的一天来聊）';
+      return days + '天前（' + lastDate.toLocaleDateString('zh-CN') + '，非常久没联系了！像久别重逢一样）';
     }
   }
-  return '从未发过消息';
+  return '从未发过消息（这是第一次对话）';
 }
 
 // ===== 检测是否有待处理的付款请求 =====
@@ -14066,8 +15058,18 @@ async function saveCurrentCharData() {
     // default角色保存到 'messages' key
     await dbPut('settings', { key: 'messages', value: messages });
   }
-  // 保存世界书
-  await dbPut('settings', { key: prefix + 'worldbook', value: worldBookEntries });
+// 保存世界书
+  try {
+    await dbPut('settings', { key: prefix + 'worldbook', value: worldBookEntries });
+    if (!prefix) {
+      await dbClear('worldbook');
+      for (var wi = 0; wi < worldBookEntries.length; wi++) {
+        await dbPut('worldbook', worldBookEntries[wi]);
+      }
+    }
+  } catch(e) {
+    console.error('保存世界书失败:', e);
+  }
   
   // 保存记忆
   var memAll = await dbGetAll('memories');
@@ -14090,6 +15092,7 @@ async function saveCurrentCharData() {
   await dbPut('settings', { key: prefix + 'anniversaries', value: anniversaries });
     // 保存表情包概率
   await dbPut('settings', { key: prefix + 'charStickerChance', value: charStickerChance });
+  await dbPut('settings', { key: prefix + 'charSkills', value: charSkills });
     // 保存日程
   await dbPut('settings', { key: prefix + 'scheduleData', value: scheduleData });
   // 保存收藏
@@ -14153,8 +15156,12 @@ async function doSwitchChar(id) {
   } else {
     memoryEntries = [];
   }
+  // 确保memoryEntries是数组
+  if (!Array.isArray(memoryEntries)) {
+    memoryEntries = [];
+  }
   renderMemoryList();
-  
+  updateMemoryStatus();
   // 加载经济
   var savedBal = await dbGet('settings', prefix + 'charBalance');
   charBalance = (savedBal && savedBal.value !== undefined) ? savedBal.value : 10000;
@@ -14183,6 +15190,8 @@ async function doSwitchChar(id) {
   var savedIntLog2 = await dbGet('settings', prefix + 'intimacyLog');
   intimacyLog = (savedIntLog2 && savedIntLog2.value) ? savedIntLog2.value : [];
   updateIntimacyUI();
+  var savedSkills = await dbGet('settings', prefix + 'charSkills');
+  charSkills = (savedSkills && savedSkills.value) ? savedSkills.value : [];
   updateMoodDisplay();
   // 加载日程
   var savedSchedule = await dbGet('settings', prefix + 'scheduleData');
@@ -15492,20 +16501,21 @@ function batchAddStickers() {
   }
 }
 
-function addSingleSticker() {
-  var name = prompt('表情包名称（角色会看到这个描述）：');
-  if (!name || !name.trim()) return;
-  
-  var url = prompt('表情包图片链接（https://...）：');
-  if (!url || !url.trim() || !url.startsWith('http')) {
-    showToast('请输入有效的图片链接', true);
-    return;
-  }
+async function addSingleSticker() {
+  var result = await showInputModal('😺 添加表情包', [
+    { id: 'name', label: '表情包名称', type: 'text', placeholder: '例如：开心、比耶、无语', hint: '角色会看到这个名称来选择表情包' },
+    { id: 'url', label: '图片链接', type: 'text', placeholder: 'https://example.com/sticker.png', hint: '支持 jpg/png/gif/webp 格式' }
+  ]);
+  if (!result) return;
+  var name = (result.name || '').trim();
+  var url = (result.url || '').trim();
+  if (!name) { showToast('请输入名称', true); return; }
+  if (!url || !url.startsWith('http')) { showToast('请输入有效的图片链接', true); return; }
   
   stickerLibrary.push({
     id: 'sticker_' + Date.now(),
-    name: name.trim(),
-    url: url.trim()
+    name: name,
+    url: url
   });
   
   saveStickerLibrary();
@@ -15654,7 +16664,7 @@ async function charSendSticker(sticker) {
     await dbPut('settings', { key: 'char_' + activeCharId + '_messages', value: messages });
   }
   
-  renderMessages();
+  appendSingleMessage(msg, messages.length - 1);
   scheduleAutoSave();
 }
 // ===== 铃声系统功能 =====
@@ -16426,10 +17436,13 @@ function updateBatteryDisplay() {
   }
   
   // 低电量警告
-  if (pagerBattery === 10) {
-    showToast('🔋 电量不足！请更换电池', true);
-  } else if (pagerBattery === 0) {
-    showToast('🪫 电池已耗尽！请立即更换电池', true);
+  // 只在装饰元素可见时才提醒电量
+  if (decoVisible) {
+    if (pagerBattery === 10) {
+      showToast('🔋 电量不足！请更换电池', true);
+    } else if (pagerBattery === 0) {
+      showToast('🪫 电池已耗尽！请立即更换电池', true);
+    }
   }
 }
 
@@ -16492,16 +17505,16 @@ async function replaceBattery() {
 
 // 发送/接收消息时消耗电量
 function batteryOnSend() {
-  drainBattery(1); // 发一条消息耗1%
+  if (decoVisible) drainBattery(1);
 }
 
 function batteryOnReceive() {
-  drainBattery(1); // 收一条消息耗1%
+  if (decoVisible) drainBattery(1);
 }
 
 // 每10分钟自动消耗一点（待机功耗）
 setInterval(function() {
-  if (pagerBattery > 0) {
+  if (pagerBattery > 0 && decoVisible) {
     drainBattery(1);
   }
 }, 10 * 60 * 1000);
@@ -17008,6 +18021,13 @@ function scheduleAutoSave() {
 
 async function performAutoSave() {
   if (!db || !pendingSave) return;
+  try {
+    // 检查数据库连接是否仍然有效
+    db.transaction('settings', 'readonly');
+  } catch(e) {
+    console.warn('数据库连接已断开，跳过自动保存');
+    return;
+  }
   pendingSave = false;
   lastSaveTime = Date.now();
   
