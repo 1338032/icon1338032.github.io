@@ -13351,7 +13351,10 @@ if (!econSettings.lastDailyTick || isNaN(econSettings.lastDailyTick)) {
     updateBalanceDisplay();
     updateEconSummary();
     renderEconLog();
-    document.getElementById('econBalance').value = charBalance;
+    var econBalEl = document.getElementById('econBalance');
+    if (econBalEl) econBalEl.value = charBalance;
+    var sysEconBalEl = document.getElementById('sysEconBalance');
+    if (sysEconBalEl) sysEconBalEl.value = charBalance;
   }
 }
 
@@ -13645,7 +13648,7 @@ async function charTransfer(amount, note) {
   updateBalanceDisplay();
   updateEconSummary();
   renderEconLog();
-  document.getElementById('econBalance').value = charBalance;
+  var _eb = document.getElementById('econBalance'); if (_eb) _eb.value = charBalance; var _seb = document.getElementById('sysEconBalance'); if (_seb) _seb.value = charBalance;
   
   var msg = {
     role: 'char',
@@ -15173,12 +15176,20 @@ async function doSwitchChar(id) {
   } else {
     econSettings = { monthlyIncome: 3000, bonusMin: 0, bonusMax: 2000, dailyExpenseMin: 50, dailyExpenseMax: 300, lastDailyTick: 0, lastMonthlyTick: 0, lastBonusTick: 0, econLog: [] };
   }
-  document.getElementById('econBalance').value = charBalance;
-  document.getElementById('econMonthlyIncome').value = econSettings.monthlyIncome || 3000;
-  document.getElementById('econBonusMin').value = econSettings.bonusMin || 0;
-  document.getElementById('econBonusMax').value = econSettings.bonusMax || 2000;
-  document.getElementById('econExpenseMin').value = econSettings.dailyExpenseMin || 50;
-  document.getElementById('econExpenseMax').value = econSettings.dailyExpenseMax || 300;
+  var _econFields = {
+    'econBalance': charBalance,
+    'econMonthlyIncome': econSettings.monthlyIncome || 3000,
+    'econBonusMin': econSettings.bonusMin || 0,
+    'econBonusMax': econSettings.bonusMax || 2000,
+    'econExpenseMin': econSettings.dailyExpenseMin || 50,
+    'econExpenseMax': econSettings.dailyExpenseMax || 300,
+    'econIncomeSource': econSettings.incomeSource || '',
+    'econExpenseFavorites': econSettings.expenseFavorites || ''
+  };
+  for (var _efk in _econFields) {
+    var _efel = document.getElementById(_efk);
+    if (_efel) _efel.value = _econFields[_efk];
+  }
   updateEconSummary();
   renderEconLog();
   
